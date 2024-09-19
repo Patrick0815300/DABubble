@@ -1,0 +1,83 @@
+mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+
+    mat-card-title {
+        font-family: 'Nunito';
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px !important;
+        border-radius: 100px;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 32.74px;
+        transition: all 125ms ease;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #ECEEFE;
+            color: #535AF1;
+        }
+
+        mat-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 32px;
+        }
+    }
+}
+
+.member-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 10px !important;
+
+    .member {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 3px 10px !important;
+        border-radius: 100px;
+        transition: ease-in 100ms;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+
+        div {
+            display: flex;
+            align-items: ceter;
+        }
+
+        &:hover {
+            background-color: #ECEEFE;
+            color: #535AF1;
+        }
+    }
+
+    .member-img {
+        width: 40px;
+        border-radius: 30px;
+        border: 2px solid white;
+        margin-left: -12px;
+
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+
+    .add-member {
+        border-radius: 20px;
+        padding: 8px;
+        transition: ease-in 80ms;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #ECEEFE;
+            color: #535AF1;
+        }
+    }
+}
