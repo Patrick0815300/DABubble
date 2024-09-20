@@ -1,34 +1,162 @@
-.header-container{
-    position:absolute;
-    top:75px;
-    left:75px;
-    display:flex;
+.header-container {
+    position: absolute;
+    top: 75px;
+    left: 75px;
+    display: flex;
     align-items: center;
-    gap:16px;
-    font-size:24px;
-    font-weight:580;
-    &:hover{
-        cursor:default;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: 580;
+
+    &:hover {
+        cursor: default;
     }
-    img{
-        width:70px;
-        height:auto;
+
+    img {
+        width: 70px;
+        height: auto;
     }
 }
 
-section{
-    width:100vw;
-    height:100%;
-    display:flex;
+section {
+    height: 100%;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 
-mat-card{
+.descriptionContainer {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    box-sizing: border-box;
+}
+
+mat-card {
     background-color: white;
     border-radius: 20px;
     height: 70vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+mat-card-title {
+    color: rgb(68, 77, 242);
+    font-weight: 700;
+    font-size: 46px;
+}
+
+mat-card-title-group {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 60px;
+}
+
+mat-card-content {
+    width: 75%;
+}
+
+.loginInputsContainer {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 40px;
+
+    .link {
+        color: #797EF3;
+        padding: 8px 10px;
+
+        &:hover {
+            cursor: pointer;
+            font-weight: 580;
+            background-color: rgb(241, 241, 241);
+            border: 1px solid rgb(241, 241, 241);
+            border-radius: 30px;
+            padding: 7px 10px;
+        }
+
+    }
+}
+
+.inputField {
+    border-radius: 30px;
+    border: 1px solid transparent;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(236, 238, 254);
+    gap: 20px;
+
+    &:hover {
+        border: 1px solid gray;
+        cursor: pointer;
+    }
+
+    input {
+        width: 70%;
+        height: 80%;
+        font-size: 20px;
+        background-color: rgb(236, 238, 254);
+        border: 0;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &:focus-visible {
+            outline: unset;
+        }
+    }
+}
+
+.button {
+    border-radius: 20px;
+    padding: 8px;
+    width: 150px;
+    border: 1px solid;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.loginButton {
+    color: white;
+    background-color: rgb(68, 77, 242);
+    border-color: rgb(121, 126, 243);
+
+    &:hover {
+        background-color: rgba(121, 126, 243, 0.8);
+    }
+}
+
+.checkPrivacyPolicyContainer {
+    width: 70%;
+    display: flex;
+    justify-self: flex-start;
+
+    input {
+        margin-right: 20px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    a {
+        margin: 0 5px;
+        color: rgba(121, 126, 243, 0.8);
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
 }
