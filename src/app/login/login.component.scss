@@ -59,18 +59,15 @@
     }
 }
 
+section{
+    display:flex;
+    justify-content: center;
+}
+
 main {
     display: flex;
     justify-content: center;
 }
-
-// .logo {
-//     position: absolute;
-//     z-index: 901;
-//     animation-name: logomovement;
-//     animation-duration: 3s;
-//     animation-fill-mode: forwards;
-// }
 
 @keyframes logomovement {
     0% {
@@ -87,7 +84,7 @@ main {
 @keyframes namefadein {
     0% {
         opacity: 0;
-        visibility:hidden;
+        visibility: hidden;
     }
 
     100% {
@@ -103,7 +100,6 @@ main {
     font-weight: 550;
     font-size: 30px;
     position: absolute;
-    margin-left: 75px;
     z-index: 901;
     animation-name: logomovement;
     animation-duration: 3s;
@@ -366,24 +362,30 @@ form {
 @media(max-width:710px) {
     main {
         width: calc(100% - 20px);
-        margin-left: 10px;
     }
 }
 
-@media(max-width:500px) {
+@media(max-width:560px) {
     footer {
         display: none;
     }
 
-    .loginLogo {
-        position: absolute;
-        left: 25%;
-        right: 25%;
-        width: 50%;
-
-        div {
-            margin-left: 0;
+    @keyframes logomovement-small {
+        0% {
+            top: 50%;
+            left: 50%;
         }
+
+        100% {
+            top: 75px;
+            left: 25%;
+        }
+    }
+
+    .loginLogo {
+        animation-name: logomovement-small;
+        width: 50%;
+        justify-content: center;
     }
 
     .loginHeaderRegister {
@@ -424,5 +426,16 @@ form {
 @media(max-width:380px) {
     .button {
         width: 120px;
+    }
+}
+
+@media(max-width:340px){
+    main {
+        width: 100%;
+        display:flex;
+        justify-content: center;
+        .card{
+            width:300px;
+        }
     }
 }
