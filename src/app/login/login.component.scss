@@ -7,7 +7,7 @@
     background: linear-gradient(to top, rgb(50, 60, 230), rgb(121, 126, 243));
     animation-name: intro;
     animation-duration: 3s;
-    animation-fill-mode:forwards;
+    animation-fill-mode: forwards;
 }
 
 @keyframes intro {
@@ -64,27 +64,35 @@ main {
     justify-content: center;
 }
 
-.logo {
-    position: absolute;
-    z-index: 901;
-    animation-name: logomovement;
-    animation-duration: 3s;
-    animation-fill-mode: forwards;
-}
+// .logo {
+//     position: absolute;
+//     z-index: 901;
+//     animation-name: logomovement;
+//     animation-duration: 3s;
+//     animation-fill-mode: forwards;
+// }
 
 @keyframes logomovement {
     0% {
-        top: 50vh;
-        left: 50vw;
-        height: 200px;
-        width: auto;
+        top: 50%;
+        left: 50%;
     }
 
     100% {
-        top: -100%;
-        left: 40px;
-        height: 70px;
-        width: auto;
+        top: 75px;
+        left: 75px;
+    }
+}
+
+@keyframes namefadein {
+    0% {
+        opacity: 0;
+        visibility:hidden;
+    }
+
+    100% {
+        opacity: 1;
+        visibility: visible;
     }
 }
 
@@ -95,14 +103,24 @@ main {
     font-weight: 550;
     font-size: 30px;
     position: absolute;
+    margin-left: 75px;
+    z-index: 901;
+    animation-name: logomovement;
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+
+    .name {
+        opacity: 0;
+        visibility: hidden;
+        animation-name: namefadein;
+        animation-duration: 3s;
+        animation-delay: 3s;
+        animation-fill-mode: forwards;
+    }
 
     img {
         height: 70px;
         width: auto;
-    }
-
-    div {
-        margin-left: 120px;
     }
 
     &:hover {
@@ -119,7 +137,7 @@ main {
     align-items: flex-end;
     flex-direction: column;
     gap: 20px;
-
+    max-width: 1920px;
 
 }
 
@@ -342,5 +360,69 @@ form {
     &:hover {
         color: white;
         background-color: rgba(121, 126, 243, 0.8)
+    }
+}
+
+@media(max-width:710px) {
+    main {
+        width: calc(100% - 20px);
+        margin-left: 10px;
+    }
+}
+
+@media(max-width:500px) {
+    footer {
+        display: none;
+    }
+
+    .loginLogo {
+        position: absolute;
+        left: 25%;
+        right: 25%;
+        width: 50%;
+
+        div {
+            margin-left: 0;
+        }
+    }
+
+    .loginHeaderRegister {
+        position: absolute;
+        bottom: 50px;
+        right: 0;
+        left: 0;
+        margin-right: 0;
+        font-size: 24px;
+
+        .link {
+            color: #797EF3;
+            margin: 0;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: 580;
+            border: 1px solid #999ce5;
+            border-radius: 20px;
+
+            &:hover {
+                color: white;
+                background-color: #999ce5;
+            }
+        }
+    }
+}
+
+@media(max-width:430px) {
+    .inputField {
+        input {
+            width: 70%;
+            border-radius: 0 30px 30px 0;
+            font-size: 15px;
+        }
+    }
+}
+
+@media(max-width:380px) {
+    .button {
+        width: 120px;
     }
 }
