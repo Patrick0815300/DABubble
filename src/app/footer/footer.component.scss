@@ -1,0 +1,33 @@
+footer {
+    height: 50px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+
+    .link {
+        color: #797EF3;
+        display: flex;
+        align-items: center;
+        margin: 0 9px;
+
+        &:hover {
+            margin: 0;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: 580;
+            border: 1px solid #999ce5;
+            border-radius: 20px;
+        }
+    }
+}
+
+@media(max-width:560px) {
+    footer {
+        display: none;
+    }
+}

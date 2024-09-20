@@ -1,22 +1,5 @@
-<div class="introContainer">
-
-</div>
-<div class="loginLogo">
-    <img src="./assets/img/01_onboarding-login-signup/Logo.png" class="logo"> 
-    <div class="name">DABubble</div>
-</div>
-<header class="loginHeader">
-    <div class="loginHeaderRegister">
-        <div>
-            Neu bei DABubble?
-        </div>
-        <div class="link">
-            Konto erstellen
-        </div>
-    </div>
-</header>
+<app-header></app-header>
 <section>
-
     <main>
         <mat-card class="card">
             <div class="info">
@@ -31,11 +14,11 @@
                 <div class="loginInputsContainer">
                     <div class="inputField">
                         <mat-icon>mail</mat-icon>
-                        <input type="mail" placeholder="beispielname@email.com">
+                        <input name="email" type="mail" placeholder="beispielname@email.com">
                     </div>
                     <div class="inputField">
                         <mat-icon>lock</mat-icon>
-                        <input type="password" placeholder="Passwort">
+                        <input name="password" type="password" placeholder="Passwort">
                     </div>
                     <div class="link">
                         Passwort vergessen?
@@ -57,8 +40,5 @@
             </form>
         </mat-card>
     </main>
-    <footer>
-        <div class="link">Impressum</div>
-        <div class="link">Datenschutz</div>
-    </footer>
+    <app-footer></app-footer>
 </section>
