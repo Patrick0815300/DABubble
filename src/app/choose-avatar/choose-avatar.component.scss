@@ -171,7 +171,7 @@ input[type="file"] {
     overflow:hidden;
 }
 
-.userMessage{
+ .userMessage{
     display:flex;
     justify-content: center;
     align-items:center;
@@ -188,7 +188,7 @@ input[type="file"] {
     animation-duration: 1s;
     animation-fill-mode: forwards;
 
-}
+ }
 
 @keyframes messageMovement{
     0%{
@@ -209,6 +209,21 @@ input[type="file"] {
         left: 50%;
         transform: translate(-50%);
     }
+
+    .userMessage{
+        width:450px;
+        animation-name: messageMovementSmallScreen;
+    }
+}
+
+@keyframes messageMovementSmallScreen {
+    0%{
+        left:1000px;
+    }
+    100%{
+        left:50%;
+        transform:translate(-50%);
+    }
 }
 
 @media(max-width:570px) {
@@ -226,6 +241,13 @@ input[type="file"] {
     mat-card-title{
         font-size:38px;
     } 
+}
+
+@media(max-width:470px){
+    .userMessage{
+        width:350px;
+        font-size:25px;
+    }
 }
 
 @media(max-width:460px) {
@@ -259,6 +281,14 @@ input[type="file"] {
 @media(max-width:390px) {
     mat-card-title-group {
         padding: 0 30px;
+    }
+}
+
+@media(max-width:370px){
+    .userMessage{
+        width:300px;
+        height:100px;
+        font-size:20px;
     }
 }
 

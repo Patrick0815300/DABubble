@@ -200,6 +200,12 @@ mat-card-content {
     }
 }
 
+@media(max-width:450px){
+    .descriptionContainer{
+        gap:32px;
+    }
+}
+
 @media(max-width:408px) {
     .checkPrivacyPolicyContainer {
         a {
