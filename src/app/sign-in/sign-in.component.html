@@ -30,11 +30,11 @@
             </mat-card-content>
 
             <div class="checkPrivacyPolicyContainer">
-                <input type="checkbox"> Ich stimme der <a routerLink="">Datenschutzerklärung</a> zu.
+                <input type="checkbox"> <div class="checkPrivacyPolicyText">Ich stimme der <a routerLink="">Datenschutzerklärung</a> zu.</div>
             </div>
 
             <div class="buttonContainer">
-                <button class="button loginButton">Weiter</button>
+                <button class="button loginButton" [routerLink]="['/chooseAvatar']">Weiter</button>
             </div>
         </div>
     </mat-card>
