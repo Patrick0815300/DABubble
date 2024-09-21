@@ -2,9 +2,29 @@
     margin: 0;
 }
 
+* :not(mat-icon) {
+    font-family: 'Nunito' !important;
+}
+
 body,
 html {
     font-family: 'Nunito' !important;
+}
+
+body {
+    background-color: #ECEEFE;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 0 30px 30px 30px !important;
+}
+
+.mat-mdc-menu-panel {
+    border-radius: 0 30px 30px 30px !important;
+}
+
+mat-icon {
+    font-family: 'Material Icons Outlined';
 }
 
 $click-color: #444DF2;

@@ -55,10 +55,15 @@ mat-dialog-content {
         }
 
         mat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 4px;
             border-radius: 20px;
             background-color: #ECEEFE;
             margin-left: 9px;
+            font-size: 24px;
+            color: black;
         }
 
         &:hover {

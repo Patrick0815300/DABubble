@@ -19,6 +19,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ChannelDialogComponent } from './channel-dialog/channel-dialog.component';
 import { MemberDialogComponent } from './member-dialog/member-dialog.component';
 import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.component';
+import { MessageComponent } from "./message/message.component";
+import { OwnMessageComponent } from "./own-message/own-message.component";
+import { MessageBoxComponent } from "./message-box/message-box.component";
 
 @Component({
   selector: 'app-chatarea',
@@ -28,7 +31,10 @@ import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.
     MatCardModule,
     MatIconModule,
     MatDialogModule,
-    ChannelDialogComponent
+    ChannelDialogComponent,
+    MessageComponent,
+    OwnMessageComponent,
+    MessageBoxComponent
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss'

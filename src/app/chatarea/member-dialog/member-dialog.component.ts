@@ -6,10 +6,13 @@ import {
   MatDialogRef,
   MatDialogActions,
   MatDialogModule,
+  MatDialog,
 } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { ProfilMemberDialogComponent } from './profil-member-dialog/profil-member-dialog.component';
+import { AddMemberDialogComponent } from '../add-member-dialog/add-member-dialog.component';
 
 @Component({
   selector: 'app-member-dialog',
@@ -28,9 +31,19 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './member-dialog.component.scss'
 })
 export class MemberDialogComponent {
-  constructor(public dialogRef: MatDialogRef<MemberDialogComponent>) { }
+  constructor(public dialogRef: MatDialogRef<MemberDialogComponent>, public dialog: MatDialog) { }
 
   closeDialog() {
     this.dialogRef.close();
+  }
+
+  openProfilDialog() {
+    this.dialog.closeAll();
+    this.dialog.open(ProfilMemberDialogComponent)
+  }
+
+  openAddMemberDialog() {
+    this.dialog.closeAll();
+    this.dialog.open(AddMemberDialogComponent)
   }
 }

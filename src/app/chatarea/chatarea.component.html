@@ -1,18 +1,21 @@
 <mat-card class="card">
+    <mat-card-header>
+        <mat-card-title (click)="openChannelDialog()" ><mat-icon>tag</mat-icon> Entwickler Team <mat-icon>keyboard_arrow_down</mat-icon></mat-card-title>
+        <div class="member-container">
+             <div class="member" (click)="openMemberDialog()">
+                 <div>
+                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
+                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elise_Roth.png">
+                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
+                 </div>
+                 <span>3</span>
+             </div>
+             <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
+        </div>
+     </mat-card-header>
     <mat-card-content>
-        <mat-card-header>
-           <mat-card-title (click)="openChannelDialog()" ><mat-icon>tag</mat-icon> Entwickler Team <mat-icon>keyboard_arrow_down</mat-icon></mat-card-title>
-           <div class="member-container">
-                <div class="member" (click)="openMemberDialog()">
-                    <div>
-                        <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
-                        <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elise_Roth.png">
-                        <img class="member-img" src="../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
-                    </div>
-                    <span>3</span>
-                </div>
-                <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
-           </div>
-        </mat-card-header>
+        <app-message></app-message>
+        <app-own-message></app-own-message>
+        <app-message-box></app-message-box>
     </mat-card-content>
 </mat-card>

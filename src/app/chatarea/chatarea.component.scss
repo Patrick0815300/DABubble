@@ -1,8 +1,16 @@
+.card {
+    border-radius: 30px;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+}
+
 mat-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
+    box-shadow: 0px 2px 10px 0px #00000014;
+    padding: 25px 45px;
 
     mat-card-title {
         font-family: 'Nunito';
@@ -49,7 +57,7 @@ mat-card-header {
 
         div {
             display: flex;
-            align-items: ceter;
+            align-items: center;
         }
 
         &:hover {
@@ -71,7 +79,12 @@ mat-card-header {
 
     .add-member {
         border-radius: 20px;
+        width: 24px;
+        font-size: 24px;
         padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: ease-in 80ms;
         cursor: pointer;
 
@@ -80,4 +93,8 @@ mat-card-header {
             color: #535AF1;
         }
     }
+}
+
+.main-chat {
+    height: 100%;
 }

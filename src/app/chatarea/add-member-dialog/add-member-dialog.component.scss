@@ -18,6 +18,9 @@ h2 {
     }
 
     mat-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 30px;
         height: 30px;
         font-size: 30px;
@@ -48,6 +51,11 @@ mat-dialog-content {
         align-items: center;
         color: #797EF3;
         gap: 15px;
+
+        mat-icon {
+            font-style: italic;
+            font-size: 24px;
+        }
     }
 
     mat-form-field {

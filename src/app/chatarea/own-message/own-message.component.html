@@ -1,0 +1,56 @@
+<div class="date-divider">
+    <div class="devider"></div>
+    <span>heute</span>
+    <div class="devider"></div>
+</div>
+<div class="message-container" (mouseenter)="onMessageHover(true)" (mouseleave)="onMessageHover(false)">
+    <div class="reaction-bar" [class.visible]="isReactionBarVisible">
+        <mat-icon><img src="../../../assets/img/04_chats-message/emoji _white heavy check mark_.png"></mat-icon>
+        <mat-icon><img src="../../../assets/img/04_chats-message/emoji _person raising both hands in celebration_.png"></mat-icon>
+        <mat-icon>add_reaction</mat-icon>
+        <mat-icon>comment</mat-icon>
+        <mat-icon mat-icon-button 
+            [matMenuTriggerFor]="editMenu"
+            (menuOpened)="onMenuOpened()"
+            (menuClosed)="onMenuClosed()"
+            >more_vert
+        </mat-icon>
+        <mat-menu class="edit" #editMenu="matMenu">
+            <button class="btn" mat-menu-item>
+                Nachricht bearbeiten   
+            </button>
+        </mat-menu>
+    </div>
+    <div class="message">
+        <div class="name-time">
+            <span class="time">14:25 Uhr</span>
+            <span class="name">Frederick Beck</span>
+        </div>
+        <span class="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum unde accusamus ipsam officia necessitatibus illum fugiat commodi cupiditate repellendus placeat incidunt velit animi sunt, in culpa ea hic magnam amet.</span>
+        <div class="reaction-container">
+            <div class="reaction">
+                <img src="../../../assets/img/04_chats-message/emoji _rocket_.png">
+                <span>1</span>
+                <div class="bubble">
+                    <img src="../../../assets/img/04_chats-message/emoji _rocket_.png">
+                    <h3>Sofia Müller</h3>
+                    <span>hat reagiert</span>
+                </div>
+            </div>
+            <div class="reaction">
+                <img src="../../../assets/img/04_chats-message/emoji _white heavy check mark_.png">
+                <span>1</span>
+                <div class="bubble">
+                    <img src="../../../assets/img/04_chats-message/emoji _white heavy check mark_.png">
+                    <h3>Noah Braun</h3>
+                    <span>hat reagiert</span>
+                </div>
+            </div>
+            <mat-icon>add_reaction</mat-icon>
+        </div>
+    </div>
+
+    <div class="img-container">
+        <img src="../../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
+    </div>
+</div>
