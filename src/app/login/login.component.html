@@ -20,7 +20,7 @@
                         <mat-icon>lock</mat-icon>
                         <input name="password" type="password" placeholder="Passwort">
                     </div>
-                    <div class="link">
+                    <div class="link" [routerLink]="['/']">
                         Passwort vergessen?
                     </div>
                 </div>
@@ -34,8 +34,8 @@
                     Anmelden mit Google
                 </div>
                 <div class="buttonContainer">
-                    <button class="button loginButton">Anmelden</button>
-                    <button class="button guestLoginButton">Gäste-Login</button>
+                    <button class="button loginButton"[routerLink]="['/']">Anmelden</button>
+                    <button class="button guestLoginButton" [routerLink]="['/']">Gäste-Login</button>
                 </div>
             </form>
         </mat-card>

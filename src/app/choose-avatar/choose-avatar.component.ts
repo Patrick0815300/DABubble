@@ -29,7 +29,7 @@ export class ChooseAvatarComponent {
 
   avatar:string[] = ["Elias_Neumann","Elise_Roth","Frederik_Beck","Noah_Braun","Sofia_Müller","Steffen_Hoffmann"];
 
-  Userregistrated: boolean = true;
+  Userregistrated: boolean = false;
 
   registerCompleted(){
     this.Userregistrated = true;
