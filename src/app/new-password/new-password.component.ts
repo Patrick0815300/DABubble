@@ -20,11 +20,16 @@ import { SignInComponent } from '../sign-in/sign-in.component';
 })
 export class NewPasswordComponent {
 
+  mailSent:boolean = false;
+
 constructor(private router: Router){
 
 }
 
   sendMail(){
-    this.router.navigate(['/newPassword2']);
+    this.mailSent = true;
+    setTimeout(() => {
+      this.mailSent = false;
+    },2000);
   }
 }

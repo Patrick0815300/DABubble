@@ -37,6 +37,5 @@ export class ChooseAvatarComponent {
       this.Userregistrated = false;
       this.router.navigate(['/']);
     },2000);
-
   }
 }
