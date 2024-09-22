@@ -17,25 +17,49 @@ import { NgFor } from '@angular/common';
     RouterModule,
     SignInComponent,
     NgFor,
+
   ],
   templateUrl: './choose-avatar.component.html',
   styleUrl: './choose-avatar.component.scss'
 })
 export class ChooseAvatarComponent {
 
-  constructor(private router: Router){
+  constructor(private router: Router) {
 
   }
 
-  avatar:string[] = ["Elias_Neumann","Elise_Roth","Frederik_Beck","Noah_Braun","Sofia_Müller","Steffen_Hoffmann"];
+  avatar: string[] = ["Elias_Neumann", "Elise_Roth", "Frederik_Beck", "Noah_Braun", "Sofia_Müller", "Steffen_Hoffmann"];
 
   Userregistrated: boolean = false;
+  chosenImage: string = './assets/img/01_onboarding-login-signup/Profil_Default.png';
+  newUrl: string = '';
 
-  registerCompleted(){
+  registerCompleted() {
     this.Userregistrated = true;
     setTimeout(() => {
       this.Userregistrated = false;
       this.router.navigate(['/']);
-    },2000);
+    }, 2000);
+  }
+
+  changeImage(name: string) {
+    ;
+    this.chosenImage = `./assets/img/00_general-buttons/characters/${name}.png`;
+  }
+
+  onFileSelected(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      const file = target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.chosenImage = e.target?.result as string;  // Setze das Bild auf die hochgeladene Datei
+      };
+      reader.readAsDataURL(file);  // Liest die Datei als Daten-URL
+
+      // Reset das Input-Feld
+      target.value = '';  // Setzt das Input-Feld zurück
+    }
+
   }
 }

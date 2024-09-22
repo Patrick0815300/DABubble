@@ -119,7 +119,7 @@ export class SignInComponent {
    */
   onSubmit(){
     this.emptyAllInputs(); 
-    this.router.navigate(['/']);
+    this.router.navigate(['/chooseAvatar']);
     console.log('SignIn works');
   }
 
