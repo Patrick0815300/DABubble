@@ -85,7 +85,7 @@
     width:400px;
     height:100px;
     transform:translate(-50%);
-    animation: logoContainerMovement 3s ease-in-out 3s forwards;
+    animation: logoContainerMovement 2s ease-in-out 3s forwards;
 
     img {
         z-index: 998;
@@ -148,7 +148,7 @@
     100%{
         top:50%;
         left:50%;
-        transform:scale(1.5);
+        transform:scale(1.2);
     }
 }
 

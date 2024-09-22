@@ -4,6 +4,8 @@ import { FooterComponent } from '../footer/footer.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { SignInComponent } from '../sign-in/sign-in.component';
+import { FormsModule, NgForm } from '@angular/forms';
+import { NgClass, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-new-password',
@@ -14,22 +16,33 @@ import { SignInComponent } from '../sign-in/sign-in.component';
     MatIconModule,
     RouterModule,
     SignInComponent,
+    FormsModule,
+    NgIf,
+    NgClass
   ],
   templateUrl: './new-password.component.html',
   styleUrl: './new-password.component.scss'
 })
 export class NewPasswordComponent {
 
-  mailSent:boolean = false;
+  mailSent: boolean = false;
 
-constructor(private router: Router){
+  constructor(private router: Router) {
 
-}
+  }
 
-  sendMail(){
-    this.mailSent = true;
-    setTimeout(() => {
-      this.mailSent = false;
-    },2000);
+  data = {
+    mail: ''
+  }
+
+
+  sendMail(ngForm: NgForm) {
+    if (ngForm.valid && ngForm.submitted) {
+      this.mailSent = true;
+      setTimeout(() => {
+        this.mailSent = false;
+        ngForm.resetForm();
+      }, 2000);
+    }
   }
 }
