@@ -27,6 +27,20 @@ mat-icon {
     font-family: 'Material Icons Outlined';
 }
 
+div.mat-mdc-select-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: auto !important;
+    border-radius: 0 20px 20px 20px !important;
+    padding: 20px 21px !important;
+    border: 1px solid #ADB0D9;
+}
+
+.mat-pseudo-checkbox {
+    display: none !important;
+}
+
 $click-color: #444DF2;
 $font-color: #535AF1;
 $hover-color: #797EF3;

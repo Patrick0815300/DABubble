@@ -1,14 +1,12 @@
 <mat-card class="card">
     <mat-card-header>
-        <mat-card-title (click)="openChannelDialog()" ><mat-icon>tag</mat-icon> Entwickler Team <mat-icon>keyboard_arrow_down</mat-icon></mat-card-title>
+        <mat-card-title (click)="openChannelDialog()" ><mat-icon>tag</mat-icon> {{ channelName }} <mat-icon>keyboard_arrow_down</mat-icon></mat-card-title>
         <div class="member-container">
              <div class="member" (click)="openMemberDialog()">
                  <div>
-                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
-                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Elise_Roth.png">
-                     <img class="member-img" src="../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
+                    <img *ngFor="let member of members" class="member-img" [src]="member.avatar" [alt]="member.firstName + ' ' + member.lastName">
                  </div>
-                 <span>3</span>
+                 <span>{{ members.length }}</span>
              </div>
              <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
         </div>

@@ -89,3 +89,72 @@ mat-dialog-actions {
 :host {
     --mdc-outlined-text-field-container-shape: 30px;
 }
+
+.mat-mdc-option:focus.mdc-list-item,
+.mat-mdc-option.mat-mdc-option-active.mdc-list-item,
+.mat-mdc-option.mdc-list-item {
+    border-radius: 30px;
+    padding: 4px 20px;
+    background-color: white !important;
+    width: fit-content;
+    transition: 100ms ease-in;
+
+    &:hover {
+        background-color: #ECEEFE !important;
+    }
+
+    &:active {
+        color: #535AF1;
+    }
+}
+
+.member-status {
+    display: flex;
+    align-items: center;
+
+    img {
+        width: 50px;
+        height: 50px;
+        border-radius: 30px;
+        border: 2px solid white;
+    }
+
+    div {
+        background-color: #92C83E;
+        width: 14px;
+        height: 14px;
+        border: 2px solid white;
+        border-radius: 50%;
+    }
+
+    .status {
+        align-self: end;
+        margin-left: -20px;
+    }
+
+    span {
+        margin-left: 15px;
+    }
+}
+
+.selected-users {
+    margin-bottom: 0 !important;
+
+    .member-status {
+        margin: 0;
+        gap: 0;
+        background-color: #ECEEFE;
+        border-radius: 35px;
+        padding: 3px 20px;
+        color: black;
+
+        img {
+            width: 34px;
+            height: 34px;
+        }
+
+        div {
+            margin-bottom: 0;
+        }
+    }
+}

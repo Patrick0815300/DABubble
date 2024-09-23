@@ -6,7 +6,6 @@ import {
   MatDialogRef,
   MatDialogActions,
   MatDialogModule,
-  MatDialog,
 } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';

@@ -3,26 +3,13 @@
     <mat-icon (click)="closeDialog()" class="close">close</mat-icon>
 </h2>
 <mat-dialog-content>
-    <div class="member" (click)="openProfilDialog()">
+    <!-- Zeige alle Mitglieder, die vom Benutzer geladen wurden -->
+    <div class="member" *ngFor="let user of users">
         <div class="member-status">
-            <img src="../../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
-            <div class="status"></div>
+            <img [src]="user.avatar" alt="{{ user.firstName }} {{ user.lastName }}">
+            <div class="status" [ngStyle]="{ 'background-color': user.online ? '#92C83E' : '#686868' }"></div>
         </div>
-        <span>Federik Beck (Du)</span>
-    </div>
-    <div class="member">
-        <div class="member-status">
-            <img src="../../../assets/img/00_general-buttons/characters/Sofia_Müller.png">
-            <div class="status"></div>
-        </div>
-        <span>Sofia Müller</span>
-    </div>
-    <div class="member">
-        <div class="member-status">
-            <img src="../../../assets/img/00_general-buttons/characters/Noah_Braun.png">
-            <div class="status"></div>
-        </div>
-        <span>Noah Braun</span>
+        <span>{{ user.firstName }} {{ user.lastName }}</span>
     </div>
 
     <div class="member add-member" (click)="openAddMemberDialog()">
