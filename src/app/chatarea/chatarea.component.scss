@@ -98,3 +98,11 @@ mat-card-header {
 .main-chat {
     height: 100%;
 }
+
+mat-card-content {
+    overflow: auto;
+}
+
+.message-box {
+    margin-bottom: 40px;
+}

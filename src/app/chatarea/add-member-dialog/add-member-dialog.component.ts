@@ -2,18 +2,15 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {
-  MatDialogRef,
-  MatDialogActions,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogActions, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { Firestore, arrayUnion, collection, doc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { User } from '../../models/user/user.model';
 import { MatSelectModule } from '@angular/material/select';
 import { FilterSelectedPipe } from '../../pipes/filter-selected.pipe';
+import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
+import { MainServiceService } from '../../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-add-member-dialog',
@@ -34,48 +31,41 @@ import { FilterSelectedPipe } from '../../pipes/filter-selected.pipe';
   styleUrl: './add-member-dialog.component.scss'
 })
 export class AddMemberDialogComponent {
-  firestore: Firestore = inject(Firestore);
   users: User[] = [];
-
-  filteredUsers: User[] = []; // Gefilterte Benutzer (die nicht im 'member'-Array sind)
+  filteredUsers: User[] = [];
   selectedUser: string[] = [];
-  memberIds: string[] = []; // IDs der Mitglieder des Channels
+  memberIds: string[] = [];
 
-
-  constructor(public dialogRef: MatDialogRef<AddMemberDialogComponent>) {
+  constructor(
+    public dialogRef: MatDialogRef<AddMemberDialogComponent>,
+    private fireService: ChatareaServiceService,
+    private mainService: MainServiceService
+  ) {
     this.loadChannelMembers();
     this.loadUsers();
   }
 
   loadChannelMembers() {
-    const channelsCollectionRef = collection(this.firestore, 'channel');
-
-    // Query, um das Dokument zu finden, wo der Name 'Entwickler Team' ist
-    const q = query(channelsCollectionRef, where('name', '==', 'Entwickler Team'));
-
-    onSnapshot(q, (snapshot) => {
-      snapshot.forEach((doc) => {
-        if (doc.exists()) {
-          const channelData = doc.data();
-          this.memberIds = channelData['member'] || []; // Lade vorhandene Mitglieder
-          this.filterUsers(); // Filtere Benutzer basierend auf den Mitglieder-IDs
-        }
-      });
+    this.fireService.getActiveChannel().subscribe({
+      next: (channel: any) => {
+        this.memberIds = channel.member || [];
+        this.filterUsers();
+      },
+      error: (err) => {
+        console.error('Fehler beim Laden der Mitglieder:', err);
+      }
     });
   }
 
   loadUsers() {
-    const usersCollectionRef = collection(this.firestore, 'user');
-
-    onSnapshot(usersCollectionRef, (snapshot) => {
-      this.users = []; // Leere das Array, um Duplikate zu vermeiden
-      snapshot.forEach((doc) => {
-        const userData = doc.data();
-        const user = new User({ ...userData, id: doc.id }); // Erstelle eine User-Instanz
-        this.users.push(user); // Füge den Benutzer zum Array hinzu
-      });
-
-      this.filterUsers(); // Filtere die Benutzer nach dem Laden
+    this.fireService.loadAllUsers().subscribe({
+      next: (users: User[]) => {
+        this.users = users;
+        this.filterUsers(); // Filtere die Benutzer nach dem Laden
+      },
+      error: (err) => {
+        console.error('Fehler beim Laden der Benutzer:', err);
+      }
     });
   }
 
@@ -89,38 +79,16 @@ export class AddMemberDialogComponent {
   }
 
   addUser() {
-    const channelsCollectionRef = collection(this.firestore, 'channel');
-
-    // Query, um das Dokument zu finden, wo der Name 'Entwickler Team' ist
-    const q = query(channelsCollectionRef, where('name', '==', 'Entwickler Team'));
-
-    // Einmalige Abfrage mit getDocs()
-    getDocs(q).then((snapshot) => {
-      snapshot.forEach((doc) => {
-        if (doc.exists()) {
-          const channelDocRef = doc.ref;
-
-          // Füge die Benutzer-ID zum 'member'-Array hinzu, falls noch nicht vorhanden
-          updateDoc(channelDocRef, {
-            member: arrayUnion(...this.selectedUser) // Füge die ausgewählte Benutzer-ID hinzu
-          })
-            .then(() => {
-              console.log('Benutzer erfolgreich hinzugefügt.');
-            })
-            .catch((error) => {
-              console.error('Fehler beim Hinzufügen der Benutzer: ', error);
-            });
-        } else {
-          console.log('Channel mit dem Namen "Entwickler Team" nicht gefunden.');
-        }
-      });
-    }).catch((error) => {
-      console.error('Fehler beim Abrufen des Channels: ', error);
+    this.fireService.addMembersToActiveChannel(this.selectedUser).subscribe({
+      next: () => {
+        console.log('Benutzer erfolgreich hinzugefügt.');
+        this.dialogRef.close();
+      },
+      error: (err) => {
+        console.error('Fehler beim Hinzufügen der Benutzer:', err);
+      }
     });
   }
-
-
-
 
   closeDialog() {
     this.dialogRef.close();

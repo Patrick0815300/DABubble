@@ -10,8 +10,9 @@ import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.
 import { MessageComponent } from "./message/message.component";
 import { OwnMessageComponent } from "./own-message/own-message.component";
 import { MessageBoxComponent } from "./message-box/message-box.component";
-import { Firestore, collection, doc, onSnapshot, query, where } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore';
 import { User } from '../models/user/user.model';
+import { ChatareaServiceService } from '../firestore-service/chatarea-service.service';
 
 @Component({
   selector: 'app-chatarea',
@@ -34,59 +35,39 @@ export class ChatareaComponent {
   firestore: Firestore = inject(Firestore);
   channelName: string = '';
   memberIds: string[] = [];
-  channelId: string = '';
   members: User[] = [];
 
-  constructor(public dialog: MatDialog) {
-    this.loadChannelId();
+  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService) {
+    this.loadActiveChannelData();
   }
 
-
-  loadChannelId() {
-    const channelsCollectionRef = collection(this.firestore, 'channel'); // Referenz auf die Channels-Sammlung
-    const q = query(channelsCollectionRef, where('name', '==', 'Entwickler Team')); // Query nach Channel-Name
-
-    onSnapshot(q, (snapshot) => {
-      snapshot.forEach((doc) => {
-        this.channelId = doc.id; // Setze die Channel-ID
-        const channelData = doc.data();
-        this.channelName = channelData['name'];
-        this.memberIds = channelData['member'] || [];
-        this.loadMembers();
-      });
-    }, (error) => {
-      console.error('Fehler beim Abrufen der Channel-ID:', error);
+  loadActiveChannelData() {
+    this.fireService.getActiveChannel().subscribe((channel: any) => {
+      this.channelName = channel.name;
+      this.memberIds = channel.member || [];
+      this.loadMembers();
     });
   }
 
   loadMembers() {
-    this.members = []; // Leere das Mitglieder-Array
+    this.members = [];
     this.memberIds.forEach((memberId) => {
-      const userDocRef = doc(this.firestore, 'user', memberId);
-
-      onSnapshot(userDocRef, (userSnapshot) => {
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data();
-          const user = new User({ ...userData, id: userSnapshot.id }); // Erstelle eine User-Instanz
-          this.members.push(user); // Füge das Mitglied zum Array hinzu
-        } else {
-          console.log(`Benutzer mit ID ${memberId} nicht gefunden.`);
-        }
-      }, (error) => {
-        console.error(`Fehler beim Abrufen des Benutzers mit ID ${memberId}:`, error);
+      this.fireService.loadDocument('user', memberId).subscribe((user: any) => {
+        const userInstance = new User({ ...user });
+        this.members.push(userInstance);
       });
     });
   }
 
   openChannelDialog() {
-    this.dialog.open(ChannelDialogComponent)
+    this.dialog.open(ChannelDialogComponent);
   }
 
   openMemberDialog() {
-    this.dialog.open(MemberDialogComponent)
+    this.dialog.open(MemberDialogComponent);
   }
 
   openAddMemberDialog() {
-    this.dialog.open(AddMemberDialogComponent)
+    this.dialog.open(AddMemberDialogComponent);
   }
 }
