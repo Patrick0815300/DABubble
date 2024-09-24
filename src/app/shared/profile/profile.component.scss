@@ -1,0 +1,61 @@
+button {
+  position: relative;
+  > .span-left {
+    height: 10px;
+    width: 10px;
+    background-color: #92c83e;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-radius: 50%;
+    border: 2px solid #eceefe;
+  }
+  > .span {
+    height: 12px;
+    width: 12px;
+    background-color: #92c83e;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    border-radius: 50%;
+    border: 2px solid #eceefe;
+  }
+}
+
+.btn-left {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: transparent;
+  > .profile-left {
+    width: 35px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+  }
+}
+
+.btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: transparent;
+
+  > .profile {
+    width: 55px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+  }
+}
+
+@media (width<500px) {
+  .btn {
+    width: 45px;
+    height: 45px;
+
+    > .profile {
+      width: 45px;
+    }
+  }
+}

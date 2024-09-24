@@ -1,0 +1,180 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    > img {
+      width: 40px;
+      object-fit: cover;
+    }
+  }
+}
+
+.sub-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.capitilize {
+  text-transform: capitalize;
+}
+.title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.main-title {
+  font-weight: 700;
+  font-size: 20px;
+}
+.list-channel {
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  height: 99px;
+  > li {
+    margin-left: 1.5rem;
+    &:hover img {
+      filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+    }
+  }
+}
+.add-channel {
+  padding-inline: 1rem;
+  &:hover span {
+    color: #535af1;
+  }
+  &:hover img {
+    filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+  }
+}
+.message-section-header {
+  &:hover button img {
+    filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+  }
+  &:hover .icon-group .capitilize {
+    > img {
+      filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+    }
+
+    > span {
+      color: #535af1;
+    }
+  }
+}
+
+.gp {
+  gap: 0.5rem;
+}
+.icon-group {
+  flex: 1;
+}
+.d-flex {
+  display: flex;
+  align-items: center;
+}
+
+.space-btn {
+  justify-content: space-between;
+}
+.l-mg-2 {
+  margin-left: 1rem;
+  padding-block: 4px;
+}
+.users {
+  overflow-y: auto;
+  height: 218px;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  transition: height 250ms ease-in-out;
+}
+
+.fold_in,
+.fold_in_channel {
+  height: 0 !important;
+}
+.fold {
+  height: 132px;
+
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  transition: all 250ms ease-in-out;
+}
+.rotateArrow,
+.rotateArrowExpand {
+  transform: rotate(-90deg);
+}
+
+li {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  padding-inline: 0.5rem;
+  border-radius: 30px;
+  cursor: pointer;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+
+.active {
+  background-color: #eceefe;
+  color: #535af1;
+  font-weight: 700;
+}
+
+.activeChannel {
+  background-color: #eceefe;
+  color: #535af1;
+  font-weight: 700;
+  > img {
+    filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+  }
+}
+.app-profile {
+  width: 35px;
+  height: 35px;
+}
+
+.closeDial {
+  background-color: transparent;
+  border: transparent;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+.closeDialBtn {
+  background-color: transparent;
+  border: transparent;
+  width: 30px;
+  height: 30px;
+}
+
+.closeDialDev {
+  background-color: transparent;
+  border: transparent;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+
+.edit-square {
+  width: 32px;
+  height: 32px;
+}

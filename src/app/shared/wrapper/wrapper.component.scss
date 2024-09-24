@@ -1,0 +1,15 @@
+div {
+  //   width: 366px;
+  width: 275px;
+  background-color: #ffffff;
+  border-radius: 30px;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+@media (width<500px) {
+  div {
+    width: unset;
+    padding: unset;
+  }
+}

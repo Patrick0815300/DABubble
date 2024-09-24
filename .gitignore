@@ -9,6 +9,7 @@
 # Node
 /node_modules
 /server
+/archives
 npm-debug.log
 yarn-error.log
 

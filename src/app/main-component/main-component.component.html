@@ -1,0 +1,70 @@
+<section class="main-section">
+  <app-nav-bar />
+  <main>
+    <button class="toggle-side-menu">
+      <span>
+        Workspace-Menü <span class="left-pad">{{ this.state_text }}</span>
+      </span>
+      <img (click)="handleToggle()" class="cursor-effect" src="{{ state_icon }}" alt="" />
+    </button>
+    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
+    <app-middle-wrapper class="app-middle-wrapper" />
+    <app-right-wrapper class="app-right-wrapper" />
+  </main>
+  @if(state){
+  <form (submit)="onAddUser()">
+    <div class="ch-creation">
+      <span>channel erstellen</span>
+      <button class="closeDial" (click)="onCloseDialog()">
+        <img class="cursor-effect" src="assets/img/icons/close.svg" alt="" />
+      </button>
+    </div>
+    <p>Channels dienen deinem Team zur Kommunikation. Am besten sollten sie themenbezogen sein #marketing zum Beispiel.</p>
+    <div class="title-container">
+      <span>channel-Name</span>
+    </div>
+    <div class="ch-info-input">
+      <input class="input" type="text" placeholder="z.B. Kooperationsprojekte" />
+      <img src="assets/img/icons/hash_tag.svg" alt="" />
+    </div>
+    <div class="title-container"><span>beschreibung</span><span class="optional"> (optional)</span></div>
+    <input class="input" type="text" placeholder="Dein Text hier" />
+    <div class="btn-container">
+      <button type="submit" class="btn">Erstellen</button>
+    </div>
+  </form>
+  <div class="overlay"></div>
+  } @if(open_dialog_add_user){
+  <section class="section-user">
+    <div class="ch-creation-user">
+      <span>leute hinzufügen</span>
+      <button class="closeDial" (click)="onCancelAddUser()">
+        <img class="cursor-effect" src="assets/img/icons/close.svg" alt="" />
+      </button>
+    </div>
+    <div class="ch-info-input-user">
+      <input class="input-user" type="radio" checked />
+      <span>Alle Mitglieder von <a href="#">OfficeTeam</a> hinzufügen</span>
+    </div>
+    <div class="ch-info-input-user">
+      <input class="input-user" type="radio" />
+      <span>Bestimmte Leute hinzufügen</span>
+    </div>
+
+    <div class="btn-container-user">
+      <button class="btn">Erstellen</button>
+    </div>
+  </section>
+
+  <div class="overlay"></div>
+  } @if (open_logout) {
+  <app-logout />
+  <div (click)="onCloseLogout()" class="overlay"></div>
+  } @if (open_show_profil) {
+  <app-show-profil />
+  <div (click)="onCloseShowProfil()" class="overlay"></div>
+  } @if (open_update_profil) {
+  <app-update-profil />
+  <div (click)="onCloseUpdateProfil()" class="overlay"></div>
+  }
+</section>

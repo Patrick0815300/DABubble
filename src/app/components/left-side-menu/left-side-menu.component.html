@@ -1,0 +1,85 @@
+<app-wrapper>
+  <div class="section-header">
+    <div>
+      <img src="assets/img/icons/workspace-logo.svg" alt="" />
+      <span class="main-title">Devspace</span>
+    </div>
+    <button class="closeDialDev">
+      <img class="edit-square" src="assets/img/icons/edit_square.svg" alt="" />
+    </button>
+  </div>
+  <!--  -->
+  <div class="sub-section">
+    <div class="channel-section-header cursor-effect d-flex">
+      <button (click)="onExpand()" class="closeDialBtn">
+        <img [class.rotateArrowExpand]="expand == true" src="assets/img/icons/arrow_drop_down.svg" alt="" />
+      </button>
+      <div class="icon-group d-flex space-btn">
+        <div (click)="onExpand()" class="gp capitilize d-flex">
+          <img src="assets/img/icons/workspaces.svg" alt="" />
+          <span class="title">channels</span>
+        </div>
+        <button class="closeDial">
+          <img (click)="onOpen()" src="assets/img/icons/add.svg" alt="" />
+        </button>
+      </div>
+    </div>
+    <!--  -->
+    <div class="fold" [class.fold_in_channel]="expand == true">
+      <ul class="list-channel">
+        <li [class.activeChannel]="selectedChannelIndex == 0" (click)="selectChannel(0)" class="d-flex gp l-mg-2">
+          <img src="assets/img/icons/hash_tag.svg" alt="" />
+          <span class="capitilize">entwicklerteam </span>
+        </li>
+        <li [class.activeChannel]="selectedChannelIndex == 1" (click)="selectChannel(1)" class="d-flex gp l-mg-2">
+          <img src="assets/img/icons/hash_tag.svg" alt="" />
+          <span class="capitilize">OfficeTeam </span>
+        </li>
+        <li [class.activeChannel]="selectedChannelIndex == 2" (click)="selectChannel(2)" class="d-flex gp l-mg-2">
+          <img src="assets/img/icons/hash_tag.svg" alt="" />
+          <span class="capitilize">Developers </span>
+        </li>
+      </ul>
+      <div class="add-channel gp d-flex l-mg-2 cursor-effect" (click)="onOpen()">
+        <img class="cursor-effect" src="assets/img/icons/add_circle.svg" alt="" />
+        <span class="capitilize">channel hinzufügen</span>
+      </div>
+    </div>
+  </div>
+  <div class="sub-section direct-messages">
+    <div (click)="onCollapse()" class="message-section-header cursor-effect d-flex">
+      <button class="closeDialBtn">
+        <img [class.rotateArrow]="collapse == true" src="assets/img/icons/arrow_drop_down.svg" alt="" />
+      </button>
+      <div class="icon-group d-flex space-btn">
+        <div class="gp capitilize d-flex">
+          <img src="assets/img/icons/account_circle.svg" alt="" />
+          <span class="title">direktnachrichten</span>
+        </div>
+        <!-- <img style="display: none" src="assets/img/icons/add.svg" alt="" /> -->
+      </div>
+    </div>
+    <ul [class.fold_in]="collapse == true" class="users">
+      <li [class.active]="selectedIndex == 0" (click)="selectUser(0)" class="d-flex capitilize gp l-mg-2">
+        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
+        <span> frederik beck </span>
+        <span *ngIf="is_authenticated == false">(Du)</span>
+      </li>
+      <li [class.active]="selectedIndex == 1" (click)="selectUser(1)" class="d-flex capitilize gp l-mg-2">
+        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
+        <span> frederik beck </span>
+        <span *ngIf="is_authenticated == false">(Du)</span>
+      </li>
+      <li [class.active]="selectedIndex == 2" (click)="selectUser(2)" class="d-flex capitilize gp l-mg-2">
+        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
+        <span> frederik beck </span>
+        <span *ngIf="is_authenticated == true">(Du)</span>
+      </li>
+      <li [class.active]="selectedIndex == 3" (click)="selectUser(3)" class="d-flex capitilize gp l-mg-2">
+        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
+        <span> frederik beck </span>
+        <span *ngIf="is_authenticated == false">(Du)</span>
+      </li>
+    </ul>
+  </div>
+</app-wrapper>

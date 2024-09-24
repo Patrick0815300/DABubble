@@ -7,12 +7,22 @@
 body {
   font-family: 'Nunito';
   background-color: #eceefe;
+  height: 100vh;
+  overflow: hidden;
+}
+
+button {
+  cursor: pointer;
 }
 
 $click-color: #444df2;
 $font-color: #535af1;
 $hover-color: #797ef3;
 $default-color: #686868;
+
+.cursor-effect {
+  cursor: pointer;
+}
 
 /* ---------------------------------------- fonts ---------------------------------------- */
 
