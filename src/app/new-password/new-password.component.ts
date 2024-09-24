@@ -7,6 +7,7 @@ import { SignInComponent } from '../sign-in/sign-in.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Component({
   selector: 'app-new-password',
@@ -27,8 +28,9 @@ import { HttpClient } from '@angular/common/http';
 export class NewPasswordComponent {
 
   mailSent: boolean = false;
+  wrongMail: boolean = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private firebase: FirebaseLoginService) {
 
   }
 
@@ -36,29 +38,70 @@ export class NewPasswordComponent {
     mail: ''
   }
 
+  mail: string = '';
+
   mailTest = true;
 
   http = inject(HttpClient);
 
-  onSubmit(ngForm: NgForm) {
-    if (ngForm.valid && ngForm.submitted) {
-      this.mailSent = true;
-      this.sentMail(ngForm)//evtl. wieder löschen
-      setTimeout(() => {
-        this.mailSent = false;
-      }, 2000);
+  /**
+   * This function trigggers functions who send a Mail to the given mail adress to change the password
+   * @param ngForm data of the form (mail adress)
+   */
+  async onSubmit(ngForm: NgForm) {
+    console.log(await this.firebase.findUserWithEmail(this.mail));
+    if (await this.firebase.findUserWithEmail(this.mail)) {
+      if (ngForm.valid && ngForm.submitted) {
+        this.displayMailsentFeedback();
+        this.sentMail(ngForm);
+        this.resetMailsentFeedback();
+      }
+    } else {
+      this.displayWrongMailError();
+      this.resetDisplayWrongMailError();
     }
   }
 
-  sentMail(ngForm:any){
+   /**
+   * This function sets the variable of the "mailsent"-Feedback to true, sothat the feedback will be displayed
+   */
+  displayMailsentFeedback() {
+    this.mailSent = true;
+  }
+
+  /**
+   * This function resets the variable which displays the "mail sent" Feedback
+   */
+  resetMailsentFeedback() {
+    setTimeout(() => {
+      this.mailSent = false;
+    }, 2000);
+  }
+
+  /**
+   * This function sets the variable of the "wrong Email"-Error to true, sothat the error will be displayed
+   */
+  displayWrongMailError() {
+    this.wrongMail = true;
+  }
+
+  /**
+   * This function resets the variable which displays the "wrong Email" Error
+   */
+  resetDisplayWrongMailError() {
+    setTimeout(() => {
+      this.wrongMail = false;
+    }, 2000);
+  }
+
+  sentMail(ngForm: any) {
     if (ngForm.submitted && ngForm.form.valid && !this.mailTest) {
       this.http.post(this.post.endPoint, this.post.body(this.data))
         .subscribe({
           next: (response) => {
-            
             ngForm.resetForm();
           },
-          error: (error:any) => {
+          error: (error: any) => {
             console.error(error);
           },
           complete: () => console.info('send post complete'),

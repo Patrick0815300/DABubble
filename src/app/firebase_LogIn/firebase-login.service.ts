@@ -91,11 +91,41 @@ export class FirebaseLoginService {
     )
   }
 
-  async updateAvatar(chosenAvatar: string, id:any){
+  /**
+   * This functionupdates the avatar of the user
+   * @param chosenAvatar the link of the profil picture
+   * @param id the user-id (DocRef of firebase)
+   */
+  async updateAvatar(chosenAvatar: string, id: any) {
     let user = this.getSingleUserRef('accounts', id);
-    await updateDoc(user,{
+    await updateDoc(user, {
       avatar: chosenAvatar
     });
   }
 
+  /**
+   * This function checks, if the entered Email exists in die firebase database or not
+   * @param email entered Email
+   * @returns the User who belongs to the entered mail-adress
+   */
+  async gettingQuery(email: string) {
+    const q = query(this.getUserRef(), where("mail", "==", email));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot;
+  }
+
+  /**
+ * This function checks, if the entered Email exists in the firebase database or not.
+ * @param email in the form entered Email
+ * @returns true / false
+ */
+  async findUserWithEmail(email: string) {
+    try {
+      const querySnapshot = await this.gettingQuery(email);
+      return !querySnapshot.empty;
+    } catch (err) {
+      console.error("Error checking email existence: ", err);
+      return false;
+    }
+  }
 }
