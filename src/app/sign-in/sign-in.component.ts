@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ChooseAvatarComponent } from '../choose-avatar/choose-avatar.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -25,10 +26,12 @@ import { NgClass } from '@angular/common';
 export class SignInComponent {
 
   data = {
+    id: '',
     name: '',
     mail: '',
     password: '',
-    acceptedPrivacyPolicy: false
+    avatar: '',
+    online: false,
   }
 
   name: string = '';
@@ -43,16 +46,16 @@ export class SignInComponent {
 
   emptyInputs: boolean = true;
 
-  constructor(private router: Router){
+  constructor(private router: Router, private firebase: FirebaseLoginService) {
 
   }
 
   /**
    * This function activates the button if all inputs are filled and calls several control functions
    */
-  checkPasswords(){
-    if(this.name && this.mail && this.password && this.privacyPolicy){
-      this.emptyInputs = false;                       
+  checkPasswords() {
+    if (this.name && this.mail && this.password && this.privacyPolicy) {
+      this.emptyInputs = false;
     }
     this.checkNameInput();
     this.checkMailInput();
@@ -63,43 +66,43 @@ export class SignInComponent {
   /**
    * This function checks if the name Input was already filled, if yes it displays an error-message
    */
-  checkNameInput(){
-    if(!this.name){
+  checkNameInput() {
+    if (!this.name) {
       this.displayNameError = true;
-    } else{
+    } else {
       this.displayNameError = false;
     }
   }
 
-   /**
-   * This function checks if the mail Input was already filled, if yes it displays an error-message
-   */
-  checkMailInput(){
-    if(!this.mail){
+  /**
+  * This function checks if the mail Input was already filled, if yes it displays an error-message
+  */
+  checkMailInput() {
+    if (!this.mail) {
       this.displayMailError = true;
-    }else{
+    } else {
       this.displayMailError = false;
     }
   }
 
-   /**
-   * This function checks if the password Input was already filled, if yes it displays an error-message
-   */
-  checkPasswordInput(){
-    if(!this.password){
+  /**
+  * This function checks if the password Input was already filled, if yes it displays an error-message
+  */
+  checkPasswordInput() {
+    if (!this.password) {
       this.displayPasswordError = true;
-    }else{
+    } else {
       this.displayPasswordError = false;
     }
   }
 
-   /**
-   * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
-   */
-  checkPrivacyPolicyInput(){    
-    if(!this.privacyPolicy){
+  /**
+  * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
+  */
+  checkPrivacyPolicyInput() {
+    if (!this.privacyPolicy) {
       this.displayPrivatPolicyError = true;
-    } else{
+    } else {
       this.displayPrivatPolicyError = false;
     }
   }
@@ -107,7 +110,7 @@ export class SignInComponent {
   /**
    * This function empties all Inputs
    */
-  emptyAllInputs(){
+  emptyAllInputs() {
     this.name = '';
     this.mail = '';
     this.password = '';
@@ -115,12 +118,25 @@ export class SignInComponent {
   }
 
   /**
-   * This function submits the form, empties all inputs and send you back to the login page
+   * This function sets the given data to a correct user data structure
    */
-  onSubmit(){
-    this.emptyAllInputs(); 
-    this.router.navigate(['/chooseAvatar']);
-    console.log('SignIn works');
+  setData() {
+    this.data.name = this.name;
+    this.data.mail = this.mail;
+    this.data.password = this.password;
+    this.data.avatar = '';
+    this.data.online = false;
   }
 
+
+  /**
+   * This function submits the form, empties all inputs and send you back to the login page
+   */
+  async onSubmit() {
+    this.setData();
+    let user = this.firebase.setUserObject(this.data);
+    await this.firebase.addUser(user);
+    this.router.navigate(['/chooseAvatar', user.id]);
+    this.emptyAllInputs();
+  }
 }

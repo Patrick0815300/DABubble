@@ -9,7 +9,7 @@ import { NewPassword2Component } from './new-password2/new-password2.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent },
     { path: "signIn", component: SignInComponent },
-    { path: "chooseAvatar", component: ChooseAvatarComponent },
+    { path: "chooseAvatar/:id", component: ChooseAvatarComponent },
     { path: "newPassword", component: NewPasswordComponent},
     { path: "newPassword2", component: NewPassword2Component}
 ];

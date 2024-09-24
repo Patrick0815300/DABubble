@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { FooterComponent } from '../footer/footer.component';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SignInComponent } from '../sign-in/sign-in.component';
 import { NgFor } from '@angular/common';
+import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 
 @Component({
@@ -24,7 +25,9 @@ import { NgFor } from '@angular/common';
 })
 export class ChooseAvatarComponent {
 
-  constructor(private router: Router) {
+  userId: any = '';
+
+  constructor(private router: Router, private route: ActivatedRoute, private firebase: FirebaseLoginService) {
 
   }
 
@@ -34,16 +37,21 @@ export class ChooseAvatarComponent {
   chosenImage: string = './assets/img/01_onboarding-login-signup/Profil_Default.png';
   newUrl: string = '';
 
-  registerCompleted() {
+  async registerCompleted() {
     this.Userregistrated = true;
+    this.getIDfromURL();
+    await this.firebase.updateAvatar(this.chosenImage, this.userId);
     setTimeout(() => {
       this.Userregistrated = false;
       this.router.navigate(['/']);
     }, 2000);
   }
 
+  getIDfromURL(){
+    this.userId = this.route.snapshot.paramMap.get('id');
+  }
+
   changeImage(name: string) {
-    ;
     this.chosenImage = `./assets/img/00_general-buttons/characters/${name}.png`;
   }
 
