@@ -39,8 +39,8 @@
                     Anmelden mit Google
                 </div>
                 <div class="buttonContainer">
-                    <button type="button" class="button loginButton" (click)="test()">Anmelden</button>
-                    <div class="button guestLoginButton divAsButton" [routerLink]="['/']">Gäste-Login</div>
+                    <button type="button" class="button loginButton" (click)="onSubmit()">Anmelden</button>
+                    <div class="button guestLoginButton divAsButton" [routerLink]="['/chooseAvatar/guest']">Gäste-Login</div> <!--Link anpassen von chooseAvatar to Dashboard-->
                 </div>
             </form>
         </mat-card>
