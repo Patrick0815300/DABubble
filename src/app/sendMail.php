@@ -18,7 +18,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     
             $recipient = $email;  
             $subject  ="Passwort zurücksetzen";
-            $message = "Klicken Sie auf den folgende Link, um Ihr Passwort zurückzusetzen.<br/> <br/> "
+            $message = "Klicken Sie auf den folgende Link, um Ihr Passwort zurückzusetzen.<br/> <br/> localhost:4200/newPassword2/"
 
     
             $headers   = array();

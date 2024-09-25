@@ -23,8 +23,8 @@
     }
 }
 
-section{
-    display:flex;
+section {
+    display: flex;
     justify-content: center;
 }
 
@@ -179,6 +179,16 @@ form {
     }
 }
 
+.divAsButton {
+    justify-content: center;
+    display: flex;
+}
+
+.error{
+    color:red;
+    height:20px;
+ }
+
 @media(max-width:710px) {
     main {
         width: calc(100% - 20px);
@@ -201,13 +211,14 @@ form {
     }
 }
 
-@media(max-width:340px){
+@media(max-width:340px) {
     main {
         width: 100%;
-        display:flex;
+        display: flex;
         justify-content: center;
-        .card{
-            width:300px;
+
+        .card {
+            width: 300px;
         }
     }
 }
