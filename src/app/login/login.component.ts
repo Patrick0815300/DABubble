@@ -49,7 +49,7 @@ export class LoginComponent {
       const safedPassword = await this.getPasswordFromFirebase(q);
       if (safedPassword === this.password) {
         let id = this.getIdFromFirebase(q);
-        this.router.navigate(['/chooseAvatar', id]); // Link anpassen
+        this.router.navigate(['/desktop', id]); // Link anpassen
       }
       else {
         this.displayWrongMailOrPasswordErrorMessage();
