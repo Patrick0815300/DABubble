@@ -43,6 +43,12 @@ div.mat-mdc-select-panel {
 
 .mat-mdc-menu-content {
   padding: 10px 20px !important;
+  height: 100vh;
+  overflow: hidden;
+}
+
+button {
+  cursor: pointer;
 }
 
 $click-color: #444DF2;
@@ -50,12 +56,9 @@ $font-color: #535AF1;
 $hover-color: #797EF3;
 $default-color: #686868;
 
-
-
-
-
-
-
+.cursor-effect {
+  cursor: pointer;
+}
 
 /* ---------------------------------------- fonts ---------------------------------------- */
 

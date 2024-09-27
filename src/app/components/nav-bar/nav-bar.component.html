@@ -3,8 +3,10 @@
     <img src="assets/img/icons/logo.svg" alt="Logo" />
     <div class="current-user">
       <span>Frederik Beck</span>
-      <img class="profile" src="assets/img/profiles/Elise_Roth.svg" alt="" />
-      <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
+      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="avatar" />
+      <button class="btn-arrow" (click)="onOpenLogOut()">
+        <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
+      </button>
     </div>
   </nav>
   <div class="input-search">
