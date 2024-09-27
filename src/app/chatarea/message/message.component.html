@@ -1,28 +1,28 @@
-<div class="date-divider">
-    <div class="devider"></div>
-    <span>Dienstag, 14. Januar</span>
-    <div class="devider"></div>
-</div>
-<div class="message-container">
-    <div class="img-container">
-        <img src="../../../assets/img/00_general-buttons/characters/Noah_Braun.png">
-    </div>
-    <div class="message">
-        <div class="name-time">
-            <span class="name">Noah Braun</span>
-            <span class="time">14:25 Uhr</span>
-        </div>
-        <span class="text">Welche Version ist aktuell von Angular</span>
-        <div class="answer">
-            <span>2 Antworten</span>
-            <span class="time">Letzte Antwort 14:56</span>
-        </div>
-    </div>
+<div *ngIf="message">
 
-    <div class="reaction-bar">
-        <mat-icon><img src="../../../assets/img/04_chats-message/emoji _white heavy check mark_.png"></mat-icon>
-        <mat-icon><img src="../../../assets/img/04_chats-message/emoji _person raising both hands in celebration_.png"></mat-icon>
+    
+    <div class="message-container">
+      <div class="img-container">
+        <img [src]="message.avatar" [alt]="message.name">
+      </div>
+      <div class="message">
+        <div class="name-time">
+          <span class="name">{{ message.name }}</span>
+          <span class="time">{{ formatTime(message.time) }}</span>
+        </div>
+        <span class="text">{{ message.content }}</span>
+        <div class="answer">
+          <span>2 Antworten</span>
+          <span class="time">Letzte Antwort 14:56</span>
+        </div>
+      </div>
+  
+      <div class="reaction-bar">
+        <mat-icon><img src="../../../assets/img/04_chats-message/emoji_white_heavy_check_mark_.png"></mat-icon>
+        <mat-icon><img src="../../../assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png"></mat-icon>
         <mat-icon>add_reaction</mat-icon>
         <mat-icon>comment</mat-icon>
+      </div>
     </div>
-</div>
+  </div>
+  

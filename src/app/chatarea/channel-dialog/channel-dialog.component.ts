@@ -90,12 +90,6 @@ export class ChannelDialogComponent {
 
   saveChanges(updatedData: any) {
     this.fireService.updateChannel(this.selectedChannelId, updatedData)
-      .then(() => {
-        console.log('Änderungen erfolgreich gespeichert.');
-      })
-      .catch((error) => {
-        console.error('Fehler beim Speichern der Änderungen:', error);
-      });
   }
 
   closeDialog() {

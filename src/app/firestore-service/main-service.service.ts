@@ -21,7 +21,6 @@ export class MainServiceService {
     const collectionRef = collection(this.firestore, colId);
     const snapshot = await getDocs(collectionRef);
     const docIds = snapshot.docs.map(doc => doc.id);
-    console.log(docIds)
     return docIds;
   }
 

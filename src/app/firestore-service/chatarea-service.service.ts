@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 
@@ -7,6 +7,8 @@ import { MainServiceService } from './main-service.service';
   providedIn: 'root'
 })
 export class ChatareaServiceService {
+
+  uid: string = 'tsvZAtPmhQsbvuAp6mi6'
 
   constructor(private firestore: Firestore, private mainService: MainServiceService) { }
 
@@ -46,7 +48,6 @@ export class ChatareaServiceService {
   leaveActiveChannel(): Observable<void> {
     const channelsCollectionRef = this.mainService.getChannelRef('channel');
     const q = query(channelsCollectionRef, where('chosen', '==', true));
-
     return new Observable((observer) => {
       onSnapshot(q, (snapshot) => {
         if (snapshot.empty) {
@@ -103,10 +104,14 @@ export class ChatareaServiceService {
     const messagesCollectionRef = collection(this.firestore, `channel/${channelId}/messages`); // Korrekte Referenz zu den Nachrichten
     return new Observable((observer) => {
       onSnapshot(messagesCollectionRef, (snapshot) => {
-        const messages = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const messages = snapshot.docs.map(doc => {
+          const messageData = doc.data();
+          return {
+            id: doc.id,
+            ...messageData,
+            isOwnMessage: messageData['senderId'] === this.uid
+          };
+        });
         observer.next(messages);
       }, (error) => observer.error(error));
     });
@@ -117,4 +122,48 @@ export class ChatareaServiceService {
     return addDoc(messagesCollectionRef, messageData);
   }
 
+  updateMessage(messageId: string, updatedData: any): Observable<void> {
+    return new Observable((observer) => {
+      this.getActiveChannel().subscribe({
+        next: (channel: any) => {
+          const messageDocRef = doc(this.firestore, `channel/${channel.id}/messages`, messageId);
+          updateDoc(messageDocRef, updatedData)
+            .then(() => observer.next())
+            .catch(error => observer.error('Fehler beim Aktualisieren der Nachricht: ' + error));
+        },
+        error: (error) => observer.error('Fehler beim Abrufen des aktiven Channels: ' + error)
+      });
+    });
+  }
+
+  async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string): Promise<void> {
+    const messageDocRef = this.mainService.getSingleChannelRef(`channel/${channelId}/messages`, messageId);
+    const snapshot = await getDoc(messageDocRef);
+    const messageData = snapshot.data();
+    const reactions = messageData?.['reactions'] || [];
+
+    const existingReactionIndex = reactions.findIndex((reaction: any) => reaction.type === reactionType && reaction.userId === userId);
+
+    if (existingReactionIndex !== -1) {
+      reactions[existingReactionIndex].count += 1;
+    } else {
+      reactions.push({
+        type: reactionType,
+        userId: userId,
+        count: 1,
+      });
+    }
+    await updateDoc(messageDocRef, { reactions: reactions });
+  }
+
+  async loadReactions(): Promise<any[]> {
+    const reactionsRef = this.mainService.getChannelRef('reactions');
+    const snapshot = await getDocs(reactionsRef);
+    const reactions = snapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data()['name'],
+      path: doc.data()['path']
+    }));
+    return reactions; // Reaktionen mit 'name' und 'path' zurückgeben
+  }
 }

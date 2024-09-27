@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -31,21 +31,47 @@ import { ChatareaServiceService } from '../firestore-service/chatarea-service.se
   styleUrl: './chatarea.component.scss'
 })
 export class ChatareaComponent {
+  @ViewChild('messageContainer') messageContainer!: ElementRef;
 
   firestore: Firestore = inject(Firestore);
   channelName: string = '';
   memberIds: string[] = [];
   members: User[] = [];
+  messages: any[] = [];
+  uid: string = 'tsvZAtPmhQsbvuAp6mi6';
+  previousMessageDate: string | null = null;
 
   constructor(public dialog: MatDialog, private fireService: ChatareaServiceService) {
     this.loadActiveChannelData();
   }
 
-  loadActiveChannelData() {
+  loadActiveChannelMessages() {
     this.fireService.getActiveChannel().subscribe((channel: any) => {
-      this.channelName = channel.name;
-      this.memberIds = channel.member || [];
-      this.loadMembers();
+      const channelId = channel.id;
+      this.loadMessages(channelId);
+    });
+  }
+
+  loadMessages(channelId: string) {
+    this.fireService.loadMessages(channelId).subscribe((messages) => {
+      this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 0);
+    });
+  }
+
+  loadActiveChannelData() {
+    this.fireService.getActiveChannel().subscribe({
+      next: (channel: any) => {
+        this.channelName = channel.name;
+        this.loadActiveChannelMessages();
+        this.memberIds = channel.member || [];
+        this.loadMembers();
+      },
+      error: (err) => {
+        console.error('Kein aktiver Channel gefunden:', err);
+      }
     });
   }
 
@@ -57,6 +83,36 @@ export class ChatareaComponent {
         this.members.push(userInstance);
       });
     });
+  }
+
+  shouldShowDivider(currentMessageTime: string, index: number): boolean {
+    const currentMessageDate = new Date(currentMessageTime).toLocaleDateString();
+    if (index === 0 || this.previousMessageDate !== currentMessageDate) {
+      this.previousMessageDate = currentMessageDate;
+      return true;
+    }
+    return false;
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const today = new Date();
+
+    if (date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()) {
+      return 'heute';
+    }
+
+    return date.toLocaleDateString('de-DE');  // TT.MM.JJJJ Format
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+    } catch (err) {
+      console.error('Fehler beim automatischen Scrollen:', err);
+    }
   }
 
   openChannelDialog() {

@@ -11,9 +11,18 @@
              <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
         </div>
      </mat-card-header>
-    <mat-card-content>
-        <app-message></app-message>
-        <app-own-message></app-own-message>     
-    </mat-card-content>
+     <mat-card-content #messageContainer>
+      <ng-container *ngFor="let message of messages; let i = index">
+        <div *ngIf="shouldShowDivider(message.time, i)" class="date-divider">
+          <div class="devider"></div>
+          <span>{{ formatDate(message.time) }}</span>
+          <div class="devider"></div>
+        </div>
+        <!-- Nachricht von anderen Benutzern -->
+        <app-message *ngIf="message.senderId !== uid" [message]="message"></app-message>
+        <!-- Eigene Nachrichten -->
+        <app-own-message *ngIf="message.senderId === uid" [message]="message"></app-own-message>
+      </ng-container>
+      </mat-card-content>
     <app-message-box class="message-box"></app-message-box>
 </mat-card>

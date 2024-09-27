@@ -6,6 +6,7 @@ export class User {
     id?: string;
     avatar: string;
     online: boolean;
+    authenticated: boolean;
 
     constructor(obj?: any) {
         this.firstName = obj ? obj.firstName : '';
@@ -14,6 +15,7 @@ export class User {
         this.password = obj ? obj.password : '';
         this.avatar = obj ? obj.avatar : '';
         this.online = obj ? obj.online : false;
+        this.authenticated = obj ? obj.authenticated : false;
         this.id = obj ? obj.id : '';
     }
 
