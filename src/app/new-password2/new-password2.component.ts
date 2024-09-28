@@ -45,14 +45,21 @@ constructor(private router: Router){
     if(this.passwordAccordance){
       this.displayError = false;
       this.clearInputs();
-      this.passwordChanged = true;
-      setTimeout(()=>{
-        this.passwordChanged = false;
-        this.router.navigate(['/']);
-      },2000);
+      this.displayPWChangedMessage();
     } else{
       this.displayError = true;
     }
+  }
+
+  /**
+   * This function displays a message, that the Password was successfully changed 
+   */
+  displayPWChangedMessage(){
+    this.passwordChanged = true;
+    setTimeout(()=>{
+      this.passwordChanged = false;
+      this.router.navigate(['/']);
+    },2000);
   }
 
   /**
@@ -68,7 +75,12 @@ constructor(private router: Router){
    */
   checkPasswords() {
     this.checkForEmptyInputs();
-    this.checkForSamePasswords();
+    let changePossible = this.checkForSamePasswords();
+    if (changePossible){
+      this.Password1
+    }else{
+
+    }
   }
 
   /**
@@ -78,6 +90,9 @@ constructor(private router: Router){
     this.displayError = false;
     if(this.Password1 === this.Password2){
       this.passwordAccordance = true;
+      return true;
+    }else{
+      return false;
     }
   }
 
@@ -91,6 +106,7 @@ constructor(private router: Router){
       this.emptyInputs = false;
     }
   }
+
 }
 
 

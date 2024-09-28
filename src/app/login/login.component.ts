@@ -9,6 +9,9 @@ import { HeaderComponent } from '../header/header.component';
 import { FormsModule } from '@angular/forms';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { NgIf } from '@angular/common';
+import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+
 
 
 
@@ -31,6 +34,8 @@ import { NgIf } from '@angular/common';
 })
 export class LoginComponent {
 
+  private auth = getAuth(); // Firebase Auth initialisieren
+
   mail: string = '';
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
@@ -39,81 +44,54 @@ export class LoginComponent {
 
   }
 
-  /**
-   * This function triggers function to call the id and password from the firebase database and checks, if the written password and the password in the database is the same.
-   * If so, it will send the User to the dashboard, if not, it will display an error message under the password input
-   */
-  async onSubmit() { // Link anpassen zu dashboard statt chooseAvatar
-    if (await this.firebase.findUserWithEmail(this.mail)) {
-      let q = await this.firebase.gettingQuery(this.mail);
-      const safedPassword = await this.getPasswordFromFirebase(q);
-      if (safedPassword === this.password) {
-        let id = this.getIdFromFirebase(q);
-        this.router.navigate(['/desktop', id]); // Link anpassen
-      }
-      else {
-        this.displayWrongMailOrPasswordErrorMessage();
-      }
-    } else {
+  db = getFirestore();
+
+  // Google-Anmeldungsanbieter initialisieren (Neu hinzugefügt)
+  private googleProvider = new GoogleAuthProvider();
+
+  // /**
+  //  * This function retriebes the userdata from the firebase database
+  //  * @param q Firebase Query
+  //  * @returns the Data
+  //  */
+  // async getUserData(user: any) {
+  //   const db = this.db; // Stelle sicher, dass db korrekt initialisiert ist    
+  //   if (!db) {
+  //     throw new Error("Firestore-Instanz (db) ist nicht initialisiert.");
+  //   }
+  // // Benutzerreferenz in Firestore basierend auf der UID
+  // const userRef = doc(db, "users", user.uid);
+  // const userDoc = await getDoc(userRef);
+
+  // if (userDoc.exists()) {
+  //   return userDoc.data();
+  // } else {
+  //   console.log("Keine Benutzerdaten vorhanden.");
+  //   return null;
+  // }
+  // }
+
+  async login() {
+    try {
+      const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
+      console.log(userCredential);
+      
+      this.sendUserToDesktop(userCredential);
+      await this.setVarOnlineToTrue(userCredential);
+    } catch (error) {
       this.displayWrongMailOrPasswordErrorMessage();
+      this.resetInputs();
     }
   }
 
   /**
-   * This function retriebes the userdata from the firebase database
-   * @param q Firebase Query
-   * @returns the Data
+   * This function sets the Var "online" in firebase to true
+   * @param userCredential User - object
    */
-  getUserData(q: any) {
-    try {
-      if (!q.empty) {
-        const userDoc = q.docs[0];
-        const userData = userDoc.data();
-        return userData;
-      }
-      return !q.empty
-    } catch (err: any) {
-      console.error("Error checking email existence: ", err);
-      return false;
-    }
-  }
-
-  /**
-   * This function retriebes the id from the firebase database
-   * @param q Firebase Query
-   * @returns the id
-   */
-  getIdFromFirebase(q: any) {
-    try {
-      if (!q.empty) {
-        const userData = this.getUserData(q);
-        const id = userData['id'];
-        return id;
-      }
-      return !q.empty;
-    } catch (err: any) {
-      console.error("Error checking email existence: ", err);
-      return false;
-    }
-  }
-
-  /**
-   * This function retriebes the password from the firebase database
-   * @param q Firebase Query
-   * @returns the password
-   */
-  getPasswordFromFirebase(q: any) {
-    try {
-      if (!q.empty) {
-        const userData = this.getUserData(q);
-        const password = userData['password']; // Hier wird das Passwort abgerufen           
-        return password; // Gebe das Passwort zurück oder nutze es entsprechend
-      }
-      return !q.empty;
-    } catch (err: any) {
-      console.error("Error checking email existence: ", err);
-      return false;
-    }
+  async setVarOnlineToTrue(userCredential:any){
+    await updateDoc(this.firebase.getSingleUserRef('users', userCredential.user.uid), {
+      online: true
+    });
   }
 
   /**
@@ -134,4 +112,41 @@ export class LoginComponent {
     }, 2000);
   }
 
+  /**
+   * This function sends the user to the desktop-Page
+   * @param userCredential User - object
+   */
+  sendUserToDesktop(userCredential: any) {
+    const user = userCredential.user;
+    this.router.navigate(['/desktop', user.uid]);
+  }
+
+/**
+ * This function saves a user in the firebase authenticator after loggin in via google
+ */
+  async googleLogin() { 
+    try {
+      const userCredential = await signInWithPopup(this.auth, this.googleProvider);
+      await this.saveUserData(userCredential.user);
+      this.sendUserToDesktop(userCredential);
+    } catch (error) {
+      console.error("Fehler bei der Google-Anmeldung:", error);
+      this.displayWrongMailOrPasswordErrorMessage();
+    }
+  }
+
+ /**
+  * This function saves the user-data in the firebase database, after logging in via google
+  * @param user user - data
+  */
+  async saveUserData(user: any) {
+    const userRef = doc(this.db, "users", user.uid);
+    await setDoc(userRef, {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      online: true,
+    }, { merge: true }); // merge: true aktualisiert die Daten, falls sie bereits existieren
+  }
 }

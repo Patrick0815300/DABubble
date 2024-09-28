@@ -8,6 +8,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
+import { PasswordResetService } from '../password_Reset/password-reset.service';
 
 @Component({
   selector: 'app-new-password',
@@ -30,7 +31,10 @@ export class NewPasswordComponent {
   mailSent: boolean = false;
   wrongMail: boolean = false;
 
-  constructor(private router: Router, private firebase: FirebaseLoginService) {
+  email: string = '';
+  message: string = '';
+
+  constructor(private router: Router, private firebase: FirebaseLoginService, private resetService: PasswordResetService) {
 
   }
 
@@ -39,9 +43,6 @@ export class NewPasswordComponent {
   }
 
   mail: string = '';
-
-  mailTest = true;
-
   http = inject(HttpClient);
 
   /**
@@ -49,11 +50,11 @@ export class NewPasswordComponent {
    * @param ngForm data of the form (mail adress)
    */
   async onSubmit(ngForm: NgForm) {
-    console.log(await this.firebase.findUserWithEmail(this.mail));
-    if (await this.firebase.findUserWithEmail(this.mail)) {
+    this.email = ngForm.value.email;
+    if (await this.firebase.findUserWithRef("email", this.email)) {
       if (ngForm.valid && ngForm.submitted) {
+        await this.resetService.resetPassword(this.email)
         this.displayMailsentFeedback();
-        this.sentMail(ngForm);
         this.resetMailsentFeedback();
       }
     } else {
@@ -94,35 +95,13 @@ export class NewPasswordComponent {
     }, 2000);
   }
 
-  sentMail(ngForm: any) {
-    if (ngForm.submitted && ngForm.form.valid && !this.mailTest) {
-      this.http.post(this.post.endPoint, this.post.body(this.data))
-        .subscribe({
-          next: (response) => {
-            ngForm.resetForm();
-          },
-          error: (error: any) => {
-            console.error(error);
-          },
-          complete: () => console.info('send post complete'),
-        });
-    } else if (ngForm.submitted && ngForm.form.valid && this.mailTest) {
-      console.log('Mail wurde gesendet!');
-      ngForm.resetForm();
-    }
+  async sentMail() {
+    // try {
+    //   await this.authService.resetPassword(this.email);
+    //   this.message = 'Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet!';
+    // } catch (error) {
+    //   this.message = 'Fehler beim Senden der E-Mail. Überprüfe deine E-Mail-Adresse.';
+    // }
   }
-
-
-  post = { //Domain muss angepasst werden!!
-    endPoint: 'https://deineDomain.de/sendMail.php', //Domain anpassen
-    body: (payload: any) => JSON.stringify(payload),
-    options: {
-      headers: {
-        'Content-Type': 'text/plain',
-        responseType: 'text',
-      },
-    },
-  };
-
 
 }

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from "firebase/app";
-import { getFirestore, Firestore, collection, doc, addDoc, updateDoc, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, Firestore, collection, doc, addDoc, updateDoc, query, where, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { User } from '../../models/user.class';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { SignInComponent } from '../sign-in/sign-in.component';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDRsqDHFGSfO5l5pWAsKLgEisUaiiqAzrI",
@@ -21,7 +23,11 @@ const firestore = getFirestore(app);
 
 export class FirebaseLoginService {
 
+  private auth = getAuth();
+  db = getFirestore();  
+
   private firestore: Firestore;
+  public firebaseConfig = firebaseConfig; 
 
 
   constructor() {
@@ -33,7 +39,7 @@ export class FirebaseLoginService {
    * @returns UserRef from Firebase
    */
   getUserRef() {
-    return collection(this.firestore, 'accounts');
+    return collection(this.firestore, 'users');
   }
 
   /**
@@ -66,40 +72,85 @@ export class FirebaseLoginService {
  * This function adds a new User to the Firebase
  * @param item the Document / the userdata
  */
-  async addUser(item: {}) {
-    await addDoc(this.getUserRef(), item).catch(
-      (err) => {
-        console.error(err);
-      }
-    ).then(
-      (docRef) => {
-        // console.log("Document written with ID: ", docRef?.id);//colID          
-        this.addingdocRefToUser(item, docRef?.id);
-      }
-    )
+  // async addUser(item: {}) {
+  //   await addDoc(this.getUserRef(), item).catch(
+  //     (err) => {
+  //       console.error(err);
+  //     }
+  //   ).then(
+  //     (docRef) => {
+  //       // console.log("Document written with ID: ", docRef?.id);//colID          
+  //       this.addingdocRefToUser(item, docRef?.id);
+  //     }
+  //   )
+  // }
+
+  /**
+   * This function creates a User in the Firebase AUthentivator
+   * @param email E-Mail of the user
+   * @param password Password of the user
+   * @param name Jame of the user
+   * @returns the user ID
+   */
+  async addUserInAuth(email: string, password: string, name: string){
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      const user = userCredential.user;  
+      this.saveUserDataToDatabase(user.uid, user.email, name, password);
+      //console.log('Benutzer erfolgreich registriert und in Firestore gespeichert mit UID:', user.uid);
+      return user.uid;
+    } catch (error) {
+      console.error('Fehler bei der Registrierung:', error);
+      return "error";
+      
+    }
   }
 
   /**
-   * This function adds the automatically cenerated id from firebase to the userdoc
-   * @param item the Document / the userdata
-   * @param docId the generated docRef
+   * This function creates a User in the Firestore database
+   * @param uid id of the user
+   * @param email E-Mail of the user
    */
-  async addingdocRefToUser(item: any, docId: any) {
-    item.id = docId;
-    await updateDoc(this.getSingleUserRef("accounts", docId), item).catch(
-      (err) => { console.log(err); }
-    )
+  saveUserDataToDatabase(uid:string, email:any, name:string, password: string) {
+    // Referenziere das Dokument mit der UID als DocID
+    const userRef = doc(this.db, "users", uid);
+    setDoc(userRef, {
+      name: name,
+      email: email,
+      password: password,
+      online: false,
+      avatar: '',
+    })
+    .then(() => {
+      return uid;
+      //console.log("Benutzer erfolgreich in der Datenbank gespeichert.");
+    })
+    .catch((error) => {
+      console.error("Fehler beim Speichern des Benutzers:", error);
+    });
   }
+
+  // /**
+  //  * This function adds the automatically cenerated id from firebase to the userdoc
+  //  * @param item the Document / the userdata
+  //  * @param docId the generated docRef
+  //  */
+  // async addingdocRefToUser(item: any, docId: any) {
+  //   item.id = docId;
+  //   await updateDoc(this.getSingleUserRef("accounts", docId), item).catch(
+  //     (err) => { console.log(err); }
+  //   )
+  // }
 
   /**
    * This functionupdates the avatar of the user
    * @param chosenAvatar the link of the profil picture
    * @param id the user-id (DocRef of firebase)
    */
-  async updateAvatar(chosenAvatar: string, id: any) {
-    let user = this.getSingleUserRef('accounts', id);
+  async updateAvatar(chosenAvatar: string, id: any) { 
+    let user = doc(this.db, "users", id)
     await updateDoc(user, {
-      avatar: chosenAvatar
+      avatar: chosenAvatar,
     });
   }
 
@@ -108,8 +159,8 @@ export class FirebaseLoginService {
    * @param email entered Email
    * @returns the User who belongs to the entered mail-adress
    */
-  async gettingQuery(email: string) {
-    const q = query(this.getUserRef(), where("mail", "==", email));
+  async gettingQuery(searchDocRef:string, value: string) {
+    const q = query(this.getUserRef(), where(searchDocRef, "==", value));
     const querySnapshot = await getDocs(q);
     return querySnapshot;
   }
@@ -119,13 +170,14 @@ export class FirebaseLoginService {
  * @param email in the form entered Email
  * @returns true / false
  */
-  async findUserWithEmail(email: string) {
+  async findUserWithRef(searchRef:string, value: string) {    
     try {
-      const querySnapshot = await this.gettingQuery(email);
+      const querySnapshot = await this.gettingQuery(searchRef, value);          
       return !querySnapshot.empty;
     } catch (err) {
       console.error("Error checking email existence: ", err);
       return false;
     }
   }
+
 }

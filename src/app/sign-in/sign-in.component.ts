@@ -7,6 +7,8 @@ import { ChooseAvatarComponent } from '../choose-avatar/choose-avatar.component'
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
+import { getDocs } from 'firebase/firestore';
+import { TestBed } from '@angular/core/testing';
 
 @Component({
   selector: 'app-sign-in',
@@ -128,15 +130,24 @@ export class SignInComponent {
     this.data.online = false;
   }
 
-
-  /**
-   * This function submits the form, empties all inputs and send you back to the login page
-   */
   async onSubmit() {
-    this.setData();
-    let user = this.firebase.setUserObject(this.data);
-    await this.firebase.addUser(user);
-    this.router.navigate(['/chooseAvatar', user.id]);
-    this.emptyAllInputs();
+    if(await this.firebase.findUserWithRef('email', this.mail) == false){
+      this.setData();
+      let user = this.firebase.setUserObject(this.data);
+      let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name);
+      //dann bild der Datenbank hinzufügen   
+      this.router.navigate(['/chooseAvatar', id]);
+      this.emptyAllInputs();
+    }else{
+      this.displayMailErrorFor3Sec();
+    }
   }
+
+  displayMailErrorFor3Sec(){
+    this.displayMailError = true;
+    setTimeout(()=>{
+      this.displayMailError = false;
+    },3000);
+  }
+
 }

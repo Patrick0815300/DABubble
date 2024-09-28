@@ -34,12 +34,12 @@
                      ODER 
                      <div class="underline"></div>
                 </div>
-                <div class="googleLogin">
+                <div class="googleLogin" (click)="googleLogin()">
                     <img src="./assets/img/01_onboarding-login-signup/Google.png">
                     Anmelden mit Google
                 </div>
                 <div class="buttonContainer">
-                    <button type="button" class="button loginButton" (click)="onSubmit()">Anmelden</button>
+                    <button type="button" class="button loginButton" (click)="login()">Anmelden</button>
                     <div class="button guestLoginButton divAsButton" [routerLink]="['/chooseAvatar/guest']">Gäste-Login</div> <!--Link anpassen von chooseAvatar to Dashboard-->
                 </div>
             </form>
