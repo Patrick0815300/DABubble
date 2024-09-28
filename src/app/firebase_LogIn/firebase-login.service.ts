@@ -69,23 +69,6 @@ export class FirebaseLoginService {
   }
 
   /**
- * This function adds a new User to the Firebase
- * @param item the Document / the userdata
- */
-  // async addUser(item: {}) {
-  //   await addDoc(this.getUserRef(), item).catch(
-  //     (err) => {
-  //       console.error(err);
-  //     }
-  //   ).then(
-  //     (docRef) => {
-  //       // console.log("Document written with ID: ", docRef?.id);//colID          
-  //       this.addingdocRefToUser(item, docRef?.id);
-  //     }
-  //   )
-  // }
-
-  /**
    * This function creates a User in the Firebase AUthentivator
    * @param email E-Mail of the user
    * @param password Password of the user
@@ -117,7 +100,7 @@ export class FirebaseLoginService {
     setDoc(userRef, {
       name: name,
       email: email,
-      password: password,
+      // password: password,
       online: false,
       avatar: '',
     })
@@ -129,18 +112,6 @@ export class FirebaseLoginService {
       console.error("Fehler beim Speichern des Benutzers:", error);
     });
   }
-
-  // /**
-  //  * This function adds the automatically cenerated id from firebase to the userdoc
-  //  * @param item the Document / the userdata
-  //  * @param docId the generated docRef
-  //  */
-  // async addingdocRefToUser(item: any, docId: any) {
-  //   item.id = docId;
-  //   await updateDoc(this.getSingleUserRef("accounts", docId), item).catch(
-  //     (err) => { console.log(err); }
-  //   )
-  // }
 
   /**
    * This functionupdates the avatar of the user

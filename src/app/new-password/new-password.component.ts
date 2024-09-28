@@ -95,13 +95,4 @@ export class NewPasswordComponent {
     }, 2000);
   }
 
-  async sentMail() {
-    // try {
-    //   await this.authService.resetPassword(this.email);
-    //   this.message = 'Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet!';
-    // } catch (error) {
-    //   this.message = 'Fehler beim Senden der E-Mail. Überprüfe deine E-Mail-Adresse.';
-    // }
-  }
-
 }

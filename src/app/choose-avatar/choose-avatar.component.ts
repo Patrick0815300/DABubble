@@ -37,6 +37,9 @@ export class ChooseAvatarComponent {
   chosenImage: string = './assets/img/01_onboarding-login-signup/Profil_Default.png';
   newUrl: string = '';
 
+  /**
+   * This function will update the database with a new account photo and will send the user back to the login page
+   */
   async registerCompleted() {
     this.Userregistrated = true;
     this.getIDfromURL();
@@ -47,14 +50,25 @@ export class ChooseAvatarComponent {
     }, 2000);
   }
 
+  /**
+   * This function collects the user id from the database
+   */
   getIDfromURL(){
     this.userId = this.route.snapshot.paramMap.get('id');
   }
 
+  /**
+   * This function updates the variable "ChosenImage" to the url of the new image
+   * @param name name of the image
+   */
   changeImage(name: string) {
     this.chosenImage = `./assets/img/00_general-buttons/characters/${name}.png`;
   }
 
+  /**
+   * This function uploads an image of the users computer instead of choosing one of the given ones
+   * @param event 
+   */
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {

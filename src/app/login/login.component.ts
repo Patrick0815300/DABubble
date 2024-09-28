@@ -13,8 +13,6 @@ import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvide
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
 
 
-
-
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -46,36 +44,14 @@ export class LoginComponent {
 
   db = getFirestore();
 
-  // Google-Anmeldungsanbieter initialisieren (Neu hinzugefügt)
   private googleProvider = new GoogleAuthProvider();
 
-  // /**
-  //  * This function retriebes the userdata from the firebase database
-  //  * @param q Firebase Query
-  //  * @returns the Data
-  //  */
-  // async getUserData(user: any) {
-  //   const db = this.db; // Stelle sicher, dass db korrekt initialisiert ist    
-  //   if (!db) {
-  //     throw new Error("Firestore-Instanz (db) ist nicht initialisiert.");
-  //   }
-  // // Benutzerreferenz in Firestore basierend auf der UID
-  // const userRef = doc(db, "users", user.uid);
-  // const userDoc = await getDoc(userRef);
-
-  // if (userDoc.exists()) {
-  //   return userDoc.data();
-  // } else {
-  //   console.log("Keine Benutzerdaten vorhanden.");
-  //   return null;
-  // }
-  // }
-
+  /** 
+   * THis function checks, if there is a account of the user. If yes the user will be logged in and will be send to the desktop-page
+  */
   async login() {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
-      console.log(userCredential);
-      
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);
     } catch (error) {
@@ -88,7 +64,7 @@ export class LoginComponent {
    * This function sets the Var "online" in firebase to true
    * @param userCredential User - object
    */
-  async setVarOnlineToTrue(userCredential:any){
+  async setVarOnlineToTrue(userCredential: any) {
     await updateDoc(this.firebase.getSingleUserRef('users', userCredential.user.uid), {
       online: true
     });
@@ -121,10 +97,10 @@ export class LoginComponent {
     this.router.navigate(['/desktop', user.uid]);
   }
 
-/**
- * This function saves a user in the firebase authenticator after loggin in via google
- */
-  async googleLogin() { 
+  /**
+   * This function saves a user in the firebase authenticator after loggin in via google
+   */
+  async googleLogin() {
     try {
       const userCredential = await signInWithPopup(this.auth, this.googleProvider);
       await this.saveUserData(userCredential.user);
@@ -135,17 +111,17 @@ export class LoginComponent {
     }
   }
 
- /**
-  * This function saves the user-data in the firebase database, after logging in via google
-  * @param user user - data
-  */
+  /**
+   * This function saves the user-data in the firebase database, after logging in via google
+   * @param user user - data
+   */
   async saveUserData(user: any) {
     const userRef = doc(this.db, "users", user.uid);
     await setDoc(userRef, {
-      uid: user.uid,
-      displayName: user.displayName,
+      // uid: user.uid,
+      name: user.displayName,
       email: user.email,
-      photoURL: user.photoURL,
+      avatar: user.photoURL,
       online: true,
     }, { merge: true }); // merge: true aktualisiert die Daten, falls sie bereits existieren
   }

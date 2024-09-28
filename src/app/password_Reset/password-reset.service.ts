@@ -15,7 +15,11 @@ constructor(private firebase: FirebaseLoginService){
   private auth = getAuth(initializeApp(this.firebase.firebaseConfig));
 
 
-// Funktion zum Senden der Passwort-Reset-E-Mail
+/**
+ * This function sends a resetPassword mail from the firebase-database to the user
+ * @param email - the users E-mail adress
+ * @returns ture or false depends on creating an error or not
+ */
 resetPassword(email: string): Promise<void> {
   return sendPasswordResetEmail(this.auth, email)
     .then(() => {

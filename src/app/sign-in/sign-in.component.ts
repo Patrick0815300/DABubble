@@ -130,12 +130,14 @@ export class SignInComponent {
     this.data.online = false;
   }
 
+  /**
+   * This function creates a user-obj in the firebase authenticator and sends the user to the chosseAvatar site
+   */
   async onSubmit() {
     if(await this.firebase.findUserWithRef('email', this.mail) == false){
       this.setData();
       let user = this.firebase.setUserObject(this.data);
-      let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name);
-      //dann bild der Datenbank hinzufügen   
+      let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name); 
       this.router.navigate(['/chooseAvatar', id]);
       this.emptyAllInputs();
     }else{
@@ -143,6 +145,9 @@ export class SignInComponent {
     }
   }
 
+  /**
+   * This function displays an Error under the E-Mail-Input for 3 sec.
+   */
   displayMailErrorFor3Sec(){
     this.displayMailError = true;
     setTimeout(()=>{
