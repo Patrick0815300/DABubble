@@ -1,3 +1,9 @@
+mat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .message-container {
     position: relative;
     display: flex;
@@ -5,6 +11,14 @@
     padding: 10px 45px;
     margin-bottom: 20px;
     transition: ease-out 100ms;
+
+    &:hover {
+        background-color: #eceefe;
+    }
+
+    &:hover .text {
+        background-color: white;
+    }
 
     .img-container {
         img {
@@ -35,15 +49,6 @@
             color: #686868;
             font-size: 14px;
         }
-
-        .answer {
-            display: flex;
-            gap: 20px;
-
-            span:first-child {
-                color: #535AF1;
-            }
-        }
     }
 
     .text {
@@ -55,50 +60,36 @@
         background-color: #ECEEFE;
     }
 
-    .reaction-bar {
-        position: absolute;
-        display: none;
-        gap: 5px;
-        padding: 3px 15px;
-        border-radius: 25px 25px 0 25px;
-        border: 1px solid #ADB0D9;
-        background-color: white;
-        top: -18px;
-        right: 43px;
+    .reactions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
-        mat-icon {
+        div {
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            font-size: 20px;
-            padding: 10px;
+            gap: 10px;
+            padding: 5px 10px;
             border-radius: 20px;
-            transition: ease-in 80ms;
+            border: 1px solid #ADB0D9;
             cursor: pointer;
 
             img {
-                width: 20px;
-                height: 20px;
+                width: 24px;
+                height: 24px;
             }
+        }
+
+        mat-icon {
+            font-size: 24px;
+            padding: 5px;
+            border-radius: 20px;
+            cursor: pointer;
 
             &:hover {
                 background-color: #ECEEFE;
                 color: #535AF1;
             }
         }
-    }
-
-    &:hover .text {
-        background-color: white;
-    }
-
-    &:hover .reaction-bar {
-        display: flex;
-    }
-
-    &:hover {
-        background-color: #ECEEFE;
     }
 }

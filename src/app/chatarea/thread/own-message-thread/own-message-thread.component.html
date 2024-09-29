@@ -1,0 +1,53 @@
+<div>
+    <div class="message-container">
+        <div class="reaction-bar">
+            <mat-icon>comment</mat-icon>
+            <mat-icon mat-icon-button 
+                      [matMenuTriggerFor]="editMenu"
+                      >more_vert
+            </mat-icon>
+            <mat-menu class="edit" #editMenu="matMenu">
+                <button class="btn" mat-menu-item (click)="editMessage()">
+                    Nachricht bearbeiten   
+                </button>
+            </mat-menu>
+        </div>
+        <div class="message">
+            <div class="name-time">
+                <span class="time">time Uhr</span>
+                <span class="name">Patrick</span>
+            </div>
+            
+            <span class="text" *ngIf="!editMode">Hallo das ist der Inhalt</span>
+            <div class="edit-menu" *ngIf="editMode">
+                <input type="text">
+                <div class="edit-bottom">
+                    <mat-icon>sentiment_satisfied</mat-icon>
+                    <div class="btns">
+                        <button (click)="cancelEdit()">Abbrechen</button>
+                        <button (click)="saveEditMessage()">Speichern</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reaction-container">
+                <div class="reaction">
+                    <img src="">
+                    <span>3</span>
+
+                    <div class="bubble">
+                        <img src="../../../assets/img/04_chats-message/emoji_rocket_.png">
+                        <h3>Sofia Müller</h3>
+                        <span>hat reagiert</span>
+                    </div>
+
+                </div>
+                <mat-icon>add_reaction</mat-icon>
+            </div>
+        </div>
+
+        <div class="img-container">
+            <img src="../../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
+        </div>
+    </div>
+</div>

@@ -1,3 +1,25 @@
-<div>
-  <ng-content />
+<div class="container">
+    <mat-card class="card">
+        <mat-card-header>
+            <mat-card-title>Thread
+                <span><mat-icon>tag</mat-icon> Channel Name</span>
+            </mat-card-title>
+            <mat-icon class="close">close</mat-icon>
+         </mat-card-header>
+         <mat-card-content #messageContainer>
+          <ng-container><!-- *ngFor="let message of messages; let i = index" -->
+
+            <div class="date-divider"> <!-- *ngIf="shouldShowDivider(message.time, i)" --> 
+              <div class="devider"></div>
+              <span><!-- {{ formatDate(message.time) }} --></span>
+              <div class="devider"></div>
+            </div>
+            <!-- Nachricht von anderen Benutzern -->
+            <app-message-thread> <!-- *ngIf="message.senderId !== uid" [message]="message" --></app-message-thread>
+            <!-- Eigene Nachrichten -->
+            <app-own-message-thread> <!-- *ngIf="message.senderId === uid" [message]="message" --></app-own-message-thread>
+          </ng-container>
+          </mat-card-content>
+        <app-message-box-thread class="message-box"></app-message-box-thread>
+    </mat-card>
 </div>
