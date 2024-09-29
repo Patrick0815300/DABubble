@@ -10,7 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { NgIf } from '@angular/common';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { UserService } from '../service/user.service/user.service';
 
 
 @Component({
@@ -25,7 +26,7 @@ import { doc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
     FooterComponent,
     HeaderComponent,
     FormsModule,
-    NgIf
+    NgIf,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -38,7 +39,7 @@ export class LoginComponent {
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
 
-  constructor(private firebase: FirebaseLoginService, private router: Router) {
+  constructor(private firebase: FirebaseLoginService, private router: Router, private userService: UserService) {
 
   }
 
@@ -52,12 +53,24 @@ export class LoginComponent {
   async login() {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
+      await this.createNewUserObject(userCredential);
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);
     } catch (error) {
       this.displayWrongMailOrPasswordErrorMessage();
       this.resetInputs();
     }
+  }
+
+  /**
+   * This function sets a user in the userService for other components to get the data
+   * @param userCredential user data 
+   */
+  async createNewUserObject(userCredential: any){
+    let userRef = this.firebase.getSingleUserRef('users', userCredential.user.uid)
+    const userSnapshot = await getDoc(userRef);
+    let user = userSnapshot.data();
+    this.userService.setUser(user);    
   }
 
   /**

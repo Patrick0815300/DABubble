@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore, collection, doc, addDoc, updateDoc, query, where, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { User } from '../../models/user.class';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { SignInComponent } from '../sign-in/sign-in.component';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDRsqDHFGSfO5l5pWAsKLgEisUaiiqAzrI",
