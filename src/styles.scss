@@ -60,6 +60,20 @@ $default-color: #686868;
   cursor: pointer;
 }
 
+html {
+  height: 100%;
+  background: rgb(236, 238, 254);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center;
+  box-sizing: border-box;
+}
+
+
+
+
+
 /* ---------------------------------------- fonts ---------------------------------------- */
 
 /* nunito-200 - latin */

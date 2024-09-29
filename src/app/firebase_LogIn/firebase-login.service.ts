@@ -1,14 +1,21 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore, collection, doc, addDoc, updateDoc, query, where, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { User } from '../../models/user.class';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { SignInComponent } from '../sign-in/sign-in.component';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDRsqDHFGSfO5l5pWAsKLgEisUaiiqAzrI",
+  authDomain: "dabubble-f7b64.firebaseapp.com",
+  projectId: "dabubble-f7b64",
+  storageBucket: "dabubble-f7b64.appspot.com",
+  messagingSenderId: "176717073486",
+  appId: "1:176717073486:web:f3bc57b168720f8879071f"
+};
 
-
-
-
+const app = initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 
 @Injectable({
   providedIn: 'root'
@@ -16,27 +23,16 @@ import { SignInComponent } from '../sign-in/sign-in.component';
 
 export class FirebaseLoginService {
 
-  firebaseConfig = {
-    apiKey: "AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k",
-    authDomain: "dabubble-57387.firebaseapp.com",
-    projectId: "dabubble-57387",
-    storageBucket: "dabubble-57387.appspot.com",
-    messagingSenderId: "1040544770849",
-    appId: "1:1040544770849:web:1df07c76989e5816c56c60"
-  };
-
-  app = initializeApp(this.firebaseConfig);
-
-  firestore2 = getFirestore(this.app);
-
-  private auth = getAuth(initializeApp(this.firebaseConfig));
+  private auth = getAuth();
   db = getFirestore();
 
-  //private firestore: Firestore;
-  //public firebaseConfig = firebaseConfig;
+  private firestore: Firestore;
+  public firebaseConfig = firebaseConfig;
 
 
-  constructor(private firestore: Firestore) { }
+  constructor() {
+    this.firestore = firestore;
+  }
 
   /**
    * This function returns the UserRef from Firebase
