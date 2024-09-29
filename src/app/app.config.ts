@@ -11,8 +11,24 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideFirebaseApp(() => initializeApp({ "projectId": "dabubble-77a15", "appId": "1:253194164742:web:3b8ee039baaa40e9d2c187", "databaseURL": "https://dabubble-77a15-default-rtdb.europe-west1.firebasedatabase.app", "storageBucket": "dabubble-77a15.appspot.com", "apiKey": "AIzaSyDpRdyiicHq6IZvm9jKFwpnGceSvZnqbr4", "authDomain": "dabubble-77a15.firebaseapp.com", "messagingSenderId": "253194164742" })),
-    provideFirestore(() => getFirestore()), provideFirebaseApp(() => initializeApp({ "projectId": "dabubble-77a15", "appId": "1:253194164742:web:3b8ee039baaa40e9d2c187", "databaseURL": "https://dabubble-77a15-default-rtdb.europe-west1.firebasedatabase.app", "storageBucket": "dabubble-77a15.appspot.com", "apiKey": "AIzaSyDpRdyiicHq6IZvm9jKFwpnGceSvZnqbr4", "authDomain": "dabubble-77a15.firebaseapp.com", "messagingSenderId": "253194164742" })), provideFirestore(() => getFirestore()),]
+    provideFirebaseApp(() => initializeApp({
+      "projectId": "dabubble-57387",
+      "appId": "1:1040544770849:web:1df07c76989e5816c56c60",
+      "databaseURL": "https://dabubble-57387-default-rtdb.europe-west1.firebasedatabase.app",
+      "storageBucket": "dabubble-57387.appspot.com",
+      "apiKey": "AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k",
+      "authDomain": "dabubble-57387.firebaseapp.com",
+      "messagingSenderId": "1040544770849"
+    })),
+    provideFirestore(() => getFirestore()), provideFirebaseApp(() => initializeApp({
+      "projectId": "dabubble-57387",
+      "appId": "1:1040544770849:web:1df07c76989e5816c56c60",
+      "databaseURL": "https://dabubble-57387-default-rtdb.europe-west1.firebasedatabase.app",
+      "storageBucket": "dabubble-57387.appspot.com",
+      "apiKey": "AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k",
+      "authDomain": "dabubble-57387.firebaseapp.com",
+      "messagingSenderId": "1040544770849"
+    })), provideFirestore(() => getFirestore()),]
 };
 
 

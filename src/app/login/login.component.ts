@@ -51,6 +51,7 @@ export class LoginComponent {
   */
   async login() {
     try {
+      debugger
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);

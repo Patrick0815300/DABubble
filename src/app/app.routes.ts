@@ -5,6 +5,7 @@ import { ChooseAvatarComponent } from './choose-avatar/choose-avatar.component';
 import { NewPasswordComponent } from './new-password/new-password.component';
 import { NewPassword2Component } from './new-password2/new-password2.component';
 import { DesktopComponent } from './desktop/desktop.component';
+import { MainComponentComponent } from './main-component/main-component.component';
 
 
 export const routes: Routes = [
@@ -13,5 +14,5 @@ export const routes: Routes = [
     { path: "chooseAvatar/:id", component: ChooseAvatarComponent },
     { path: "newPassword", component: NewPasswordComponent },
     { path: "newPassword2", component: NewPassword2Component },
-    { path: "desktop/:id", component: DesktopComponent }
+    { path: "desktop/:id", component: MainComponentComponent }
 ];
