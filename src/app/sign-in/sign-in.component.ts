@@ -7,8 +7,6 @@ import { ChooseAvatarComponent } from '../choose-avatar/choose-avatar.component'
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
-import { getDocs } from 'firebase/firestore';
-import { TestBed } from '@angular/core/testing';
 
 @Component({
   selector: 'app-sign-in',
