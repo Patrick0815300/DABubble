@@ -1,0 +1,224 @@
+.loginInputsContainer {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 40px;
+
+    .link {
+        color: #797EF3;
+        padding: 8px 10px;
+
+        &:hover {
+            cursor: pointer;
+            font-weight: 580;
+            background-color: rgb(241, 241, 241);
+            border: 1px solid rgb(241, 241, 241);
+            border-radius: 30px;
+            padding: 7px 10px;
+        }
+
+    }
+}
+
+section {
+    display: flex;
+    justify-content: center;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+}
+
+mat-card {
+    background-color: white;
+    border-radius: 20px;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .info {
+        margin-top: 50px;
+        padding: 0 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        height: 133px;
+
+        .title {
+            color: rgb(68, 77, 242);
+            font-weight: 700;
+            font-size: 46px;
+            margin-bottom: 30px;
+        }
+
+        .description {
+            font-weight: 400;
+            font-size: 16px;
+        }
+    }
+}
+
+form {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.seperator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.underline {
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+.inputField {
+    border-radius: 30px;
+    border: 1px solid transparent;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(236, 238, 254);
+    gap: 20px;
+
+    &:hover {
+        border: 1px solid gray;
+        cursor: pointer;
+    }
+
+    input {
+        width: 80%;
+        height: 80%;
+        font-size: 20px;
+        background-color: rgb(236, 238, 254);
+        border: 0;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &:focus-visible {
+            outline: unset;
+        }
+    }
+}
+
+.googleLogin {
+    border-radius: 30px;
+    width: 100%;
+    height: 60px;
+    background-color: rgb(236, 238, 254);
+    display: flex;
+    border: 1px solid transparent;
+    justify-content: center;
+    align-items: center;
+    color: #797EF3;
+    margin-bottom: 40px;
+    gap: 10px;
+
+    img {
+        width: 38px;
+        height: auto;
+    }
+
+    &:hover {
+        cursor: pointer;
+        font-weight: 580;
+        border: 1px solid blue;
+    }
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 20px;
+}
+
+.button {
+    border-radius: 20px;
+    padding: 8px;
+    width: 150px;
+    border: 1px solid;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.loginButton {
+    color: white;
+    background-color: rgb(68, 77, 242);
+    border-color: rgb(121, 126, 243);
+
+    &:hover {
+        background-color: rgba(121, 126, 243, 0.8);
+    }
+}
+
+.guestLoginButton {
+    background-color: white;
+    color: rgb(121, 126, 243);
+    border-color: rgb(121, 126, 243);
+
+    &:hover {
+        color: white;
+        background-color: rgba(121, 126, 243, 0.8)
+    }
+}
+
+.divAsButton {
+    justify-content: center;
+    display: flex;
+}
+
+.error{
+    color:red;
+    height:20px;
+ }
+
+@media(max-width:710px) {
+    main {
+        width: calc(100% - 20px);
+    }
+}
+
+@media(max-width:430px) {
+    .inputField {
+        input {
+            width: 70%;
+            border-radius: 0 30px 30px 0;
+            font-size: 15px;
+        }
+    }
+}
+
+@media(max-width:380px) {
+    .button {
+        width: 120px;
+    }
+}
+
+@media(max-width:340px) {
+    main {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        .card {
+            width: 300px;
+        }
+    }
+}
