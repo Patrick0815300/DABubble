@@ -13,5 +13,6 @@ export const routes: Routes = [
     { path: "chooseAvatar/:id", component: ChooseAvatarComponent },
     { path: "newPassword", component: NewPasswordComponent },
     { path: "newPassword2", component: NewPassword2Component },
-    { path: "desktop/:id", component: DesktopComponent }
+    { path: "desktop/:id", component: DesktopComponent },
+    { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

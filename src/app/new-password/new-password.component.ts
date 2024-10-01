@@ -56,6 +56,7 @@ export class NewPasswordComponent {
         await this.resetService.resetPassword(this.email)
         this.displayMailsentFeedback();
         this.resetMailsentFeedback();
+        this.redirectToLogin();
       }
     } else {
       this.displayWrongMailError();
@@ -95,4 +96,12 @@ export class NewPasswordComponent {
     }, 2000);
   }
 
+  /**
+   * This function sends the user back to the login-page after a timeout of 2 Sec. 
+   */
+  redirectToLogin(){
+    setTimeout(()=>{
+      this.router.navigate(['/']);
+    },2000);
+  }
 }
