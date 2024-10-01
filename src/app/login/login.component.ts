@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { NgIf } from '@angular/common';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { Firestore, doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
 
 
 @Component({
@@ -38,11 +38,11 @@ export class LoginComponent {
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
 
-  constructor(private firebase: FirebaseLoginService, private router: Router) {
+  constructor(private firebase: FirebaseLoginService, private router: Router, private firestore: Firestore) {
 
   }
 
-  db = getFirestore();
+  // db = getFirestore();
 
   private googleProvider = new GoogleAuthProvider();
 
@@ -51,7 +51,6 @@ export class LoginComponent {
   */
   async login() {
     try {
-      debugger
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);
@@ -117,7 +116,7 @@ export class LoginComponent {
    * @param user user - data
    */
   async saveUserData(user: any) {
-    const userRef = doc(this.db, "users", user.uid);
+    const userRef = doc(this.firestore, "users", user.uid);
     await setDoc(userRef, {
       // uid: user.uid,
       name: user.displayName,

@@ -6,10 +6,10 @@
     <!-- Zeige alle Mitglieder, die vom Benutzer geladen wurden -->
     <div class="member" *ngFor="let user of users">
         <div class="member-status">
-            <img [src]="user.avatar" alt="{{ user.firstName }} {{ user.lastName }}">
+            <img [src]="user.avatar" alt="{{ user.name }}">
             <div class="status" [ngStyle]="{ 'background-color': user.online ? '#92C83E' : '#686868' }"></div>
         </div>
-        <span>{{ user.firstName }} {{ user.lastName }}</span>
+        <span>{{ user.name }}</span>
     </div>
 
     <div class="member add-member" (click)="openAddMemberDialog()">

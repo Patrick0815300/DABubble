@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
@@ -7,8 +7,17 @@ import { MatIcon } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatIcon],
   templateUrl: './message-box-thread.component.html',
-  styleUrl: './message-box-thread.component.scss'
+  styleUrl: './message-box-thread.component.scss',
+  template: `
+    <input #inputBox type="text" (keyup.enter)="send(inputBox.value)">
+  `
 })
 export class MessageBoxThreadComponent {
-  sendMessage() { }
+  @Output() sendMessage = new EventEmitter<string>();
+
+  send(value: string) {
+    if (value.trim().length > 0) {
+      this.sendMessage.emit(value); // sendMessage-Ereignis mit einem string auslösen
+    }
+  }
 }

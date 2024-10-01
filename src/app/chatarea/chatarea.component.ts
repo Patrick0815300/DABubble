@@ -38,7 +38,7 @@ export class ChatareaComponent {
   memberIds: string[] = [];
   members: User[] = [];
   messages: any[] = [];
-  uid: string = 'tsvZAtPmhQsbvuAp6mi6';
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   previousMessageDate: string | null = null;
 
   constructor(public dialog: MatDialog, private fireService: ChatareaServiceService) {
@@ -78,7 +78,7 @@ export class ChatareaComponent {
   loadMembers() {
     this.members = [];
     this.memberIds.forEach((memberId) => {
-      this.fireService.loadDocument('user', memberId).subscribe((user: any) => {
+      this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.members.push(userInstance);
       });

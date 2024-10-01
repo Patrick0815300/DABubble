@@ -1,6 +1,5 @@
 export class User {
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     password: string;
     id?: string;
@@ -9,8 +8,7 @@ export class User {
     authenticated: boolean;
 
     constructor(obj?: any) {
-        this.firstName = obj ? obj.firstName : '';
-        this.lastName = obj ? obj.lastName : '';
+        this.name = obj ? obj.name : '';
         this.email = obj ? obj.email : '';
         this.password = obj ? obj.password : '';
         this.avatar = obj ? obj.avatar : '';
@@ -21,8 +19,7 @@ export class User {
 
     toJSON() {
         return {
-            firstName: this.firstName,
-            lastName: this.lastName,
+            name: this.name,
             email: this.email,
             avatar: this.avatar,
             online: this.online

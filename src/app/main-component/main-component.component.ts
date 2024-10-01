@@ -47,6 +47,8 @@ export class MainComponentComponent {
   open_dialog_add_user: boolean = false;
   hide_navigation: boolean = false;
 
+  isThreadVisible: boolean = true;
+
   constructor(
     private navService: NavService,
     private logOutService: LogOutService,
@@ -65,6 +67,10 @@ export class MainComponentComponent {
     this.updateProfilService.open_update_profil$.subscribe(state => {
       this.open_update_profil = state;
     });
+  }
+
+  toggelThread() {
+    this.isThreadVisible = !this.isThreadVisible
   }
 
   toggleNavigation() {

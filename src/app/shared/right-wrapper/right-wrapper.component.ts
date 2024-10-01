@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { OwnMessageComponent } from '../../chatarea/own-message/own-message.component';
-import { MessageComponent } from '../../chatarea/message/message.component';
-import { MessageBoxComponent } from '../../chatarea/message-box/message-box.component';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
 import { OwnMessageThreadComponent } from "../../chatarea/thread/own-message-thread/own-message-thread.component";
 import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thread/message-box-thread.component';
+import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
+import { ActivatedRoute } from '@angular/router';
+import { ChatServiceService } from '../../firestore-service/chat-service.service';
 
 @Component({
   selector: 'app-right-wrapper',
@@ -18,11 +18,32 @@ import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thr
     MatIconModule,
     MessageThreadComponent,
     OwnMessageThreadComponent,
-    MessageBoxThreadComponent
+    MessageBoxThreadComponent,
+    CommonModule
   ],
   templateUrl: './right-wrapper.component.html',
   styleUrl: './right-wrapper.component.scss'
 })
-export class RightWrapperComponent {
+export class RightWrapperComponent implements OnInit {
+  isVisible: boolean = true;
+  selectedThread: any;
+  threads: any[] = [];
+  channelId: string = '';
+  messageId: string = '';
+
+  public chatService = inject(ChatServiceService);
+  private route = inject(ActivatedRoute);
+
+  ngOnInit() {
+    this.channelId = this.route.snapshot.paramMap.get('channelId') || '';
+    this.messageId = this.route.snapshot.paramMap.get('messageId') || '';
+
+
+  }
+
+  toggleThread() {
+    this.isVisible = !this.isVisible;
+  }
+
 
 }

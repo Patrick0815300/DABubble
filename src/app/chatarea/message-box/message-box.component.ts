@@ -23,10 +23,10 @@ export class MessageBoxComponent {
 
   sendMessage() {
     if (this.messageContent.trim() === '') return;
-    const senderId = "tsvZAtPmhQsbvuAp6mi6";  // Aktuell eingeloggter Benutzer (z.B. von Auth abgerufen)
-    this.fireService.loadDocument('user', senderId).subscribe({
+    const senderId = "cYNWHsbhyTZwZHCZnGD3ujgD2Db2";  // Aktuell eingeloggter Benutzer (z.B. von Auth abgerufen)
+    this.fireService.loadDocument('users', senderId).subscribe({
       next: (user: any) => {
-        const userName = `${user.firstName} ${user.lastName}`;
+        const userName = `${user.name}`;
         this.fireService.getActiveChannel().subscribe({
           next: (channel: any) => {
             const messageData = {
@@ -59,9 +59,9 @@ export class MessageBoxComponent {
   async loadActiveChannelName() {
     this.fireService.getActiveChannel().subscribe((channel: any) => {
       const channelId = channel.id;
-      console.log(channelId);
+      //console.log(channelId);
 
-      this.fireService.loadDocument('channel', channelId).subscribe((channelDoc: any) => {
+      this.fireService.loadDocument('channels', channelId).subscribe((channelDoc: any) => {
         const channelData = channelDoc;
         this.channelName = channelData.name;
       });

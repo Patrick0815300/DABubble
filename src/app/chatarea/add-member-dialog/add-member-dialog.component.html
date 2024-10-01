@@ -11,16 +11,16 @@
             <mat-select-trigger>
                 <div class="selected-users">
                   <div class="member-status" *ngFor="let user of filteredUsers | filterSelected: selectedUser">
-                    <img [src]="user.avatar" alt="{{ user.firstName }} {{ user.lastName }}">
-                    <span>{{ user.firstName }} {{ user.lastName }}</span>
+                    <img [src]="user.avatar">
+                    <span>{{ user.name }}</span>
                   </div>
                 </div>
               </mat-select-trigger>
             <mat-option *ngFor="let user of filteredUsers" [value]="user.id">
                 <div class="member-status">
-                    <img [src]="user.avatar" alt="{{ user.firstName }} {{ user.lastName }}">
+                    <img [src]="user.avatar">
                     <div class="status" [ngStyle]="{ 'background-color': user.online ? '#92C83E' : '#686868' }"></div>
-                    <span>{{ user.firstName }} {{ user.lastName }}</span>
+                    <span>{{ user.name }}</span>
                 </div>
             </mat-option>
           </mat-select>

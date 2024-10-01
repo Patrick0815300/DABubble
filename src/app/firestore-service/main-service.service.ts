@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs } from '@angular/fire/firestore';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -7,7 +8,20 @@ import { Observable } from 'rxjs';
 })
 export class MainServiceService {
 
-  constructor(private firestore: Firestore) { }
+  uid: string = '';
+
+  constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router) { }
+
+  /**
+   * This function extracts the last segment of the current URL (e.g., the UID) and stores it.
+   */
+  extractLastUrlSegment(): void {
+    const currentUrl = this.router.url; // Gibt die aktuelle URL zurück
+    const urlSegments = currentUrl.split('/'); // Zerlegt die URL in Teile basierend auf "/"
+    this.uid = urlSegments[urlSegments.length - 1]; // Nimmt den letzten Teil der URL
+    console.log('Letzter Teil der URL:', this.uid);
+    // Hier kannst du die lastSegment verwenden (z.B. in Firestore speichern oder für weitere Logik nutzen)
+  }
 
   getChannelRef(colId: string) {
     return collection(this.firestore, colId);

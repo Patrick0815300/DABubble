@@ -12,7 +12,7 @@ export class PasswordResetService {
 
   }
 
-  private auth = getAuth(initializeApp(this.firebase.firebaseConfig));
+  private auth = getAuth();
 
 
   /**

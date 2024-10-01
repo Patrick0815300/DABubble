@@ -1,6 +1,4 @@
 <div *ngIf="message">
-
-    
     <div class="message-container">
       <div class="img-container">
         <img [src]="message.avatar" [alt]="message.name">
@@ -12,16 +10,23 @@
         </div>
         <span class="text">{{ message.content }}</span>
         <div class="answer">
-          <span>2 Antworten</span>
+          <span class="counted-answers">2 Antworten</span>
           <span class="time">Letzte Antwort 14:56</span>
         </div>
+        <div class="reaction-container" *ngIf="message.reactions?.length > 0">
+          <div class="reaction" *ngFor="let reaction of message.reactions">
+            <img [src]="reaction.path">
+            <span>{{ reaction.count }}</span>
+          </div>
+        </div>
+
       </div>
   
       <div class="reaction-bar">
-        <mat-icon><img src="../../../assets/img/04_chats-message/emoji_white_heavy_check_mark_.png"></mat-icon>
-        <mat-icon><img src="../../../assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png"></mat-icon>
+        <mat-icon (click)="reactToMessage(message.id, 'check mark', 'assets/img/04_chats-message/emoji_white_heavy_check_mark_.png')"><img src="../../../assets/img/04_chats-message/emoji_white_heavy_check_mark_.png"></mat-icon>
+        <mat-icon (click)="reactToMessage(message.id, 'raising hands', 'assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png')"><img src="../../../assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png"></mat-icon>
         <mat-icon>add_reaction</mat-icon>
-        <mat-icon>comment</mat-icon>
+        <mat-icon (click)="openThread(message.id)">comment</mat-icon>
       </div>
     </div>
   </div>

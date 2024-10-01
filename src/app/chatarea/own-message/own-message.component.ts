@@ -6,6 +6,8 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { reactionList } from '../../models/reactions/reaction-list.model';
+import { ReactionServiceService } from '../../firestore-service/reaction-service.service';
+import { ChatServiceService } from '../../firestore-service/chat-service.service';
 
 @Component({
   selector: 'app-own-message',
@@ -31,15 +33,39 @@ export class OwnMessageComponent implements OnInit {
   previousMessageDate: string | null = null;
   uid: string = 'tsvZAtPmhQsbvuAp6mi6'
   editMode: { [messageId: string]: boolean } = {};
+  channelId: string = '';
 
   private fireService = inject(ChatareaServiceService);
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService) {
     this.fireService.loadReactions();
   }
 
   ngOnInit() {
     this.loadActiveChannelMessages();
-    //this.renderReact();
+    this.renderReact();
+    this.loadActiveChannelId();
+  }
+
+  openThread(messageId: string) {
+    const threadInfo = {
+      channelId: this.channelId,
+      messageId: messageId,
+      //senderId: senderId
+    };
+    console.log('Thread geöffnet mit:', threadInfo);
+    // Hier kannst du threadInfo in einem Service oder lokalen Speicher speichern
+    //this.chatService.setThreadData(threadInfo);
+  }
+
+  loadActiveChannelId() {
+    this.chatService.getActiveChannel().subscribe({
+      next: (channel: any) => {
+        this.channelId = channel.id; // Dynamische Channel-ID
+      },
+      error: (err) => {
+        console.error('Fehler beim Laden des aktiven Channels:', err);
+      }
+    });
   }
 
   onReactionClick(reactionName: string) {
@@ -59,23 +85,16 @@ export class OwnMessageComponent implements OnInit {
     }
   }
 
-  reactToMessage(messageId: string, reactionType: string) {
-    this.fireService.getActiveChannel().subscribe({
-      next: (channel: any) => {
-        const channelId = channel.id;
-        this.fireService.addReactionToMessage(channelId, messageId, reactionType, this.uid)
-          .then(() => {
-            this.onReactionClick(reactionType);
-          })
-          .catch(error => {
-            console.error('Fehler beim Hinzufügen der Reaktion:', error);
-          });
-      },
-      error: (err) => {
-        console.error('Kein aktiver Channel gefunden:', err);
-      }
-    });
+  reactToMessage(messageId: string, reactionType: string, path: string) {
+    if (!this.channelId) {
+      console.error('Keine Channel-ID vorhanden.');
+      return;
+    }
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
+      .then(() => console.log('Reaktion hinzugefügt'))
+      .catch(error => console.error('Fehler beim Hinzufügen der Reaktion:', error));
   }
+
 
   editMessage(messageId: string) {
     this.editMode[messageId] = true;

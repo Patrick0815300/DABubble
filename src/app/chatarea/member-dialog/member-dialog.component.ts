@@ -51,7 +51,7 @@ export class MemberDialogComponent {
   loadUsers() {
     this.users = [];
     this.memberIds.forEach((memberId) => {
-      this.chatareaService.loadDocument('user', memberId).subscribe((user: any) => {
+      this.chatareaService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.users.push(userInstance);
       });

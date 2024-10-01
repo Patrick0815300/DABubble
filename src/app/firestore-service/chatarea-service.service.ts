@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 
 @Injectable({
@@ -30,7 +30,7 @@ export class ChatareaServiceService {
   }
 
   getActiveChannel(): Observable<any> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channel');
+    const channelsCollectionRef = this.mainService.getChannelRef('channels');
     const q = query(channelsCollectionRef, where('chosen', '==', true));
     return new Observable((observer) => {
       onSnapshot(q, (snapshot) => {
@@ -46,7 +46,7 @@ export class ChatareaServiceService {
   }
 
   leaveActiveChannel(): Observable<void> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channel');
+    const channelsCollectionRef = this.mainService.getChannelRef('channels');
     const q = query(channelsCollectionRef, where('chosen', '==', true));
     return new Observable((observer) => {
       onSnapshot(q, (snapshot) => {
@@ -69,12 +69,12 @@ export class ChatareaServiceService {
   }
 
   updateChannel(channelId: string, updatedData: any): Promise<void> {
-    const channelDocRef = this.mainService.getSingleChannelRef('channel', channelId);
+    const channelDocRef = this.mainService.getSingleChannelRef('channels', channelId);
     return updateDoc(channelDocRef, updatedData);
   }
 
   loadAllUsers(): Observable<any[]> {
-    const usersCollectionRef = this.mainService.getChannelRef('user');
+    const usersCollectionRef = this.mainService.getChannelRef('users');
     return new Observable((observer) => {
       onSnapshot(usersCollectionRef, (snapshot) => {
         const users = snapshot.docs.map(doc => ({
@@ -90,7 +90,7 @@ export class ChatareaServiceService {
     return new Observable((observer) => {
       this.getActiveChannel().subscribe({
         next: (channel: any) => {
-          const channelDocRef = this.mainService.getSingleChannelRef('channel', channel.id);
+          const channelDocRef = this.mainService.getSingleChannelRef('channels', channel.id);
           updateDoc(channelDocRef, { member: arrayUnion(...userIds) })
             .then(() => observer.next())
             .catch((error) => observer.error(error));
@@ -101,7 +101,7 @@ export class ChatareaServiceService {
   }
 
   loadMessages(channelId: string): Observable<any[]> {
-    const messagesCollectionRef = collection(this.firestore, `channel/${channelId}/messages`); // Korrekte Referenz zu den Nachrichten
+    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`); // Korrekte Referenz zu den Nachrichten
     return new Observable((observer) => {
       onSnapshot(messagesCollectionRef, (snapshot) => {
         const messages = snapshot.docs.map(doc => {
@@ -118,7 +118,7 @@ export class ChatareaServiceService {
   }
 
   addMessage(channelId: string, messageData: any): Promise<DocumentReference<any>> {
-    const messagesCollectionRef = collection(this.firestore, `channel/${channelId}/messages`);
+    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
     return addDoc(messagesCollectionRef, messageData);
   }
 
@@ -126,7 +126,7 @@ export class ChatareaServiceService {
     return new Observable((observer) => {
       this.getActiveChannel().subscribe({
         next: (channel: any) => {
-          const messageDocRef = doc(this.firestore, `channel/${channel.id}/messages`, messageId);
+          const messageDocRef = doc(this.firestore, `channels/${channel.id}/messages`, messageId);
           updateDoc(messageDocRef, updatedData)
             .then(() => observer.next())
             .catch(error => observer.error('Fehler beim Aktualisieren der Nachricht: ' + error));
@@ -136,8 +136,8 @@ export class ChatareaServiceService {
     });
   }
 
-  async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string): Promise<void> {
-    const messageDocRef = this.mainService.getSingleChannelRef(`channel/${channelId}/messages`, messageId);
+  async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string, reactionPath: string): Promise<void> {
+    const messageDocRef = this.mainService.getSingleChannelRef(`channels/${channelId}/messages`, messageId);
     const snapshot = await getDoc(messageDocRef);
     const messageData = snapshot.data();
     const reactions = messageData?.['reactions'] || [];
@@ -151,6 +151,7 @@ export class ChatareaServiceService {
         type: reactionType,
         userId: userId,
         count: 1,
+        path: reactionPath,
       });
     }
     await updateDoc(messageDocRef, { reactions: reactions });

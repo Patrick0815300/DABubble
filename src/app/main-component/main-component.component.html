@@ -9,7 +9,7 @@
     </button>
     <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
     <app-middle-wrapper class="app-middle-wrapper" />
-    <app-right-wrapper class="app-right-wrapper" />
+    <app-right-wrapper class="app-right-wrapper" *ngIf="isThreadVisible"/>
   </main>
   @if(state){
   <form (submit)="onAddUser()">

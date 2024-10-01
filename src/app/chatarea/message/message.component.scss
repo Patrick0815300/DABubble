@@ -40,8 +40,46 @@
             display: flex;
             gap: 20px;
 
-            span:first-child {
+            .counted-answers {
                 color: #535AF1;
+                cursor: pointer;
+
+                &:hover {
+                    font-weight: 700;
+                    color: #444DF2;
+                }
+            }
+        }
+
+        .reaction-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .reaction {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border: 1px solid #adb0d9;
+                border-radius: 20px;
+                padding: 5px 10px;
+                cursor: pointer;
+
+                img {
+                    width: 24px;
+                    height: 24px;
+                }
+
+                span {
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: black;
+                }
+            }
+
+            mat-icon {
+                font-size: 24px;
             }
         }
     }

@@ -4,7 +4,7 @@
         <div class="member-container">
              <div class="member" (click)="openMemberDialog()">
                  <div>
-                    <img *ngFor="let member of members" class="member-img" [src]="member.avatar" [alt]="member.firstName + ' ' + member.lastName">
+                    <img *ngFor="let member of members" class="member-img" [src]="member.avatar" [alt]="member.name + ' ' + member.name">
                  </div>
                  <span>{{ members.length }}</span>
              </div>

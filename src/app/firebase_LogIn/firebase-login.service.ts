@@ -5,17 +5,9 @@ import { User } from '../../models/user.class';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { SignInComponent } from '../sign-in/sign-in.component';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k",
-  authDomain: "dabubble-57387.firebaseapp.com",
-  projectId: "dabubble-57387",
-  storageBucket: "dabubble-57387.appspot.com",
-  messagingSenderId: "1040544770849",
-  appId: "1:1040544770849:web:1df07c76989e5816c56c60"
-};
 
-const app = initializeApp(firebaseConfig);
-const firestore = getFirestore();
+//const app = initializeApp(firebaseConfig);
+//const firestore = getFirestore();
 
 @Injectable({
   providedIn: 'root'
@@ -23,15 +15,20 @@ const firestore = getFirestore();
 
 export class FirebaseLoginService {
 
+  public firebaseConfig = {
+    apiKey: "AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k",
+    authDomain: "dabubble-57387.firebaseapp.com",
+    projectId: "dabubble-57387",
+    storageBucket: "dabubble-57387.appspot.com",
+    messagingSenderId: "1040544770849",
+    appId: "1:1040544770849:web:1df07c76989e5816c56c60"
+  };
+
   private auth = getAuth();
-  db = getFirestore();
+  //private firestore: Firestore;
 
-  private firestore: Firestore;
-  public firebaseConfig = firebaseConfig;
-
-
-  constructor() {
-    this.firestore = firestore;
+  constructor(private firestore: Firestore) {
+    // this.firestore = fireService;
   }
 
   /**
@@ -96,7 +93,7 @@ export class FirebaseLoginService {
    */
   saveUserDataToDatabase(uid: string, email: any, name: string, password: string) {
     // Referenziere das Dokument mit der UID als DocID
-    const userRef = doc(this.db, "users", uid);
+    const userRef = doc(this.firestore, "users", uid);
     setDoc(userRef, {
       name: name,
       email: email,
@@ -119,7 +116,7 @@ export class FirebaseLoginService {
    * @param id the user-id (DocRef of firebase)
    */
   async updateAvatar(chosenAvatar: string, id: any) {
-    let user = doc(this.db, "users", id)
+    let user = doc(this.firestore, "users", id)
     await updateDoc(user, {
       avatar: chosenAvatar,
     });
