@@ -14,6 +14,10 @@ import { UpdateProfilComponent } from '../components/update-profil/update-profil
 import { LogOutService } from '../modules/log-out.service';
 import { ShowProfilService } from '../modules/show-profil.service';
 import { UpdateProfilService } from '../modules/update-profil.service';
+import { nanoid } from 'nanoid';
+import { MessagesComponent } from '../components/messages/messages.component';
+import { Message } from '../modules/database.model';
+import { DatabaseServiceService } from '../database-service.service';
 
 @Component({
   selector: 'app-main-component',
@@ -30,6 +34,7 @@ import { UpdateProfilService } from '../modules/update-profil.service';
     LogoutComponent,
     ShowProfilComponent,
     UpdateProfilComponent,
+    MessagesComponent,
   ],
   templateUrl: './main-component.component.html',
   styleUrl: './main-component.component.scss',
@@ -44,12 +49,14 @@ export class MainComponentComponent {
   open_update_profil!: boolean;
   open_dialog_add_user: boolean = false;
   hide_navigation: boolean = false;
+  chatMessages: Message[] = [];
 
   constructor(
     private navService: NavService,
     private logOutService: LogOutService,
     private showProfileService: ShowProfilService,
-    private updateProfilService: UpdateProfilService
+    private updateProfilService: UpdateProfilService,
+    private databaseService: DatabaseServiceService
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -62,6 +69,9 @@ export class MainComponentComponent {
     });
     this.updateProfilService.open_update_profil$.subscribe(state => {
       this.open_update_profil = state;
+    });
+    this.databaseService.messages$.subscribe(state => {
+      this.chatMessages = state;
     });
   }
 
@@ -111,4 +121,8 @@ export class MainComponentComponent {
     this.onCloseShowProfil();
     this.updateProfilService.updateProfile();
   }
+
+  // onChatMessages(id: string) {
+  //   return;
+  // }
 }

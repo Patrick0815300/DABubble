@@ -56,29 +56,18 @@
           <img src="assets/img/icons/account_circle.svg" alt="" />
           <span class="title">direktnachrichten</span>
         </div>
-        <!-- <img style="display: none" src="assets/img/icons/add.svg" alt="" /> -->
       </div>
     </div>
     <ul [class.fold_in]="collapse == true" class="users">
-      <li [class.active]="selectedIndex == 0" (click)="selectUser(0)" class="d-flex capitilize gp l-mg-2">
-        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
-        <span> frederik beck </span>
-        <span *ngIf="is_authenticated == false">(Du)</span>
-      </li>
-      <li [class.active]="selectedIndex == 1" (click)="selectUser(1)" class="d-flex capitilize gp l-mg-2">
-        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
-        <span> frederik beck </span>
-        <span *ngIf="is_authenticated == false">(Du)</span>
-      </li>
-      <li [class.active]="selectedIndex == 2" (click)="selectUser(2)" class="d-flex capitilize gp l-mg-2">
-        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
-        <span> frederik beck </span>
-        <span *ngIf="is_authenticated == true">(Du)</span>
-      </li>
-      <li [class.active]="selectedIndex == 3" (click)="selectUser(3)" class="d-flex capitilize gp l-mg-2">
-        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="avatar" />
-        <span> frederik beck </span>
-        <span *ngIf="is_authenticated == false">(Du)</span>
+      <li
+        *ngFor="let user of users$ | async; let i = index"
+        [class.active]="selectedIndex == i"
+        (click)="selectUser(i); sendUserId(user.user_id); loadMessages(onlineUsers[0]?.user_id, user.user_id)"
+        class="d-flex capitilize gp l-mg-2"
+      >
+        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="user.image_file" />
+        <span> {{ user.first_name }} <span> </span>{{ user.last_name }}</span>
+        <span *ngIf="user.online === true">(Du)</span>
       </li>
     </ul>
   </div>

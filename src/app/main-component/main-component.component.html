@@ -8,7 +8,7 @@
       <img (click)="handleToggle()" class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
     <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
-    <app-middle-wrapper class="app-middle-wrapper" />
+    <app-messages class="app-middle-wrapper" />
     <app-right-wrapper class="app-right-wrapper" />
   </main>
   @if(state){
