@@ -33,39 +33,43 @@ export class NewPassword2Component {
   emptyInputs: boolean = true;
   displayError: boolean = false;
   passwordChanged: boolean = false;
+  passwordNotLongEnough: boolean = false;
 
-constructor(private router: Router){
+  constructor(private router: Router) {
 
-}
+  }
 
   /**
    * This function clears the inputs and changes the Passwords
    */
-  changePassword() {
-    if(this.passwordAccordance){
-      this.displayError = false;
-      this.clearInputs();
-      this.displayPWChangedMessage();
-    } else{
-      this.displayError = true;
+  changePassword() {    
+    if (this.passwordNotLongEnough) {
+    } else {
+      if (this.passwordAccordance) {
+        this.displayError = false;
+        this.clearInputs();
+        this.displayPWChangedMessage();
+      } else {
+        this.displayError = true;
+      }
     }
   }
 
   /**
    * This function displays a message, that the Password was successfully changed 
    */
-  displayPWChangedMessage(){
+  displayPWChangedMessage() {
     this.passwordChanged = true;
-    setTimeout(()=>{
+    setTimeout(() => {
       this.passwordChanged = false;
       this.router.navigate(['/']);
-    },2000);
+    }, 2000);
   }
 
   /**
    * This function clears the inputs
    */
-  clearInputs(){
+  clearInputs() {
     this.Password1 = '';
     this.Password2 = '';
   }
@@ -74,24 +78,35 @@ constructor(private router: Router){
    * This function calls different Password-control functions
    */
   checkPasswords() {
+    this.checkPasswordLength();
     this.checkForEmptyInputs();
     let changePossible = this.checkForSamePasswords();
-    if (changePossible){
+    if (changePossible) {
       this.Password1
-    }else{
+    } else {
+    }
+  }
 
+  /**
+   * This function checks, if the passwords are long enough
+   */
+  checkPasswordLength() {
+    if (this.Password1.length < 6 || this.Password2.length < 6) {
+      this.passwordNotLongEnough = true;
+    } else {
+      this.passwordNotLongEnough = false;
     }
   }
 
   /**
    * This function checks if the PW1 and PW2 are the same or not
    */
-  checkForSamePasswords(){
+  checkForSamePasswords() {
     this.displayError = false;
-    if(this.Password1 === this.Password2){
+    if (this.Password1 === this.Password2) {
       this.passwordAccordance = true;
       return true;
-    }else{
+    } else {
       return false;
     }
   }
@@ -99,14 +114,13 @@ constructor(private router: Router){
   /**
    * This function checks, if the Inputs for Password 1 and 2 are empty or not
    */
-  checkForEmptyInputs(){
-    if(!this.Password1 || !this.Password2){
+  checkForEmptyInputs() {
+    if (!this.Password1 || !this.Password2) {
       this.emptyInputs = true;
-    }else{
+    } else {
       this.emptyInputs = false;
     }
   }
-
 }
 
 
