@@ -9,46 +9,29 @@ import { HeaderComponent } from '../header/header.component';
 import { FormsModule } from '@angular/forms';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { NgIf } from '@angular/common';
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { Firestore, doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
-
-
+import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { Firestore } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    MatToolbarModule,
-    MatCardModule,
-    MatIconModule,
-    MatFormFieldModule,
-    RouterModule,
-    FooterComponent,
-    HeaderComponent,
-    FormsModule,
-    NgIf
-  ],
+  imports: [MatToolbarModule, MatCardModule, MatIconModule, MatFormFieldModule, RouterModule, FooterComponent, HeaderComponent, FormsModule, NgIf],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-
-  private auth = getAuth(); // Firebase Auth initialisieren
-
   mail: string = '';
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
 
-  constructor(private firebase: FirebaseLoginService, private router: Router, private firestore: Firestore) {
-
-  }
-
-  // db = getFirestore();
+  constructor(private firebase: FirebaseLoginService, private router: Router, private firestore: Firestore, private auth: Auth) {}
 
   private googleProvider = new GoogleAuthProvider();
 
-  /** 
+  /**
    * THis function checks, if there is a account of the user. If yes the user will be logged in and will be send to the desktop-page
-  */
+   */
   async login() {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
@@ -66,7 +49,7 @@ export class LoginComponent {
    */
   async setVarOnlineToTrue(userCredential: any) {
     await updateDoc(this.firebase.getSingleUserRef('users', userCredential.user.uid), {
-      online: true
+      online: true,
     });
   }
 
@@ -106,7 +89,7 @@ export class LoginComponent {
       await this.saveUserData(userCredential.user);
       this.sendUserToDesktop(userCredential);
     } catch (error) {
-      console.error("Fehler bei der Google-Anmeldung:", error);
+      console.error('Fehler bei der Google-Anmeldung:', error);
       this.displayWrongMailOrPasswordErrorMessage();
     }
   }
@@ -116,13 +99,17 @@ export class LoginComponent {
    * @param user user - data
    */
   async saveUserData(user: any) {
-    const userRef = doc(this.firestore, "users", user.uid);
-    await setDoc(userRef, {
-      // uid: user.uid,
-      name: user.displayName,
-      email: user.email,
-      avatar: user.photoURL,
-      online: true,
-    }, { merge: true }); // merge: true aktualisiert die Daten, falls sie bereits existieren
+    const userRef = doc(this.firestore, 'users', user.uid);
+    await setDoc(
+      userRef,
+      {
+        // uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        avatar: user.photoURL,
+        online: true,
+      },
+      { merge: true }
+    ); // merge: true aktualisiert die Daten, falls sie bereits existieren
   }
 }
