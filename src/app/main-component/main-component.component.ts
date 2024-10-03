@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { WrapperComponent } from '../shared/wrapper/wrapper.component';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
@@ -18,6 +18,7 @@ import { nanoid } from 'nanoid';
 import { MessagesComponent } from '../components/messages/messages.component';
 import { Message } from '../modules/database.model';
 import { DatabaseServiceService } from '../database-service.service';
+import { AddUserNameComponent } from '../components/add-user-name/add-user-name.component';
 
 @Component({
   selector: 'app-main-component',
@@ -35,6 +36,7 @@ import { DatabaseServiceService } from '../database-service.service';
     ShowProfilComponent,
     UpdateProfilComponent,
     MessagesComponent,
+    AddUserNameComponent,
   ],
   templateUrl: './main-component.component.html',
   styleUrl: './main-component.component.scss',
@@ -64,7 +66,7 @@ export class MainComponentComponent {
     this.logOutService.open_logout$.subscribe(state => {
       this.open_logout = state;
     });
-    this.showProfileService.open_show_profil$.subscribe(state => {
+    this.showProfileService.open_show_profile$.subscribe(state => {
       this.open_show_profil = state;
     });
     this.updateProfilService.open_update_profil$.subscribe(state => {
@@ -121,8 +123,4 @@ export class MainComponentComponent {
     this.onCloseShowProfil();
     this.updateProfilService.updateProfile();
   }
-
-  // onChatMessages(id: string) {
-  //   return;
-  // }
 }

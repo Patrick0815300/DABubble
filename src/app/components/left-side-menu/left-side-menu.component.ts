@@ -109,20 +109,20 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
-  fetchUser(userId: string) {
-    console.log(userId);
+  // fetchUser(userId: string) {
+  //   console.log(userId);
 
-    if (!this.userByIdMap[userId]) {
-      console.log('inside');
+  //   if (!this.userByIdMap[userId]) {
+  //     console.log('inside');
 
-      this.databaseService.getUserById(userId, user => {
-        this.userByIdMap[userId] = user;
-      });
-    }
-    console.log('outside');
+  //     this.databaseService.getUserById(userId, user => {
+  //       this.userByIdMap[userId] = user;
+  //     });
+  //   }
+  //   console.log('outside');
 
-    return this.userByIdMap[userId];
-  }
+  //   return this.userByIdMap[userId];
+  // }
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     const cacheKey = `${currentUserId}-${targetUserId}`;
@@ -132,17 +132,17 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
-        this.chatMap[cacheKey] = messages;
+        // this.chatMap[cacheKey] = messages;
         console.log('Messages', messages);
         this.userService.emitChat(messages);
       } else {
-        this.chatMap[cacheKey] = [];
+        // this.chatMap[cacheKey] = [];
         this.userService.emitChat([]);
       }
     });
     // }
 
-    return this.chatMap[cacheKey];
+    // return this.chatMap[cacheKey];
   }
 
   onSelectUser(currentUserId: string | undefined, targetUserId: string): void {

@@ -1,10 +1,10 @@
 <app-middle-wrapper [hasDefaultPadding]="false" class="app-middle-wrapper">
   <div class="chat-content">
     <div class="current-nav-user">
-      <img class="sender" src="assets/img/profiles/{{ fetchUser(toUserId)?.image_file }}" alt="" />
-      <span>{{ fetchUser(toUserId)?.first_name }} {{ fetchUser(toUserId)?.last_name }}</span>
+      <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+      <span>{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</span>
     </div>
-    @if(chat){
+    @if(chat.length !==0){
     <div class="chat-container">
       <div *ngFor="let chatGroup of groupedChat">
         <div class="group-date">
@@ -13,11 +13,11 @@
         </div>
         <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.user_id">
           <div class="image-message">
-            <img class="sender" src="assets/img/profiles/{{ fetchUser(message?.from_user)?.image_file }}" alt="" />
+            <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
           </div>
           <div class="name-date-line">
             <div>
-              <span>{{ fetchUser(message?.from_user)?.first_name }} {{ fetchUser(message?.from_user)?.last_name }}</span>
+              <span>{{ getCachedUser(message?.from_user)?.first_name }} {{ getCachedUser(message?.from_user)?.last_name }}</span>
               <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
             </div>
             <p>{{ message.message_content }}</p>
@@ -25,15 +25,16 @@
         </div>
       </div>
     </div>
-    } @else if(toUserId!='' || toUserId===authenticatedUser?.user_id) {
+    } @else{
     <div id="message" class="message">
       <div>
-        <div>
-          <img class="sender" src="assets/img/profiles/{{ fetchUser(toUserId)?.image_file }}" alt="" />
-          <span>{{ fetchUser(toUserId)?.first_name }} {{ fetchUser(toUserId)?.last_name }}</span>
+        <div class="user-ref">
+          <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+          <span class="username text-capitalize">{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</span>
         </div>
         <div>
-          Diese Unterhaltung findet nur zwischen <span class="tag">&#64;{{ fetchUser(toUserId)?.first_name }} {{ fetchUser(toUserId)?.last_name }}</span>
+          Diese Unterhaltung findet nur zwischen
+          <button class="tag text-capitalize" (click)="onOpenShowProfile()">&#64;{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</button>
           und dir statt.
         </div>
       </div>
@@ -47,7 +48,7 @@
           [(ngModel)]="message_content"
           type="text"
           name="meassage"
-          placeholder="Nachrichten an {{ fetchUser(toUserId)?.first_name }} {{ fetchUser(toUserId)?.last_name }}"
+          placeholder="Nachrichten an {{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}"
         />
         <div class="send-line">
           <div class="alternate-line">

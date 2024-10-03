@@ -129,11 +129,11 @@ export class DatabaseServiceService {
     onSnapshot(userQuery, snapshot => {
       if (!snapshot.empty) {
         const userData = snapshot.docs[0].data();
-        callback(userData);
         this.userByIdSubject.next(userData);
+        callback(userData);
       } else {
-        callback(null);
         this.userByIdSubject.next(null);
+        callback(null);
       }
     });
   }

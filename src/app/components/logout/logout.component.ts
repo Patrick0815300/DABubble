@@ -9,15 +9,15 @@ import { ShowProfilService } from '../../modules/show-profil.service';
   styleUrl: './logout.component.scss',
 })
 export class LogoutComponent {
-  open_show_profil!: boolean;
+  open_show_profile!: boolean;
 
   constructor(private showProfileService: ShowProfilService) {
-    this.showProfileService.open_show_profil$.subscribe(state => {
-      this.open_show_profil = state;
+    this.showProfileService.open_show_profile$.subscribe(state => {
+      this.open_show_profile = state;
     });
   }
 
-  onOpenShowProfil() {
+  onOpenShowProfile() {
     this.showProfileService.updateProfile();
   }
 }

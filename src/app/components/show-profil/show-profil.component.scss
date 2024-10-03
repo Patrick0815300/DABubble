@@ -77,8 +77,8 @@ section {
     height: 10px;
   }
   > .mail {
-    width: 30px;
-    height: 30px;
+    width: 23px;
+    height: 23px;
   }
   > span:not(.address) {
     color: #92c83e;
@@ -89,7 +89,8 @@ section {
 }
 
 .mail-address {
-  padding-left: 2.5rem;
+  padding-left: 2rem;
+  color: #1381ff;
 }
 .btn-container {
   > .btn {

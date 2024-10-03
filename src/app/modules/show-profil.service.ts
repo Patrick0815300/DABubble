@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 export class ShowProfilService {
   private logSubject = new BehaviorSubject<boolean>(false);
   constructor() {}
-  open_show_profil$ = this.logSubject.asObservable();
+  open_show_profile$ = this.logSubject.asObservable();
   isDialogOpen = false;
 
   updateProfile() {

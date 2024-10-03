@@ -63,6 +63,8 @@ button {
 
 .tag {
   color: #535af1;
+  font-family: 'Nunito';
+  font-size: 16px;
 }
 
 .input-form {
@@ -193,7 +195,7 @@ button {
   justify-content: flex-start;
   box-shadow: 0px 2px 10px 0 rgba(0, 0, 0, 0.08);
   padding-inline: 1.5rem;
-  padding-block: 0.5rem;
+  padding-block: 1rem;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
   gap: 1rem;
@@ -201,4 +203,18 @@ button {
     text-transform: capitalize;
     font-weight: 700;
   }
+}
+
+.user-ref {
+  display: flex;
+  padding-bottom: 0.5rem;
+  gap: 1rem;
+  > .username {
+    font-weight: 700;
+    align-self: flex-end;
+  }
+}
+
+.text-capitalize {
+  text-transform: capitalize;
 }

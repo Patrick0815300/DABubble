@@ -8,6 +8,7 @@ import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 import { UserService } from '../../modules/user.service';
+import { ShowProfilService } from '../../modules/show-profil.service';
 @Component({
   selector: 'app-messages',
   standalone: true,
@@ -19,31 +20,38 @@ export class MessagesComponent implements OnInit {
   message_content = '';
   chatMessages: Message[] = [];
   toUserId: string = '';
-  chat!: Message[];
+  chat: Message[] = [];
   groupedChat: any;
   userByIdMap: { [userId: string]: any } = {};
   authenticatedUser: User | undefined;
   today!: string;
+  open_show_profile!: boolean;
 
-  constructor(private userService: UserService, private databaseService: DatabaseServiceService) {
+  constructor(private showProfileService: ShowProfilService, private userService: UserService, private databaseService: DatabaseServiceService) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
+    });
+    this.showProfileService.open_show_profile$.subscribe(state => {
+      this.open_show_profile = state;
     });
   }
 
   ngOnInit(): void {
     this.databaseService.authenticatedUser().subscribe(user => {
       this.authenticatedUser = user;
+      console.log('Auth User', this.authenticatedUser.user_id);
     });
 
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
+      console.log('current to user', this.toUserId);
     });
 
     this.userService.chatMessages$.subscribe(msg => {
       this.today = formatDate(new Date(), 'EEEE, dd MMMM y', 'en-US');
       this.chat = msg.sort((a, b) => b.send_date - a.send_date);
       this.groupedChat = this.groupMessagesByDate(this.chat);
+      this.loadChatData(this.groupedChat, this.toUserId);
       console.log('Group', this.groupMessagesByDate(this.chat));
     });
 
@@ -52,12 +60,38 @@ export class MessagesComponent implements OnInit {
     });
   }
 
-  fetchUser(userId: string) {
-    if (!this.userByIdMap[userId]) {
-      this.databaseService.getUserById(userId, user => {
-        this.userByIdMap[userId] = user;
-      });
+  /**
+   *Fetch user data for all unique user IDs and cache them for
+   * performance improvement
+   * @param {array} messages -  array of message
+   */
+  prefetchUsers(messages: any[], toUserId: string) {
+    const uniqueUserIds = new Set<string>();
+
+    messages.forEach(message => {
+      if (message.from_user && !this.userByIdMap[message.from_user]) {
+        uniqueUserIds.add(message.from_user);
+      }
+    });
+
+    if (toUserId && !this.userByIdMap[toUserId]) {
+      uniqueUserIds.add(toUserId);
     }
+    uniqueUserIds.forEach(userId => {
+      this.databaseService.getUserById(userId, user => {
+        if (user) {
+          this.userByIdMap[userId] = user;
+        }
+      });
+    });
+  }
+
+  loadChatData(chatGroups: any[], toUserId: string) {
+    const allMessages = chatGroups.reduce((acc, group) => [...acc, ...group.messages], []);
+    this.prefetchUsers(allMessages, toUserId);
+  }
+
+  getCachedUser(userId: string) {
     return this.userByIdMap[userId];
   }
 
@@ -120,5 +154,9 @@ export class MessagesComponent implements OnInit {
 
   setTimeFormat(date: Date) {
     return formatDate(date, 'HH:mm', 'en-US');
+  }
+
+  onOpenShowProfile() {
+    this.showProfileService.updateProfile();
   }
 }

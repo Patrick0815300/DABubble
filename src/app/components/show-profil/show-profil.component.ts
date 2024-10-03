@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ShowProfilService } from '../../modules/show-profil.service';
 import { UpdateProfilService } from '../../modules/update-profil.service';
+import { User } from '../../modules/database.model';
+import { DatabaseServiceService } from '../../database-service.service';
 
 @Component({
   selector: 'app-show-profil',
@@ -9,15 +11,22 @@ import { UpdateProfilService } from '../../modules/update-profil.service';
   templateUrl: './show-profil.component.html',
   styleUrl: './show-profil.component.scss',
 })
-export class ShowProfilComponent {
-  open_show_profil!: boolean;
-  open_update_profil!: boolean;
-  constructor(private showProfileService: ShowProfilService, private updateProfilService: UpdateProfilService) {
-    this.showProfileService.open_show_profil$.subscribe(state => {
-      this.open_show_profil = state;
+export class ShowProfilComponent implements OnInit {
+  open_show_profile!: boolean;
+  open_update_profile!: boolean;
+  authenticatedUser: User | undefined;
+  constructor(private showProfileService: ShowProfilService, private updateProfilService: UpdateProfilService, private databaseService: DatabaseServiceService) {
+    this.showProfileService.open_show_profile$.subscribe(state => {
+      this.open_show_profile = state;
     });
     this.updateProfilService.open_update_profil$.subscribe(state => {
-      this.open_update_profil = state;
+      this.open_update_profile = state;
+    });
+  }
+
+  ngOnInit(): void {
+    this.databaseService.authenticatedUser().subscribe(user => {
+      this.authenticatedUser = user;
     });
   }
 

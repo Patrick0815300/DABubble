@@ -3,20 +3,20 @@
     <span>profil</span>
     <img class="cursor-effect" (click)="onCloseShowProfil()" src="assets/img/icons/close.svg" alt="" />
   </div>
-  <img class="user-profile-img" src="assets/img/profiles/Elise_Roth.svg" alt="" />
+  <img class="user-profile-img" src="assets/img/profiles/{{ authenticatedUser?.image_file }}" alt="" />
   <div class="user-name-update">
-    <span>Frederik Beck</span>
+    <span>{{ authenticatedUser?.first_name }} {{ authenticatedUser?.last_name }}</span>
     <button (click)="onOpenUpdateProfil()">bearbeiten</button>
   </div>
   <div class="single-user-info">
     <img class="online" src="assets/img/icons/Online.svg" alt="" />
-    <span>activ</span>
+    <span>aktiv</span>
   </div>
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <span class="mail-address">beckmail.com</span>
+  <span class="mail-address">{{ authenticatedUser?.email }}</span>
   <div class="btn-container">
     <button class="btn">
       <img src="assets/img/icons/mode_comment.svg" alt="" />
