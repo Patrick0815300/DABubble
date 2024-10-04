@@ -1,15 +1,23 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, arrayUnion, where } from '@angular/fire/firestore';
+import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, where } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MainServiceService } from './main-service.service';
+import { Message } from '../models/messages/channel-message.model';
+import { Channel } from '../models/channels/entwickler-team.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatServiceService {
-  uid: string = 'tsvZAtPmhQsbvuAp6mi6';
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
   senderId: string = '';
+
+  private pickedThreadSubject = new BehaviorSubject<any>(null);
+  pickedThread$: Observable<any> = this.pickedThreadSubject.asObservable();
+
+  private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
+  currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
   constructor(private firestore: Firestore, private mainService: MainServiceService) { }
 
@@ -21,29 +29,43 @@ export class ChatServiceService {
     return this.threadData;
   }
 
-  formatTime(timeString: string): string {
-    const date = new Date(timeString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+  setCurrentChannel(channel: Channel) {
+    this.currentChannelSubject.next(channel);
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const today = new Date();
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return 'heute';
-    }
-    return date.toLocaleDateString('de-DE'); // Format: "TT.MM.JJJJ"
+  async getThreadDetails(channelId: string, messageId: string): Promise<{ count: number, lastMessageTime: string | null }> {
+    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    const querySnapshot = await getDocs(threadsCollectionRef);
+
+    const threadMessages = querySnapshot.docs
+      .map(doc => doc.data())
+      .filter(message => message['content']);
+
+    const count = threadMessages.length;
+    const lastMessageTime = count > 0 ? threadMessages[threadMessages.length - 1]['time'] : null;
+    return { count, lastMessageTime };
   }
 
+  async updateChannelThreadState(channelId: string, isVisible: boolean): Promise<void> {
+    const channelDocRef = doc(this.firestore, `channels/${channelId}`);
+    await updateDoc(channelDocRef, { openedThread: isVisible });
+  }
 
+  async loadActiveChannel(): Promise<void> {
+    this.getActiveChannel().subscribe({
+      next: (channel) => {
+        if (channel) {
+          this.setCurrentChannel(channel);
+        } else {
+          console.error('Kein aktiver Channel ausgewählt.');
+        }
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden des aktiven Channels:', error);
+      }
+    });
+  }
 
-  // Funktion zum Laden der Nachricht anhand der messageId
   async loadMessageData(channelId: string, messageId: string): Promise<any> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages`, messageId);
     const messageSnapshot = await getDoc(messageDocRef);
@@ -66,10 +88,27 @@ export class ChatServiceService {
     return { channelId, messageId, ...messageData };
   }
 
+  async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<void> {
+    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
+    await addDoc(messagesCollectionRef, message.toJSON());
+  }
+
+  loadMessagesFromPath(path: string): Observable<any[]> {
+    const messagesCollectionRef = collection(this.firestore, path);
+    return new Observable((observer) => {
+      onSnapshot(messagesCollectionRef, (snapshot) => {
+        const messages = snapshot.docs
+          .map(doc => doc.data())
+          .filter(message => message['content'])  // Filtern von leeren Nachrichten
+          .sort((a, b) => a['time'].localeCompare(b['time'])); // Sortieren nach Zeit
+        observer.next(messages);
+      }, (error) => observer.error(error));
+    });
+  }
+
   async checkIfThreadExists(channelId: string, messageId: string, senderId: string): Promise<boolean> {
     const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    const querySnapshot = await getDocs(query(threadsCollectionRef, where(this.senderId, '==', senderId)));
-
+    const querySnapshot = await getDocs(query(threadsCollectionRef, where('senderId', '==', senderId)));
     return !querySnapshot.empty;
   }
 
@@ -80,64 +119,93 @@ export class ChatServiceService {
       senderId: messageData.senderId,
       time: messageData.time,
       name: messageData.name,
-      createdAt: new Date() // Optional: Zeitstempel des Threads
+      createdAt: new Date()
     });
-    console.log('Thread erfolgreich hinzugefügt mit ID:', threadDocRef.id);
+
+    await updateDoc(threadDocRef, { threadId: threadDocRef.id });
+    this.loadPickedThread(channelId, messageId, threadDocRef.id);
   }
 
-  async openExistingThread(channelId: string, messageId: string): Promise<void> {
+  async getUserNameByUid(uid: string): Promise<string> {
     try {
-      // Nachrichtendaten laden
-      const messageData = await this.loadMessageData(channelId, messageId);
-      const senderId = messageData.senderId; // Sender ID aus den Nachrichtendaten
+      const userDocRef = doc(this.firestore, `users/${uid}`);
+      const userSnapshot = await getDoc(userDocRef);
 
-      const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-      const querySnapshot = await getDocs(query(threadsCollectionRef, where(this.senderId, '==', senderId)));
-
-      if (!querySnapshot.empty) {
-        querySnapshot.forEach((doc) => {
-          const threadData = doc.data();
-          console.log('Thread gefunden:', threadData);
-
-          // Hier kannst du den Thread-Daten anzeigen, z.B. in einem UI-Bereich
-        });
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        return userData?.['name'] || 'Unbekannt';
       } else {
-        console.log('Kein Thread gefunden.');
+        throw new Error('Benutzer nicht gefunden');
       }
     } catch (error) {
-      console.error('Fehler beim Öffnen des vorhandenen Threads:', error);
+      console.error('Fehler beim Abrufen des Benutzernamens:', error);
+      throw error;
     }
   }
 
+  async loadPickedThread(channelId: string, messageId: string, threadId: string): Promise<any> {
+    try {
+      const threadDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads`, threadId);
+      const threadSnapshot = await getDoc(threadDocRef);
+
+      if (threadSnapshot.exists()) {
+        const threadData = threadSnapshot.data();
+        this.pickedThreadSubject.next({
+          id: threadSnapshot.id,
+          channelId: channelId,
+          messageId: messageId,
+          ...threadData,
+        });
+      } else {
+        console.error('Thread nicht gefunden');
+        return null;
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden des Threads:', error);
+      throw error;
+    }
+  }
+
+  async openExistingThread(channelId: string, messageId: string, threadId: string): Promise<void> {
+    this.loadPickedThread(channelId, messageId, threadId);
+  }
+
+  async getExistingThreadId(channelId: string, messageId: string, senderId: string): Promise<string | null> {
+    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    const querySnapshot = await getDocs(query(threadsCollectionRef, where('senderId', '==', senderId)));
+
+    if (!querySnapshot.empty) {
+      const threadDoc = querySnapshot.docs[0];
+      return threadDoc.id;
+    } else {
+      return null;
+    }
+  }
 
   async setThreadDataFromMessage(channelId: string, messageId: string): Promise<void> {
     try {
-      // Nachrichtendaten laden
       const messageData = await this.loadMessageDataFromFirestore(channelId, messageId);
-      this.senderId = messageData.senderId;
-
-      // Überprüfen, ob der Benutzer bereits einen Thread erstellt hat
       const threadExists = await this.checkIfThreadExists(channelId, messageId, messageData.senderId);
 
       if (threadExists) {
-        // Thread existiert, öffne den bestehenden Thread
-        console.log('Ein Thread von diesem Benutzer existiert bereits. Öffne den Thread.');
-        this.openExistingThread(channelId, messageId);
+        const existingThreadId = await this.getExistingThreadId(channelId, messageId, messageData.senderId);
+        if (existingThreadId) {
+          await this.openExistingThread(channelId, messageId, existingThreadId);
+        } else {
+          console.error('Thread-ID konnte nicht abgerufen werden.');
+        }
       } else {
-        // Thread existiert nicht, neuen Thread erstellen
         await this.addNewThread(channelId, messageId, messageData);
       }
+
+      await this.updateChannelThreadState(channelId, true);
+
+      this.setThreadData(messageData);
     } catch (error) {
       console.error('Fehler beim Laden und Speichern der Nachricht:', error);
     }
   }
 
-
-
-  /**
-   * Lädt die Nachrichten aus der angegebenen Channel-ID.
-   * @param channelId - ID des Channels, aus dem die Nachrichten geladen werden sollen.
-   */
   loadMessages(channelId: string): Observable<any[]> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
     return new Observable((observer) => {
@@ -203,25 +271,26 @@ export class ChatServiceService {
     });
   }
 
-  /**
-   * Fügt eine Reaktion zu einer Nachricht hinzu.
-   * @param channelId - Channel-ID.
-   * @param messageId - Nachrichten-ID.
-   * @param reactionType - Typ der Reaktion.
-   * @param userId - Benutzer-ID.
-   * @param reactionPath - Pfad der Reaktion.
-   */
   async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string, reactionPath: string): Promise<void> {
     const messageDocRef = this.mainService.getSingleChannelRef(`channels/${channelId}/messages`, messageId);
     const snapshot = await getDoc(messageDocRef);
     const messageData = snapshot.data();
     const reactions = messageData?.['reactions'] || [];
+    const hasReacted = await this.hasUserReacted(reactions, reactionType, userId);
 
-    const existingReactionIndex = reactions.findIndex((reaction: any) => reaction.type === reactionType && reaction.userId === userId);
+    if (!hasReacted) {
+      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, userId, reactionPath);
+      await updateDoc(messageDocRef, { reactions: updatedReactions });
+    }
+  }
 
-    if (existingReactionIndex !== -1) {
-      reactions[existingReactionIndex].count += 1;
-    } else {
+  async hasUserReacted(reactions: any[], reactionType: string, userId: string): Promise<boolean> {
+    return reactions.some(reaction => reaction.type === reactionType && reaction.userId === userId);
+  }
+
+  async addOrUpdateReaction(reactions: any[], reactionType: string, userId: string, reactionPath: string): Promise<any[]> {
+    const existingReactionIndex = reactions.findIndex(reaction => reaction.type === reactionType && reaction.userId === userId);
+    if (existingReactionIndex === -1) {
       reactions.push({
         type: reactionType,
         userId: userId,
@@ -229,13 +298,9 @@ export class ChatServiceService {
         path: reactionPath,
       });
     }
-
-    await updateDoc(messageDocRef, { reactions: reactions });
+    return reactions;
   }
 
-  /**
-   * Lädt die Reaktionen.
-   */
   async loadReactions(): Promise<any[]> {
     const reactionsRef = this.mainService.getChannelRef('reactions');
     const snapshot = await getDocs(reactionsRef);
@@ -245,5 +310,24 @@ export class ChatServiceService {
       path: doc.data()['path']
     }));
   }
-}
 
+  formatTime(timeString: string): string {
+    const date = new Date(timeString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const today = new Date();
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return 'heute';
+    }
+    return date.toLocaleDateString('de-DE'); // Format: "TT.MM.JJJJ"
+  }
+}

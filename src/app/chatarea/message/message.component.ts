@@ -13,28 +13,39 @@ import { ChatServiceService } from '../../firestore-service/chat-service.service
   styleUrl: './message.component.scss'
 })
 export class MessageComponent {
-  @Input() message: any;  // Nachrichtendaten als Input
-  @Input() previousMessageDate: string | null = null;  // Für die Divider-Logik
+  @Input() message: any;
+  @Input() previousMessageDate: string | null = null;
 
-  uid: string = 'tsvZAtPmhQsbvuAp6mi6';
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   channelId: string = '';
+  answerCount: number = 0;
+  lastAnswerTime: string | null = null;
+  allReactions: boolean = false;
 
   constructor(private chatService: ChatServiceService) {
     this.loadActiveChannelId();
   }
 
+  loadThreadDetails() {
+    if (this.message && this.channelId) {
+      this.chatService.getThreadDetails(this.channelId, this.message.id)
+        .then(({ count, lastMessageTime }) => {
+          this.answerCount = count;
+          this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
+        })
+        .catch(error => console.error('Fehler beim Laden der Thread-Details:', error));
+    }
+  }
+
   openThread(messageId: string) {
-    this.chatService.setThreadDataFromMessage(this.channelId, messageId).then(() => {
-      console.log('Thread-Daten geladen:', this.chatService.getThreadData());
-    }).catch(error => {
-      console.error('Fehler beim Öffnen des Threads:', error);
-    });
+    this.chatService.setThreadDataFromMessage(this.channelId, messageId);
   }
 
   loadActiveChannelId() {
     this.chatService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelId = channel.id;  // Dynamische Channel-ID setzen
+        this.channelId = channel.id;
+        this.loadThreadDetails();
       },
       error: (err) => {
         console.error('Fehler beim Laden des aktiven Channels:', err);
@@ -42,15 +53,17 @@ export class MessageComponent {
     });
   }
 
-  // Reaktionslogik mit dynamischer Channel-ID
+  openReactions() {
+    this.allReactions = !this.allReactions;
+  }
+
   reactToMessage(messageId: string, reactionType: string, path: string) {
+    this.openReactions();
     if (!this.channelId) {
       console.error('Keine Channel-ID vorhanden.');
       return;
     }
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
-      .then(() => console.log('Reaktion hinzugefügt'))
-      .catch(error => console.error('Fehler beim Hinzufügen der Reaktion:', error));
   }
 
   formatTime(timeString: string): string {

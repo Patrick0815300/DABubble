@@ -13,11 +13,23 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './own-message-thread.component.scss'
 })
 export class OwnMessageThreadComponent {
-  editMode: boolean = false;
-
   @Input() thread: any;
 
-  constructor(private chatService: ChatServiceService) { }
+  editMode: boolean = false;
+  threadData: any;
+  showReactions: boolean = false
+
+  constructor(private chatService: ChatServiceService) {
+    this.chatService.pickedThread$.subscribe((data) => {
+      if (data) {
+        this.threadData = data;
+      }
+    });
+  }
+
+  toggleReactions() {
+    this.showReactions = !this.showReactions
+  }
 
   formatTime(timeString: string): string {
     return this.chatService.formatTime(timeString);

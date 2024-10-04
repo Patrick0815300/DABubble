@@ -21,7 +21,8 @@ export class Message {
             content: this.content,
             name: this.name,
             reactions: this.reactions,
-            time: this.time
+            time: this.time,
+            senderId: this.senderId,
         };
     }
 }

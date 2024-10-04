@@ -216,6 +216,31 @@ mat-icon {
         mat-icon {
             font-size: 24px;
         }
+
+        .chose-reaction {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            z-index: 250;
+            background-color: white;
+            border-radius: 25px 0 25px 25px;
+            border: 1px solid #adb0d9;
+            box-sizing: border-box;
+            padding: 3px 15px;
+            bottom: -43px;
+            left: 35px;
+
+            img {
+                border-radius: 20px;
+                width: 20px;
+                height: 20px;
+                padding: 10px;
+
+                &:hover {
+                    background-color: #ECEEFE;
+                }
+            }
+        }
     }
 
     .reaction-bar {

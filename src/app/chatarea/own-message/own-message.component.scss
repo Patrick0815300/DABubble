@@ -61,6 +61,22 @@ mat-icon {
         box-sizing: border-box;
         width: 100%;
 
+        .answer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+
+            .counted-answers {
+                color: #535AF1;
+                cursor: pointer;
+
+                &:hover {
+                    font-weight: 700;
+                    color: #444DF2;
+                }
+            }
+        }
+
         .name-time {
             display: flex;
             justify-content: flex-end;
@@ -252,6 +268,7 @@ mat-icon {
                 color: #535af1;
             }
         }
+
     }
 }
 

@@ -4,6 +4,7 @@ import { ProfileComponent } from '../../shared/profile/profile.component';
 import { WrapperComponent } from '../../shared/wrapper/wrapper.component';
 import { CommonModule } from '@angular/common';
 import { NavService } from '../../modules/nav.service';
+import { ChannelService } from '../../firestore-service/channel.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -26,7 +27,10 @@ export class LeftSideMenuComponent {
     this.navService.state$.subscribe(state => {
       this.state = state;
     });
+
+    //this.channelService.loadChannels();
   }
+
 
   onOpen() {
     this.navService.createChannel();
