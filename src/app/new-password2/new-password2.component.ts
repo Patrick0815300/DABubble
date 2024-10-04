@@ -7,6 +7,10 @@ import { Router, RouterModule } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { PasswordResetService } from '../password_Reset/password-reset.service';
+import { confirmPasswordReset, getAuth } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Component({
   selector: 'app-new-password2',
@@ -35,23 +39,51 @@ export class NewPassword2Component {
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
 
   }
+
+  private auth = getAuth(initializeApp(this.firebase.firebaseConfig));
+  urlParams = new URLSearchParams(window.location.search);
+  oobCode = this.urlParams.get('oobCode');
+
+
 
   /**
    * This function clears the inputs and changes the Passwords
    */
-  changePassword() {    
-    if (this.passwordNotLongEnough) {
+  changePassword() {
+    if (this.checkForSamePasswords()) {
+      this.resetPassword();
     } else {
-      if (this.passwordAccordance) {
+      this.displayError = true;
+      setTimeout(() => {
         this.displayError = false;
-        this.clearInputs();
-        this.displayPWChangedMessage();
-      } else {
-        this.displayError = true;
-      }
+      }, 2000);
+    }
+  }
+
+  resetPassword() {
+    if (this.oobCode) {
+      confirmPasswordReset(this.auth, this.oobCode, this.Password1)
+        .then(() => {
+          console.log("Passwort erfolgreich zurückgesetzt.");
+          this.service.redirectToLogin();
+          this.passwordChanged = true;
+          this.resetPasswordInDatabase();
+          setTimeout(() => {
+            this.passwordChanged = false;
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error("Fehler beim Zurücksetzen des Passworts: ", error);
+        });
+    }
+  }
+
+  resetPasswordInDatabase() {
+    if (this.auth.currentUser) {
+      this.firebase.updatePassword(this.Password1, this.auth.currentUser.uid);
     }
   }
 

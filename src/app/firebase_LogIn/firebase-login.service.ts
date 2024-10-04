@@ -23,10 +23,10 @@ const firestore = getFirestore(app);
 export class FirebaseLoginService {
 
   private auth = getAuth();
-  db = getFirestore();  
+  db = getFirestore();
 
   private firestore: Firestore;
-  public firebaseConfig = firebaseConfig; 
+  public firebaseConfig = firebaseConfig;
 
 
   constructor() {
@@ -74,17 +74,17 @@ export class FirebaseLoginService {
    * @param name Jame of the user
    * @returns the user ID
    */
-  async addUserInAuth(email: string, password: string, name: string){
+  async addUserInAuth(email: string, password: string, name: string) {
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-      const user = userCredential.user;  
+      const user = userCredential.user;
       this.saveUserDataToDatabase(user.uid, user.email, name, password);
       //console.log('Benutzer erfolgreich registriert und in Firestore gespeichert mit UID:', user.uid);
       return user.uid;
     } catch (error) {
       console.error('Fehler bei der Registrierung:', error);
       return "error";
-      
+
     }
   }
 
@@ -93,23 +93,23 @@ export class FirebaseLoginService {
    * @param uid id of the user
    * @param email E-Mail of the user
    */
-  saveUserDataToDatabase(uid:string, email:any, name:string, password: string) {
+  saveUserDataToDatabase(uid: string, email: any, name: string, password: string) {
     // Referenziere das Dokument mit der UID als DocID
     const userRef = doc(this.db, "users", uid);
     setDoc(userRef, {
       name: name,
       email: email,
-      // password: password,
+      password: password,
       online: false,
       avatar: '',
     })
-    .then(() => {
-      return uid;
-      //console.log("Benutzer erfolgreich in der Datenbank gespeichert.");
-    })
-    .catch((error) => {
-      console.error("Fehler beim Speichern des Benutzers:", error);
-    });
+      .then(() => {
+        return uid;
+        //console.log("Benutzer erfolgreich in der Datenbank gespeichert.");
+      })
+      .catch((error) => {
+        console.error("Fehler beim Speichern des Benutzers:", error);
+      });
   }
 
   /**
@@ -117,10 +117,22 @@ export class FirebaseLoginService {
    * @param chosenAvatar the link of the profil picture
    * @param id the user-id (DocRef of firebase)
    */
-  async updateAvatar(chosenAvatar: string, id: any) { 
+  async updateAvatar(chosenAvatar: string, id: any) {
     let user = doc(this.db, "users", id)
     await updateDoc(user, {
       avatar: chosenAvatar,
+    });
+  }
+
+  /**
+  * This functionupdates the avatar of the user
+  * @param password the password
+  * @param id the user-id (DocRef of firebase)
+  */
+  async updatePassword(password: string, id: any) {
+    let user = doc(this.db, "users", id)
+    await updateDoc(user, {
+      password: password,
     });
   }
 
@@ -129,7 +141,7 @@ export class FirebaseLoginService {
    * @param email entered Email
    * @returns the User who belongs to the entered mail-adress
    */
-  async gettingQuery(searchDocRef:string, value: string) {
+  async gettingQuery(searchDocRef: string, value: string) {
     const q = query(this.getUserRef(), where(searchDocRef, "==", value));
     const querySnapshot = await getDocs(q);
     return querySnapshot;
@@ -140,9 +152,9 @@ export class FirebaseLoginService {
  * @param email in the form entered Email
  * @returns true / false
  */
-  async findUserWithRef(searchRef:string, value: string) {    
+  async findUserWithRef(searchRef: string, value: string) {
     try {
-      const querySnapshot = await this.gettingQuery(searchRef, value);          
+      const querySnapshot = await this.gettingQuery(searchRef, value);
       return !querySnapshot.empty;
     } catch (err) {
       console.error("Error checking email existence: ", err);

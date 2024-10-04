@@ -9,6 +9,7 @@ import { NgClass, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 @Component({
   selector: 'app-new-password',
@@ -44,6 +45,7 @@ export class NewPasswordComponent {
 
   mail: string = '';
   http = inject(HttpClient);
+  auth = getAuth();
 
   /**
    * This function trigggers functions who send a Mail to the given mail adress to change the password
@@ -51,22 +53,22 @@ export class NewPasswordComponent {
    */
   async onSubmit(ngForm: NgForm) {
     this.email = ngForm.value.email;
-    if (await this.firebase.findUserWithRef("email", this.email)) {
-      if (ngForm.valid && ngForm.submitted) {
-        await this.resetService.resetPassword(this.email)
-        this.displayMailsentFeedback();
-        this.resetMailsentFeedback();
-        this.redirectToLogin();
-      }
-    } else {
-      this.displayWrongMailError();
-      this.resetDisplayWrongMailError();
-    }
+      if (await this.firebase.findUserWithRef("email", this.email)) {
+        if (ngForm.valid && ngForm.submitted) {
+          this.resetService.resetPassword(this.email);
+          this.displayMailsentFeedback();
+          this.resetMailsentFeedback();
+          this.resetService.redirectToLogin();
+        }
+      } else {
+        this.displayWrongMailError();
+        this.resetDisplayWrongMailError();
+      }   
   }
 
-   /**
-   * This function sets the variable of the "mailsent"-Feedback to true, sothat the feedback will be displayed
-   */
+  /**
+  * This function sets the variable of the "mailsent"-Feedback to true, sothat the feedback will be displayed
+  */
   displayMailsentFeedback() {
     this.mailSent = true;
   }
@@ -96,12 +98,4 @@ export class NewPasswordComponent {
     }, 2000);
   }
 
-  /**
-   * This function sends the user back to the login-page after a timeout of 2 Sec. 
-   */
-  redirectToLogin(){
-    setTimeout(()=>{
-      this.router.navigate(['/']);
-    },2000);
-  }
 }
