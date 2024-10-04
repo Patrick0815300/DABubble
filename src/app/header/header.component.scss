@@ -109,15 +109,15 @@
         align-items: center;
         justify-content: center;
         position: relative;
+        animation: textcolor 2s ease-in-out 3s forwards;
 
         .text{
             position:absolute;
             left:-50px;
-
             white-space: nowrap; /* Verhindert Zeilenumbruch */
             position: relative;
             left: -100%; /* Startpunkt: außerhalb des Containers */
-            animation: slide-in 2s ease-in-out 0.3s forwards, textcolor 2s ease-in-out 3s forwards;
+            animation: slide-in 2s ease-in-out 0.3s forwards;
         }
     }
 }
