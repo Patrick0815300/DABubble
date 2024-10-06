@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ChatareaComponent } from "../../chatarea/chatarea.component";
 
 @Component({
@@ -6,8 +6,8 @@ import { ChatareaComponent } from "../../chatarea/chatarea.component";
   standalone: true,
   imports: [ChatareaComponent],
   templateUrl: './middle-wrapper.component.html',
-  styleUrl: './middle-wrapper.component.scss'
+  styleUrl: './middle-wrapper.component.scss',
 })
 export class MiddleWrapperComponent {
-
+  @Input() hasDefaultPadding: boolean = true;
 }

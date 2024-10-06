@@ -2,8 +2,8 @@
   <nav>
     <img src="assets/img/icons/logo.svg" alt="Logo" />
     <div class="current-user">
-      <span>Frederik Beck</span>
-      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="avatar" />
+      <span class="to_upper">{{ authenticatedUser?.first_name }} <span> </span>{{ authenticatedUser?.last_name }}</span>
+      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="authenticatedUser?.image_file" />
       <button class="btn-arrow" (click)="onOpenLogOut()">
         <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
       </button>

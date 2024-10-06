@@ -8,7 +8,8 @@
       <img (click)="handleToggle()" class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
     <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
-    <app-middle-wrapper class="app-middle-wrapper" />
+    <app-messages *ngIf="isChannelView === false" class="app-middle-wrapper" />
+    <app-channel-messages *ngIf="isChannelView === true" class="app-middle-wrapper" />
     <app-right-wrapper class="app-right-wrapper" *ngIf="isThreadVisible"/>
   </main>
   @if(state){
@@ -24,13 +25,13 @@
       <span>channel-Name</span>
     </div>
     <div class="ch-info-input">
-      <input class="input" type="text" placeholder="z.B. Kooperationsprojekte" />
+      <input [(ngModel)]="channel_name" class="input" name="channel_name" type="text" placeholder="z.B. Kooperationsprojekte" />
       <img src="assets/img/icons/hash_tag.svg" alt="" />
     </div>
     <div class="title-container"><span>beschreibung</span><span class="optional"> (optional)</span></div>
-    <input class="input" type="text" placeholder="Dein Text hier" />
+    <input [(ngModel)]="channel_description" class="input" name="description" type="text" placeholder="Dein Text hier" />
     <div class="btn-container">
-      <button type="submit" class="btn">Erstellen</button>
+      <button id="btn-create" type="submit" class="btn">Erstellen</button>
     </div>
   </form>
   <div class="overlay"></div>
@@ -43,16 +44,16 @@
       </button>
     </div>
     <div class="ch-info-input-user">
-      <input class="input-user" type="radio" checked />
+      <input class="input-user" type="radio" name="toggleOptions" [(ngModel)]="isChecked" value="officeTeam" />
       <span>Alle Mitglieder von <a href="#">OfficeTeam</a> hinzufügen</span>
     </div>
     <div class="ch-info-input-user">
-      <input class="input-user" type="radio" />
+      <input class="input-user" name="toggleOptions" type="radio" [(ngModel)]="isChecked" value="singleUser" />
       <span>Bestimmte Leute hinzufügen</span>
     </div>
-
+    <input [(ngModel)]="new_person_name" class="add-person" *ngIf="isChecked === 'singleUser'" type="text" placeholder="Name eingeben" />
     <div class="btn-container-user">
-      <button class="btn">Erstellen</button>
+      <button class="btn" (click)="onCreateChannel()">Erstellen</button>
     </div>
   </section>
 
@@ -63,8 +64,14 @@
   } @if (open_show_profil) {
   <app-show-profil />
   <div (click)="onCloseShowProfil()" class="overlay"></div>
+  } @if (open_show_profile_nav) {
+  <app-show-profil [isNavBar]="true" />
+  <div (click)="onOpenNavProfile()" class="overlay"></div>
   } @if (open_update_profil) {
   <app-update-profil />
   <div (click)="onCloseUpdateProfil()" class="overlay"></div>
+  } @if(open_edit_channel){
+  <app-edit-channel />
+  <div (click)="onCloseEditChannel()" class="overlay"></div>
   }
 </section>

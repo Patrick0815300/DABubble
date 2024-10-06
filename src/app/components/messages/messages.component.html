@@ -1,0 +1,76 @@
+<app-middle-wrapper [hasDefaultPadding]="false" class="app-middle-wrapper">
+  <div class="chat-content">
+    <div class="current-nav-user">
+      <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+      <span>{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</span>
+    </div>
+    @if(chat.length !==0){
+    <div class="chat-container">
+      <div *ngFor="let chatGroup of groupedChat">
+        <div class="group-date">
+          <span>{{ chatGroup.date }} </span>
+          <div class="line"></div>
+        </div>
+        <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.user_id">
+          <div class="image-message">
+            <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
+          </div>
+          <div class="name-date-line">
+            <div>
+              <span>{{ getCachedUser(message?.from_user)?.first_name }} {{ getCachedUser(message?.from_user)?.last_name }}</span>
+              <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
+            </div>
+            <p>{{ message.message_content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    } @else{
+    <div id="message" class="message">
+      <div>
+        <div class="user-ref">
+          <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+          <span class="username text-capitalize">{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</span>
+        </div>
+        @if(getCachedUser(toUserId)?.user_id===authenticatedUser?.user_id){
+        <div class="self-room">
+          <span>Dieser Raum ist nur für dich da.</span> Mache dir Notizen, liste deine To-dos auf oder bewahre Links und Dateien griffbereit auf. Du kannst hier auch gerne Dinge
+          mit dir selbst besprechen.
+        </div>
+        } @else {
+        <div>
+          Diese Unterhaltung findet nur zwischen
+          <button class="tag text-capitalize" (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">
+            &#64;{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}
+          </button>
+          und dir statt.
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="input-wrapper">
+      <div class="input-form">
+        <input
+          class="message-input"
+          [(ngModel)]="message_content"
+          type="text"
+          name="meassage"
+          placeholder="Nachrichten an {{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}"
+        />
+        <div class="send-line">
+          <div class="alternate-line">
+            <img class="icons" src="assets/img/icons/input_add.svg" alt="" />
+            <div class="sep-line"></div>
+            <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+            <img class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
+          </div>
+          <button (click)="onAddMessage(authenticatedUser?.user_id, toUserId)">
+            <img src="assets/img/icons/send.svg" alt="Send message" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-middle-wrapper>

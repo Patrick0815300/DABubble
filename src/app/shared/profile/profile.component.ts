@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
 })
 export class ProfileComponent {
   @Input({ required: true }) left_side_profile: boolean = false;
-  @Input({ required: true }) image_user!: string;
+  @Input({ required: true }) image_user!: string | undefined;
 
   get imagePath() {
     return 'assets/img/profiles/' + this.image_user;
