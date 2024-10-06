@@ -194,19 +194,44 @@
     @keyframes logomovement-small {
         0% {
             top: 50%;
-            left: 50%;
+            left:0%;
         }
 
         100% {
             top: 75px;
-            left: 25%;
+            left: 0%;
         }
+    }
+
+    .name{
+        overflow:unset;
+    }
+
+    .text{
+        font-size:20px;
+        margin-left:-20px;
     }
 
     .loginLogo {
         animation-name: logomovement-small;
-        width: 50%;
+        width:100%;
+        left:0%;
         justify-content: center;
+        transform:none;
+
+        .name{
+            transform:scale(1.2);
+            font-size:20px;
+            margin-left:-25px;
+
+            .text{
+                margin-left:5px;
+            }
+        }
+
+        img{
+            transform:scale(0.8);
+        }
     }
 
     .loginHeaderRegister {
