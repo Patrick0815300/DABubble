@@ -10,9 +10,8 @@ section {
   border-top-left-radius: 30px;
   background-color: white;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 88px;
+  right: 1rem;
   z-index: 5;
   box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.2);
   > input {
@@ -66,6 +65,17 @@ section {
       font-size: 23px;
     }
   }
+}
+
+.close-btn {
+  border-radius: 50%;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+
+.capitalize {
+  text-transform: capitalize;
 }
 .single-user-info {
   display: flex;

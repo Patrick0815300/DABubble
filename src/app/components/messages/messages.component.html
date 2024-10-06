@@ -32,11 +32,20 @@
           <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
           <span class="username text-capitalize">{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</span>
         </div>
+        @if(getCachedUser(toUserId)?.user_id===authenticatedUser?.user_id){
+        <div class="self-room">
+          <span>Dieser Raum ist nur für dich da.</span> Mache dir Notizen, liste deine To-dos auf oder bewahre Links und Dateien griffbereit auf. Du kannst hier auch gerne Dinge
+          mit dir selbst besprechen.
+        </div>
+        } @else {
         <div>
           Diese Unterhaltung findet nur zwischen
-          <button class="tag text-capitalize" (click)="onOpenShowProfile()">&#64;{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}</button>
+          <button class="tag text-capitalize" (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">
+            &#64;{{ getCachedUser(toUserId)?.first_name }} {{ getCachedUser(toUserId)?.last_name }}
+          </button>
           und dir statt.
         </div>
+        }
       </div>
     </div>
     }

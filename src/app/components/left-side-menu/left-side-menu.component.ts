@@ -1,14 +1,13 @@
-import { Component, EventEmitter, OnInit, output, Output } from '@angular/core';
-
+import { Component, OnInit } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
 import { WrapperComponent } from '../../shared/wrapper/wrapper.component';
 import { CommonModule } from '@angular/common';
 import { NavService } from '../../modules/nav.service';
 import { DatabaseServiceService } from '../../database-service.service';
-import { User, Message } from '../../modules/database.model';
-import { combineLatest, forkJoin, Observable, of, switchMap, filter, from } from 'rxjs';
-import { onSnapshot } from '@angular/fire/firestore';
+import { User, Channel, Message } from '../../modules/database.model';
+import { combineLatest, Observable, of, switchMap, map } from 'rxjs';
 import { UserService } from '../../modules/user.service';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -21,28 +20,29 @@ export class LeftSideMenuComponent implements OnInit {
   avatar = 'Elise_Roth.svg';
   is_authenticated = true;
   state: boolean = false;
-  nameState: User = new User();
   active: boolean = false;
+  show_channel_msg!: boolean;
   selectedIndex!: number;
   selectedChannelIndex!: number;
   collapse: boolean = false;
   expand: boolean = false;
   users$: Observable<User[]> = new Observable<User[]>();
+  channels$: Observable<Channel[]> = new Observable<Channel[]>();
   messages$: Observable<Message[]> = new Observable<Message[]>();
   directMessages$: Observable<Message[]> = new Observable<Message[]>();
-  userFromId: string | undefined;
   authenticatedUser: User | undefined;
-  pictureFromId: string | undefined;
   userNames: { [userId: string]: string } = {};
   users: User[] = [new User()];
   messages: Message[] = [new Message()];
   chatMessages: Message[] = [];
   chat!: Message[];
-  allDirectMsg: Message[] = [new Message()];
   usersMap: { [key: string]: User } = {};
   messagesMap: { [key: string]: Message } = {};
   toUserId!: string;
+  all_channel!: Channel[];
+  channel: Channel = new Channel();
   onlineUsers: any[] = [];
+  selectedUser: User | undefined;
   userById: any | null = null;
   userByIdMap: { [userId: string]: any } = {};
   chatMap: { [key: string]: any[] } = {};
@@ -52,7 +52,7 @@ export class LeftSideMenuComponent implements OnInit {
    * @param {NavService} navService - instance of NavService for subscribing to the
    * Observable state$
    */
-  constructor(private userService: UserService, private navService: NavService, public databaseService: DatabaseServiceService) {
+  constructor(private userService: UserService, private channelService: ChannelService, private navService: NavService, private databaseService: DatabaseServiceService) {
     this.navService.state$.subscribe(state => {
       this.state = state;
     });
@@ -64,10 +64,15 @@ export class LeftSideMenuComponent implements OnInit {
     });
 
     this.users$ = this.databaseService.snapUsers();
+    this.channels$ = this.databaseService.snapChannels();
     this.messages$ = this.databaseService.snapMessages();
+
+    this.databaseService.channels$.subscribe(channel => {
+      this.all_channel = channel;
+    });
+
     this.databaseService.authenticatedUser().subscribe(user => {
       this.authenticatedUser = user;
-      // this.toUserId = this.authenticatedUser?.user_id;
     });
 
     /**
@@ -101,60 +106,97 @@ export class LeftSideMenuComponent implements OnInit {
       }, {} as { [key: string]: Message });
     });
 
+    /**
+     * subscribe to userIds$ for the Id of the selected user
+     */
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
     });
+
+    /**
+     * subscribe to channelId$ for the Id of the selected channel
+     */
+    // this.userService.channelIds$.subscribe(id => {
+    //   this.channelId = id;
+    // });
+
+    this.userService.channel$.subscribe(channel => {
+      this.channel = channel;
+    });
+
+    /**
+     * subscribe to selectedUser$ for the selected user object
+     */
+    this.userService.selectedUser$.subscribe(selected_user => {
+      this.selectedUser = selected_user;
+    });
+
+    this.channelService.showChannelMsg$.subscribe(is_channel => {
+      this.show_channel_msg = is_channel;
+    });
+
     this.userService.chatMessages$.subscribe(msg => {
       this.chat = msg;
     });
   }
 
-  // fetchUser(userId: string) {
-  //   console.log(userId);
-
-  //   if (!this.userByIdMap[userId]) {
-  //     console.log('inside');
-
-  //     this.databaseService.getUserById(userId, user => {
-  //       this.userByIdMap[userId] = user;
-  //     });
-  //   }
-  //   console.log('outside');
-
-  //   return this.userByIdMap[userId];
-  // }
-
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
-    const cacheKey = `${currentUserId}-${targetUserId}`;
-
-    // if (!this.chatMap[cacheKey]) {
     console.log('I load again msg');
-
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
-        // this.chatMap[cacheKey] = messages;
         console.log('Messages', messages);
+        if (currentUserId !== targetUserId) {
+          messages = messages.filter(m => m.from_user !== m.to_user);
+        }
         this.userService.emitChat(messages);
       } else {
-        // this.chatMap[cacheKey] = [];
         this.userService.emitChat([]);
       }
     });
-    // }
-
-    // return this.chatMap[cacheKey];
   }
 
-  onSelectUser(currentUserId: string | undefined, targetUserId: string): void {
-    this.databaseService.filterDirectMessages(currentUserId, targetUserId);
+  loadChannelMembers(channel_id: string) {
+    this.databaseService.getChannelMembers(channel_id, members => {
+      if (members) {
+        console.log('channel Members', members);
+
+        this.channelService.emitChannelMembers(members);
+      } else {
+        this.channelService.emitChannelMembers([]);
+      }
+    });
+  }
+
+  loadChannelMessages(targetChannelId: string) {
+    console.log('I load again msg');
+    this.databaseService.getChannelMessages(targetChannelId, messages => {
+      if (messages) {
+        console.log('Channel Msg', messages);
+        this.userService.emitChannelMessage(messages);
+      } else {
+        this.userService.emitChannelMessage([]);
+      }
+    });
   }
 
   sendUserId(to_id: string) {
     this.userService.emitUserId(to_id);
   }
 
-  getPicture(id: string) {
-    return this.databaseService.pictureFromID(id);
+  // sendChannelId(id: string) {
+  //   this.userService.emitChannelId(id);
+  // }
+
+  sendChannel(channel: Channel) {
+    this.userService.emitChannel(channel);
+  }
+
+  showChannelMessages(isShown: boolean) {
+    this.channelService.emitChannelView(isShown);
+  }
+
+  sendSelectedUser(user: User) {
+    this.userService.emitSelectedUser(user);
   }
 
   /**

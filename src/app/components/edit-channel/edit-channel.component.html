@@ -1,0 +1,34 @@
+<form>
+  <div class="ch-creation">
+    <span>&num; {{ channel.channel_name }}</span>
+    <button class="closeDial">
+      <img src="assets/img/icons/close.svg" (click)="onOpenEditChannel()" alt="" />
+    </button>
+  </div>
+  <div class="title-container">
+    <div>
+      <span>channel-name</span>
+      <button>bearbeiten</button>
+    </div>
+    <span>&num; {{ channel.channel_name }}</span>
+  </div>
+
+  <div class="title-container">
+    <div>
+      <span>Beschreibung</span>
+      <button>bearbeiten</button>
+    </div>
+    <span>
+      {{ channel.description }}
+    </span>
+    <div class="separator-line"></div>
+    <div class="author-line">
+      <span class="creator">Erstellt von</span>
+      <div class="creator-name">{{ admin_name }}</div>
+    </div>
+  </div>
+
+  <div class="btn-container">
+    <button type="button" class="btn" (click)="onLeaveChannel()">Channel verlassen</button>
+  </div>
+</form>

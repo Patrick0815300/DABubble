@@ -20,12 +20,15 @@ export class MessagesComponent implements OnInit {
   message_content = '';
   chatMessages: Message[] = [];
   toUserId: string = '';
+  toChannelId: string = '';
   chat: Message[] = [];
+  channelChat: Message[] = [];
   groupedChat: any;
   userByIdMap: { [userId: string]: any } = {};
   authenticatedUser: User | undefined;
   today!: string;
   open_show_profile!: boolean;
+  selectedUser: User = new User();
 
   constructor(private showProfileService: ShowProfilService, private userService: UserService, private databaseService: DatabaseServiceService) {
     this.databaseService.messages$.subscribe(state => {
@@ -39,16 +42,16 @@ export class MessagesComponent implements OnInit {
   ngOnInit(): void {
     this.databaseService.authenticatedUser().subscribe(user => {
       this.authenticatedUser = user;
-      console.log('Auth User', this.authenticatedUser.user_id);
+      console.log('Auth User ooo', this.authenticatedUser.user_id);
     });
 
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
-      console.log('current to user', this.toUserId);
+      console.log('current to user no', this.toUserId);
     });
 
     this.userService.chatMessages$.subscribe(msg => {
-      this.today = formatDate(new Date(), 'EEEE, dd MMMM y', 'en-US');
+      this.today = formatDate(new Date(), 'EEEE, dd MMMM y', 'de-DE');
       this.chat = msg.sort((a, b) => b.send_date - a.send_date);
       this.groupedChat = this.groupMessagesByDate(this.chat);
       this.loadChatData(this.groupedChat, this.toUserId);
@@ -57,6 +60,14 @@ export class MessagesComponent implements OnInit {
 
     this.databaseService.filteredMessages$.subscribe(messages => {
       this.chatMessages = messages;
+    });
+
+    /**
+     * subscribe to selectedUser$ for the selected user object
+     */
+    this.userService.selectedUser$.subscribe(selected_user => {
+      this.selectedUser = selected_user;
+      console.log('selected User is:', this.selectedUser);
     });
   }
 
@@ -148,8 +159,8 @@ export class MessagesComponent implements OnInit {
   }
 
   checkDateIfToday(date: Date) {
-    const formattedDate = formatDate(date, 'EEEE, dd MMMM y', 'en-US');
-    return formattedDate === this.today ? 'Today' : formattedDate;
+    const formattedDate = formatDate(date, 'EEEE, dd MMMM y', 'de-DE');
+    return formattedDate === this.today ? 'heute' : formattedDate;
   }
 
   setTimeFormat(date: Date) {
@@ -158,5 +169,9 @@ export class MessagesComponent implements OnInit {
 
   onOpenShowProfile() {
     this.showProfileService.updateProfile();
+  }
+
+  sendSelectedUser(user: User) {
+    this.userService.emitSelectedUser(user);
   }
 }

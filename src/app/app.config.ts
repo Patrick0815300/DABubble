@@ -1,9 +1,12 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+
+registerLocaleData(localeDe);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,5 +22,6 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideFirestore(() => getFirestore()),
+    { provide: LOCALE_ID, useValue: 'de-DE' },
   ],
 };

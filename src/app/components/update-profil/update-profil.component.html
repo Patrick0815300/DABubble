@@ -1,7 +1,7 @@
 <section>
   <div class="ch-creation">
     <span>Dein Profil bearbeiten</span>
-    <img class="cursor-effect" (click)="onCloseUpdateProfile()" src="assets/img/icons/close.svg" alt="" />
+    <img class="cursor-effect close-btn" (click)="onCloseUpdateProfile()" src="assets/img/icons/close.svg" alt="" />
   </div>
   <img class="user-profile-img" src="assets/img/profiles/{{ authenticatedUser?.image_file }}" alt="" />
 
@@ -9,14 +9,14 @@
     <img class="mail" src="./../../../assets/img/icons/account_circle.svg" alt="" />
     <span class="address">Vollständiger Name</span>
   </div>
-  <input type="text" placeholder="Frederik Beck" />
+  <input class="capitalize" [(ngModel)]="username" type="text" placeholder="Vorname Nachname" />
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <input type="text" placeholder="beckmail.com" />
+  <input [(ngModel)]="user_email" type="text" placeholder="max-mustermann@gmail.com" />
   <div class="btn-container">
-    <button class="btn">Abbrechen</button>
-    <button class="btn">Speichern</button>
+    <button class="btn" (click)="onCloseUpdateProfile()">Abbrechen</button>
+    <button class="btn" (click)="save('users', authenticatedUser?.user_id!)">Speichern</button>
   </div>
 </section>

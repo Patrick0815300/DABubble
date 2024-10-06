@@ -55,8 +55,8 @@ button {
   border: transparent;
 }
 .sender {
-  height: 35px;
-  width: 35px;
+  height: 18px;
+  width: 18px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -162,7 +162,6 @@ button {
     margin: 0 auto;
     padding: 5px 15px;
     border: 1px solid #adb0d9;
-    text-transform: capitalize;
     border-radius: 30px;
     z-index: 1;
     background-color: white;
@@ -199,17 +198,56 @@ button {
   padding-block: 1rem;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-  gap: 1rem;
-  > span {
+  > div {
+    align-items: center;
+    display: flex;
+    border-radius: 30px;
+    padding: 2px;
+    transition: all 150ms ease-in-out;
+    &:hover {
+      color: #535af1;
+      background-color: #eceefe;
+      > img {
+        filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
+      }
+    }
+  }
+
+  > div span {
     text-transform: capitalize;
     font-weight: 700;
+  }
+  > div img {
+    transition: all 150ms ease-in-out;
+  }
+  > div .arrow {
+    width: 26px;
+  }
+}
+
+.error_section {
+  font-family: 'Nunito';
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  gap: 1rem;
+  > img {
+    width: 350px;
+    margin: 0 auto;
+  }
+  > p {
+    font-size: 16px;
+    > span {
+      font-weight: 700;
+      color: #535af1;
+    }
   }
 }
 
 .user-ref {
   display: flex;
   padding-bottom: 0.5rem;
-  gap: 1rem;
+  align-items: center;
   > .username {
     font-weight: 700;
     align-self: flex-end;

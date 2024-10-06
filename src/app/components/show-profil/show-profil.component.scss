@@ -67,6 +67,21 @@ section {
     }
   }
 }
+
+.close-btn {
+  border-radius: 50%;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+
+.nav-section {
+  top: 88px !important;
+  left: unset !important;
+  right: 1rem !important;
+  transform: unset !important;
+}
+
 .single-user-info {
   display: flex;
   align-items: center;
