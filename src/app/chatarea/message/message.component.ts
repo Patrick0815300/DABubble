@@ -22,18 +22,18 @@ export class MessageComponent {
   lastAnswerTime: string | null = null;
   allReactions: boolean = false;
 
-  constructor(private chatService: ChatServiceService) {
+  constructor(private chatService: ChatServiceService) { }
+
+  ngOnInit() {
     this.loadActiveChannelId();
   }
 
   loadThreadDetails() {
     if (this.message && this.channelId) {
-      this.chatService.getThreadDetails(this.channelId, this.message.id)
-        .then(({ count, lastMessageTime }) => {
-          this.answerCount = count;
-          this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
-        })
-        .catch(error => console.error('Fehler beim Laden der Thread-Details:', error));
+      this.chatService.getThreadDetailsInRealTime(this.channelId, this.message.id, (count, lastMessageTime) => {
+        this.answerCount = count;
+        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
+      });
     }
   }
 

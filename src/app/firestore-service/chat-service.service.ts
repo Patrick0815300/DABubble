@@ -12,10 +12,8 @@ export class ChatServiceService {
   uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
   senderId: string = '';
-
   private pickedThreadSubject = new BehaviorSubject<any>(null);
   pickedThread$: Observable<any> = this.pickedThreadSubject.asObservable();
-
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
@@ -33,23 +31,79 @@ export class ChatServiceService {
     this.currentChannelSubject.next(channel);
   }
 
-  async getThreadDetails(channelId: string, messageId: string): Promise<{ count: number, lastMessageTime: string | null }> {
+  async getThreadDetailsInRealTime(
+    channelId: string,
+    messageId: string,
+    callback: (count: number, lastMessageTime: string | null) => void
+  ) {
     const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    const querySnapshot = await getDocs(threadsCollectionRef);
+    onSnapshot(threadsCollectionRef, (threadsSnapshot) => {
+      let totalMessagesCount = 0;
+      let lastMessageTime: string | null = null;
+      threadsSnapshot.docs.forEach(threadDoc => {
+        const threadId = threadDoc.id;
+        const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
+        onSnapshot(messagesCollectionRef, (messagesSnapshot) => {
+          const threadMessages = messagesSnapshot.docs
+            .map(doc => doc.data())
+            .filter(message => message['content']);
+          totalMessagesCount = threadMessages.length;
+          if (threadMessages.length > 0) {
+            const lastMessage = threadMessages[threadMessages.length - 1];
+            if (!lastMessageTime || lastMessage['time'] > lastMessageTime) {
+              lastMessageTime = lastMessage['time'];
+            }
+          }
+          callback(totalMessagesCount, lastMessageTime);
+        });
+      });
+    });
+  }
 
-    const threadMessages = querySnapshot.docs
+  async loadThreads(channelId: string, messageId: string): Promise<any> {
+    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    return await getDocs(threadsCollectionRef);
+  }
+
+  // Threads verarbeiten
+  async processThreads(threadsSnapshot: any, channelId: string, messageId: string): Promise<{ totalMessagesCount: number, lastMessageTime: string | null }> {
+    let totalMessagesCount = 0;
+    let lastMessageTime: string | null = null;
+
+    for (const threadDoc of threadsSnapshot.docs) {
+      const { threadMessages, lastMessageInThread } = await this.loadThreadMessages(channelId, messageId, threadDoc.id);
+      totalMessagesCount += threadMessages.length;
+      lastMessageTime = this.updateLastMessageTime(lastMessageInThread, lastMessageTime);
+    }
+    return { totalMessagesCount, lastMessageTime };
+  }
+
+  // Thread-Nachrichten laden und Anzahl/letzte Nachricht ermitteln
+  async loadThreadMessages(channelId: string, messageId: string, threadId: string): Promise<{ threadMessages: any[], lastMessageInThread: any }> {
+    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
+    const messagesSnapshot = await getDocs(messagesCollectionRef);
+
+    const threadMessages = messagesSnapshot.docs
       .map(doc => doc.data())
       .filter(message => message['content']);
 
-    const count = threadMessages.length;
-    const lastMessageTime = count > 0 ? threadMessages[threadMessages.length - 1]['time'] : null;
-    return { count, lastMessageTime };
+    const lastMessageInThread = threadMessages.length > 0 ? threadMessages[threadMessages.length - 1] : null;
+    return { threadMessages, lastMessageInThread };
+  }
+
+  // Zeit der letzten Nachricht aktualisieren
+  updateLastMessageTime(lastMessageInThread: any, lastMessageTime: string | null): string | null {
+    if (lastMessageInThread && (!lastMessageTime || lastMessageInThread['time'] > lastMessageTime)) {
+      return lastMessageInThread['time'];
+    }
+    return lastMessageTime;
   }
 
   async updateChannelThreadState(channelId: string, isVisible: boolean): Promise<void> {
     const channelDocRef = doc(this.firestore, `channels/${channelId}`);
     await updateDoc(channelDocRef, { openedThread: isVisible });
   }
+
 
   async loadActiveChannel(): Promise<void> {
     this.getActiveChannel().subscribe({

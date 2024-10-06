@@ -51,12 +51,10 @@ export class OwnMessageComponent implements OnInit {
 
   loadThreadDetails() {
     if (this.message && this.channelId) {
-      this.chatService.getThreadDetails(this.channelId, this.message.id)
-        .then(({ count, lastMessageTime }) => {
-          this.answerCount = count;
-          this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
-        })
-        .catch(error => console.error('Fehler beim Laden der Thread-Details:', error));
+      this.chatService.getThreadDetailsInRealTime(this.channelId, this.message.id, (count, lastMessageTime) => {
+        this.answerCount = count; // Setze die Anzahl der Antworten
+        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null; // Formatiere die Zeit der letzten Nachricht
+      });
     }
   }
 
