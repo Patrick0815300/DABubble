@@ -8,19 +8,20 @@
       <img (click)="handleToggle()" class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
     <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
-    <app-messages *ngIf="isChannelView === false" class="app-middle-wrapper" />
-    <app-channel-messages *ngIf="isChannelView === true" class="app-middle-wrapper" />
+    <app-messages *ngIf="isChannelView === false" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
+    <app-channel-messages *ngIf="isChannelView === true" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
+    <app-dev-new-message *ngIf="dev_message_search === true" class="app-middle-wrapper" />
     <app-right-wrapper class="app-right-wrapper" />
   </main>
   @if(state){
-  <form (submit)="onAddUser()">
+  <form (submit)="onAddUser()" autocomplete="off">
     <div class="ch-creation">
       <span>channel erstellen</span>
       <button class="closeDial" (click)="onCloseDialog()">
         <img class="cursor-effect" src="assets/img/icons/close.svg" alt="" />
       </button>
     </div>
-    <p>Channels dienen deinem Team zur Kommunikation. Am besten sollten sie themenbezogen sein #marketing zum Beispiel.</p>
+    <p>Channels dienen deinem Team zur Kommunikation. Am besten sollten sie themenbezogen sein <span class="bold-ex">#marketing</span> zum Beispiel.</p>
     <div class="title-container">
       <span>channel-Name</span>
     </div>
@@ -51,7 +52,11 @@
       <input class="input-user" name="toggleOptions" type="radio" [(ngModel)]="isChecked" value="singleUser" />
       <span>Bestimmte Leute hinzufügen</span>
     </div>
-    <input [(ngModel)]="new_person_name" class="add-person" *ngIf="isChecked === 'singleUser'" type="text" placeholder="Name eingeben" />
+    <div class="search-section">
+      <input [(ngModel)]="new_person_name" (input)="onSearchUser()" class="add-person" *ngIf="isChecked === 'singleUser'" type="text" placeholder="Name eingeben" />
+      <app-search-user *ngIf="showSearchUserName === true" class="app-search-user" />
+    </div>
+
     <div class="btn-container-user">
       <button class="btn" (click)="onCreateChannel()">Erstellen</button>
     </div>

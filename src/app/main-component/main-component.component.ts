@@ -24,6 +24,8 @@ import { ChannelMessagesComponent } from '../components/channel-messages/channel
 import { ChannelService } from '../modules/channel.service';
 import { FormsModule } from '@angular/forms';
 import { EditChannelComponent } from '../components/edit-channel/edit-channel.component';
+import { SearchUserComponent } from '../components/search-user/search-user.component';
+import { DevNewMessageComponent } from '../components/dev-new-message/dev-new-message.component';
 
 @Component({
   selector: 'app-main-component',
@@ -45,6 +47,8 @@ import { EditChannelComponent } from '../components/edit-channel/edit-channel.co
     ChannelMessagesComponent,
     FormsModule,
     EditChannelComponent,
+    SearchUserComponent,
+    DevNewMessageComponent,
   ],
   templateUrl: './main-component.component.html',
   styleUrl: './main-component.component.scss',
@@ -72,6 +76,13 @@ export class MainComponentComponent implements OnInit {
   authenticatedUser: User | undefined;
   new_person_name: string = '';
   open_edit_channel: boolean = false;
+  all_users: User[] = [];
+  filtered_users: User[] = [];
+  searchUser: User[] = [];
+  PickedArray: string[] = [];
+  showSearchUserName: boolean = false;
+  dev_message_search: boolean = false;
+
   constructor(
     private navService: NavService,
     private channelService: ChannelService,
@@ -116,6 +127,10 @@ export class MainComponentComponent implements OnInit {
       this.all_channel = channel;
     });
 
+    this.channelService.filtered_users$.subscribe(user => {
+      this.searchUser = user;
+    });
+
     /**
      * subscribe to selectedUser$ for the selected user object
      */
@@ -136,6 +151,17 @@ export class MainComponentComponent implements OnInit {
 
     this.databaseService.officeTeam().subscribe(team => {
       this.officeTeamChannel = team;
+    });
+
+    this.databaseService.users$.subscribe(users => {
+      this.all_users = users;
+    });
+
+    this.channelService.userPicked$.subscribe(user => {
+      this.PickedArray = user;
+    });
+    this.navService.stateOpenDevSearch$.subscribe(state => {
+      this.dev_message_search = state;
     });
   }
 
@@ -158,21 +184,32 @@ export class MainComponentComponent implements OnInit {
       member_id: this.authenticatedUser?.user_id,
     };
     let office = new Channel(channelData).toObject();
-    let members = new ChannelMember(channelMemberData).toObject(); // I will use it for else
+    let members = new ChannelMember(channelMemberData).toObject();
     this.databaseService.getOfficeTeamMembers(this.officeTeamChannel?.channel_id, members => {
       if (members) {
-        const memberArr = members.map(m => m.member_id);
+        const memberArray = members.map(m => m.member_id);
+        this.databaseService.addChannel(office);
         if (this.isChecked === 'officeTeam') {
-          this.databaseService.addChannel(office);
-          memberArr.forEach(member => {
-            const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
-            this.databaseService.addMemberToChannel(newMember);
-          });
-          this.onCancelAddUser();
+          this.onAddPeopleToChannel(memberArray, office);
+        } else if (this.isChecked === 'singleUser') {
+          this.onAddPeopleToChannel(this.PickedArray, office);
+          console.log('people added', this.PickedArray);
         }
+        this.onCancelAddUser();
+        this.channel_name = '';
       } else {
         console.log('No office members');
       }
+    });
+  }
+
+  onAddPeopleToChannel(array: any[], office: any) {
+    if (!array.includes(this.authenticatedUser?.user_id)) {
+      array.push(this.authenticatedUser?.user_id);
+    }
+    array.forEach(member => {
+      const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
+      this.databaseService.addMemberToChannel(newMember);
     });
   }
 
@@ -203,16 +240,18 @@ export class MainComponentComponent implements OnInit {
   }
 
   onAddUser() {
-    if (this.channel_name) {
+    if (this.channel_name && this.channel_name[0] !== ' ') {
       this.onCloseDialog();
       this.open_dialog_add_user = true;
     }
+    if (this.channel_name[0] === ' ') {
+      console.log('Der Name vom Channel kann nicht mit Leerzeichen starten oder leer sein!');
+    }
   }
-
-  onAddPerson() {}
 
   onCancelAddUser() {
     this.open_dialog_add_user = false;
+    this.channelService.emitPickedUser([]);
   }
 
   onOpenEditChannel() {
@@ -235,5 +274,17 @@ export class MainComponentComponent implements OnInit {
 
   onCloseUpdateProfil() {
     this.updateProfilService.updateProfile();
+  }
+
+  onSearchUser() {
+    if (this.new_person_name) {
+      this.showSearchUserName = true;
+      this.filtered_users = this.all_users.filter(
+        u => u.first_name.toLowerCase().includes(this.new_person_name.toLowerCase()) || u.last_name.toLowerCase().includes(this.new_person_name.toLowerCase())
+      );
+      this.channelService.emitFilteredUsers(this.filtered_users);
+    } else {
+      this.showSearchUserName = false;
+    }
   }
 }

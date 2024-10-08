@@ -94,12 +94,12 @@ export class ChannelMessagesComponent implements OnInit {
 
   checkDateIfToday(date: Date) {
     const formattedDate = formatDate(date, 'EEEE, dd MMMM y', 'de-DE');
-    return formattedDate === this.today ? 'heute' : formattedDate;
+    return formattedDate === this.today ? 'Heute' : formattedDate;
   }
 
   setChannelCreateDate(date: number) {
     if (date) {
-      return this.checkDateIfToday(new Date(date)) === 'heute' ? 'heute' : `am ${this.checkDateIfToday(new Date(date))}`;
+      return this.checkDateIfToday(new Date(date)) === 'Heute' ? 'heute' : `am ${this.checkDateIfToday(new Date(date))}`;
     } else {
       return '';
     }

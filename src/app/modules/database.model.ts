@@ -74,7 +74,7 @@ export class Channel {
     this.channel_id = obj ? obj.channel_id || nanoid() : '';
     this.channel_name = obj ? obj.channel_name : '';
     this.created_at = obj ? obj.created_at || Date.now() : '';
-    this.description = obj ? obj.description : '';
+    this.description = obj ? obj.description || 'Dieser Channel hat noch keine Beschreibung.' : '';
     this.admin = obj ? obj.admin : '';
     this.thread_open = obj ? obj.thread_open || false : '';
   }
