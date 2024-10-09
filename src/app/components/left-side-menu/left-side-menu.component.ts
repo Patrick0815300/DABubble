@@ -157,6 +157,11 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
+  handleChosen(currentChannelId: string) {
+    this.channelService.updateChannelData('channels', 'chosen', true, { chosen: false });
+    this.channelService.updateChannelData('channels', 'channel_id', currentChannelId, { chosen: true });
+  }
+
   onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
@@ -213,6 +218,10 @@ export class LeftSideMenuComponent implements OnInit {
   showChannelMessages(isShown: boolean) {
     this.channelService.emitChannelView(isShown);
   }
+
+  // sendChosen() {
+  //   this.channelService.emitChosen();
+  // }
 
   /**
    * This function actualize the value of the selected user defined in userService

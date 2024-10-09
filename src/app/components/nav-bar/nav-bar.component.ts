@@ -66,13 +66,9 @@ export class NavBarComponent implements OnInit {
       if (this.search_input.length == 1) {
         this.filtered_users = this.all_users;
         this.channelService.emitFilteredUsers(this.filtered_users);
-        console.log('for 1', this.filtered_users);
       } else if (this.search_input.length > 1 && this.search_input[0] === '@') {
-        console.log('For more1', this.filtered_users);
-        this.filtered_users = this.all_users.filter(
-          u => u.first_name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()) || u.last_name.toLowerCase().includes(this.search_input.slice(1).toLowerCase())
-        );
-        console.log('For more', this.filtered_users);
+        this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
+
         this.channelService.emitFilteredUsers(this.filtered_users);
       }
     } else if (this.search_input && this.search_input[0] !== '@') {

@@ -173,6 +173,11 @@ export class MainComponentComponent implements OnInit {
     }
   }
 
+  alreadyExist(newChannelName: string) {
+    let channel_names = this.all_channel.map(channel => channel.channel_name);
+    return channel_names.includes(newChannelName);
+  }
+
   onCreateChannel() {
     let channelData = {
       channel_name: this.channel_name,
@@ -180,30 +185,24 @@ export class MainComponentComponent implements OnInit {
       admin: this.authenticatedUser?.user_id,
     };
 
-    let channelMemberData = {
-      member_id: this.authenticatedUser?.user_id,
-    };
     let office = new Channel(channelData).toObject();
-    let members = new ChannelMember(channelMemberData).toObject();
     this.databaseService.getOfficeTeamMembers(this.officeTeamChannel?.channel_id, members => {
       if (members) {
         const memberArray = members.map(m => m.member_id);
-        this.databaseService.addChannel(office);
         if (this.isChecked === 'officeTeam') {
           this.onAddPeopleToChannel(memberArray, office);
-        } else if (this.isChecked === 'singleUser') {
-          this.onAddPeopleToChannel(this.PickedArray, office);
-          console.log('people added', this.PickedArray);
         }
-        this.onCancelAddUser();
-        this.channel_name = '';
       } else {
         console.log('No office members');
+      }
+      if (this.isChecked === 'singleUser') {
+        this.onAddPeopleToChannel(this.PickedArray, office);
       }
     });
   }
 
   onAddPeopleToChannel(array: any[], office: any) {
+    this.databaseService.addChannel(office);
     if (!array.includes(this.authenticatedUser?.user_id)) {
       array.push(this.authenticatedUser?.user_id);
     }
@@ -211,6 +210,8 @@ export class MainComponentComponent implements OnInit {
       const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
       this.databaseService.addMemberToChannel(newMember);
     });
+    this.onCancelAddUser();
+    this.channel_name = '';
   }
 
   iconPath() {
@@ -279,9 +280,7 @@ export class MainComponentComponent implements OnInit {
   onSearchUser() {
     if (this.new_person_name) {
       this.showSearchUserName = true;
-      this.filtered_users = this.all_users.filter(
-        u => u.first_name.toLowerCase().includes(this.new_person_name.toLowerCase()) || u.last_name.toLowerCase().includes(this.new_person_name.toLowerCase())
-      );
+      this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.new_person_name.toLowerCase()));
       this.channelService.emitFilteredUsers(this.filtered_users);
     } else {
       this.showSearchUserName = false;

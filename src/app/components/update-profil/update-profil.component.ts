@@ -36,7 +36,7 @@ export class UpdateProfilComponent implements OnInit {
   ngOnInit(): void {
     this.databaseService.authenticatedUser().subscribe(user => {
       this.authenticatedUser = user;
-      this.username = `${this.authenticatedUser?.first_name} ${this.authenticatedUser?.last_name}`;
+      this.username = this.authenticatedUser?.name;
       this.user_email = this.authenticatedUser?.email;
     });
   }
@@ -46,8 +46,7 @@ export class UpdateProfilComponent implements OnInit {
   }
 
   save(collectionName: string, userId: string) {
-    const name = this.username.split(' ');
-    this.databaseService.updateUserData(collectionName, userId, { email: this.user_email, first_name: name[0], last_name: name[1] });
+    this.databaseService.updateUserData(collectionName, userId, { email: this.user_email, name: this.username });
     this.updateProfilService.updateProfile();
     this.showProfileService.updateNavProfile();
   }

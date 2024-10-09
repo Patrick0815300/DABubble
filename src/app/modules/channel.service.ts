@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { Channel, ChannelMember, User } from './database.model';
+import { collection, doc, Firestore, getDocs, query, updateDoc, where } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -12,15 +13,17 @@ export class ChannelService {
   private logFilteredChannelsSubject = new ReplaySubject<Channel[]>(1);
   private logUserSubject = new ReplaySubject<string[]>(1);
   private logSubject = new BehaviorSubject<boolean>(false);
+  private logchosenSubject = new BehaviorSubject<boolean>(false);
   showChannelMsg$ = this.isChannelSource.asObservable();
   channelMembers$ = this.channelMemberSource.asObservable();
   userPicked$ = this.logUserSubject.asObservable();
   filtered_users$ = this.logFilteredUserSubject.asObservable();
   filtered_channels$ = this.logFilteredChannelsSubject.asObservable();
   open_update_channel$ = this.logSubject.asObservable();
+  chosen$ = this.logchosenSubject.asObservable();
   isDialogOpen = false;
 
-  constructor() {}
+  constructor(private firestore: Firestore) {}
 
   emitChannelView(isShown: boolean) {
     this.isChannelSource.next(isShown);
@@ -35,6 +38,10 @@ export class ChannelService {
     this.logSubject.next(this.isDialogOpen);
   }
 
+  // emitChosen(bool:boolean) {
+  //   this.logchosenSubject.next(this.isDialogOpen);
+  // }
+
   emitFilteredUsers(users: User[]) {
     this.logFilteredUserSubject.next(users);
   }
@@ -44,5 +51,34 @@ export class ChannelService {
 
   emitPickedUser(userId: string[]) {
     this.logUserSubject.next(userId);
+  }
+
+  async getDocumentIdById(collectionName: string, field: string, parameter: any) {
+    const collectionRef = collection(this.firestore, collectionName);
+    const q = query(collectionRef, where(field, '==', parameter));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log(`No ${collectionName} found with field:', ${parameter}`);
+      return null;
+    } else {
+      const docSnapshot = querySnapshot.docs[0];
+      return docSnapshot.id;
+    }
+  }
+
+  async updateChannelData(collectionName: string, field: string, parameter: any, editedData: object) {
+    const docId = await this.getDocumentIdById(collectionName, field, parameter);
+    if (docId) {
+      const userDocRef = doc(this.firestore, `${collectionName}/${docId}`);
+      try {
+        await updateDoc(userDocRef, editedData);
+        console.log('Channel successfully updated!');
+      } catch (error) {
+        console.error('Error updating channel field chosen: ', error);
+      }
+    } else {
+      console.log(`No ${collectionName} found with ID:', ${parameter}`);
+    }
   }
 }

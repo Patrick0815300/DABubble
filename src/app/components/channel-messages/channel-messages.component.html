@@ -25,7 +25,7 @@
             </div>
             <div class="name-date-line">
               <div>
-                <span>{{ getCachedUser(message?.from_user)?.first_name }} {{ getCachedUser(message?.from_user)?.last_name }}</span>
+                <span>{{ getCachedUser(message?.from_user)?.name }}</span>
                 <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
               </div>
               <p>{{ message.message_content }}</p>

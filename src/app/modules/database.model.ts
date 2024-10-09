@@ -3,8 +3,7 @@ import { nanoid } from 'nanoid';
 ////////////// MODEL FOR USER ///////////////////////////////
 export class User {
   user_id!: string;
-  first_name!: string;
-  last_name!: string;
+  name!: string;
   email!: string;
   image_file!: string;
   password!: string;
@@ -12,8 +11,7 @@ export class User {
 
   constructor(obj?: any) {
     this.user_id = obj ? obj.user_id || nanoid() : '';
-    this.first_name = obj ? obj.first_name : '';
-    this.last_name = obj ? obj.last_name : '';
+    this.name! = obj ? obj.name : '';
     this.email = obj ? obj.email : '';
     this.image_file = obj ? obj.image_file : '';
     this.password = obj ? obj.password : '';
@@ -23,8 +21,7 @@ export class User {
   public toObject() {
     return {
       user_id: this.user_id,
-      first_name: this.first_name,
-      last_name: this.last_name,
+      name: this.name,
       email: this.email,
       password: this.password,
       image_file: this.image_file,
@@ -69,6 +66,7 @@ export class Channel {
   description!: string;
   admin!: string;
   thread_open!: boolean;
+  chosen!: boolean;
 
   constructor(obj?: any) {
     this.channel_id = obj ? obj.channel_id || nanoid() : '';
@@ -77,6 +75,7 @@ export class Channel {
     this.description = obj ? obj.description || 'Dieser Channel hat noch keine Beschreibung.' : '';
     this.admin = obj ? obj.admin : '';
     this.thread_open = obj ? obj.thread_open || false : '';
+    this.chosen = obj ? obj.chosen || false : '';
   }
 
   public toObject() {
@@ -87,6 +86,7 @@ export class Channel {
       description: this.description,
       admin: this.admin,
       thread_open: this.thread_open,
+      chosen: this.chosen,
     };
   }
 }

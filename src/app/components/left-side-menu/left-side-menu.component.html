@@ -36,7 +36,8 @@
             onToggleDevSearch(false);
             sendChannel(channel);
             showChannelMessages(true);
-            loadChannelMessages(channel.channel_id)
+            loadChannelMessages(channel.channel_id);
+            handleChosen(channel.channel_id)
           "
           class="d-flex gp l-mg-2"
         >
@@ -76,7 +77,7 @@
         class="d-flex capitilize gp l-mg-2"
       >
         <app-profile class="app-profile" [left_side_profile]="true" *ngIf="authenticatedUser?.image_file" [image_user]="authenticatedUser?.image_file" />
-        <span> {{ authenticatedUser?.first_name }} <span> </span>{{ authenticatedUser?.last_name }}</span>
+        <span> {{ authenticatedUser?.name }}</span>
         <span *ngIf="authenticatedUser?.online === true">(Du)</span>
       </li>
       <ng-container *ngFor="let user of users$ | async; let i = index">
@@ -94,7 +95,7 @@
           class="d-flex capitilize gp l-mg-2"
         >
           <app-profile class="app-profile" [left_side_profile]="true" *ngIf="user.image_file" [image_user]="user.image_file" />
-          <span> {{ user.first_name }} <span> </span>{{ user.last_name }}</span>
+          <span> {{ user.name }}</span>
           <span *ngIf="user.online === true">(Du)</span>
         </li>
       </ng-container>
