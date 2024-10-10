@@ -8,6 +8,7 @@ import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thr
 import { ActivatedRoute } from '@angular/router';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { Channel } from '../../models/channels/entwickler-team.model';
+import { Message } from '../../models/messages/channel-message.model';
 
 @Component({
   selector: 'app-right-wrapper',
@@ -25,7 +26,7 @@ import { Channel } from '../../models/channels/entwickler-team.model';
   styleUrl: './right-wrapper.component.scss'
 })
 export class RightWrapperComponent {
-  isVisible: boolean = false;
+  isVisible: boolean = true;
   selectedThread: any;
   threads: any[] = [];
   uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
@@ -58,7 +59,7 @@ export class RightWrapperComponent {
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
         this.currentChannel = channel;
-        this.isVisible = channel.openedThread;
+        this.isVisible = channel.thread_open;
       }
     });
   }
@@ -66,9 +67,15 @@ export class RightWrapperComponent {
   loadThreadMessages(channelId: string, messageId: string, threadId: string) {
     const path = `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`;
     this.chatService.loadMessagesFromPath(path).subscribe((messages) => {
-      this.threadMessages = messages;
+      this.threadMessages = messages.map(message => {
+        return {
+          ...message,
+          id: message.id
+        };
+      });
     });
   }
+
 
   toggleThread() {
     this.isVisible = !this.isVisible;

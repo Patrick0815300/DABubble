@@ -36,6 +36,7 @@ export class ChannelDialogComponent {
   channels: Channel[] = [];
   channelNameEdit: boolean = false;
   channelDescEdit: boolean = false;
+  channel: Channel = new Channel();
 
   constructor(
     public dialogRef: MatDialogRef<ChannelDialogComponent>,
@@ -48,11 +49,15 @@ export class ChannelDialogComponent {
     this.dialogRef.close();
   }
 
+
+
+
+
   loadActiveChannel() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.selectedChannelId = channel.id;
-        this.name = channel.name;
+        this.selectedChannelId = channel.channel_id;
+        this.name = channel.channel_name;
         this.description = channel.description;
         this.admin = channel.admin;
       },

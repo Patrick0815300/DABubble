@@ -31,12 +31,14 @@
             <ng-container *ngFor="let message of threadMessages">
                 <app-own-message-thread 
                     *ngIf="message.senderId === uid" 
-                    [thread]="message">
+                    [thread]="message"
+                    [id]="message.docId">
                 </app-own-message-thread>
                 
                 <app-message-thread 
                     *ngIf="message.senderId !== uid" 
-                    [thread]="message">
+                    [thread]="message"
+                    [id]="message.docId">
                 </app-message-thread>
             </ng-container>
         </mat-card-content>

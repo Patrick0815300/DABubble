@@ -21,16 +21,27 @@ export class MessageComponent {
   answerCount: number = 0;
   lastAnswerTime: string | null = null;
   allReactions: boolean = false;
+  reactionNames: string[] = [];
 
   constructor(private chatService: ChatServiceService) { }
 
   ngOnInit() {
     this.loadActiveChannelId();
+    this.loadReactionNames()
+  }
+
+  async loadReactionNames() {
+    if (this.message.reactions && this.message.reactions.length > 0) {
+      for (let reaction of this.message.reactions) {
+        const name = await this.chatService.getUserNameByUid(reaction.userId);
+        this.reactionNames.push(name);
+      }
+    }
   }
 
   loadThreadDetails() {
     if (this.message && this.channelId) {
-      this.chatService.getThreadDetailsInRealTime(this.channelId, this.message.id, (count, lastMessageTime) => {
+      this.chatService.getThreadDetails(this.channelId, this.message.id, (count, lastMessageTime) => {
         this.answerCount = count;
         this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
       });

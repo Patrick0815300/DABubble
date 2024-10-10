@@ -12,8 +12,10 @@ export class ChatServiceService {
   uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
   senderId: string = '';
+
   private pickedThreadSubject = new BehaviorSubject<any>(null);
   pickedThread$: Observable<any> = this.pickedThreadSubject.asObservable();
+
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
@@ -31,22 +33,55 @@ export class ChatServiceService {
     this.currentChannelSubject.next(channel);
   }
 
-  async getThreadDetailsInRealTime(
+  async loadThreadMessages(channelId: string, messageId: string, threadId: string): Promise<any[]> {
+    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
+    const snapshot = await getDocs(messagesCollectionRef);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  }
+
+  async addReactionToThreadMessage(
+    channelId: string,
+    messageId: string,
+    threadId: string,
+    reactionType: string,
+    reactionPath: string,
+    messageIdThread: string
+  ): Promise<void> {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${messageIdThread}`);
+    const snapshot = await getDoc(messageDocRef);
+    const messageData = snapshot.data();
+    const reactions = messageData?.['reactions'] || [];
+    const hasReacted = await this.hasUserReacted(reactions, reactionType, this.uid);
+
+    if (!hasReacted) {
+      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, this.uid, reactionPath);
+      await updateDoc(messageDocRef, { reactions: updatedReactions });
+    }
+  }
+
+  async getThreadDetails(
     channelId: string,
     messageId: string,
     callback: (count: number, lastMessageTime: string | null) => void
-  ) {
+  ): Promise<void> {
     const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+
     onSnapshot(threadsCollectionRef, (threadsSnapshot) => {
       let totalMessagesCount = 0;
       let lastMessageTime: string | null = null;
-      threadsSnapshot.docs.forEach(threadDoc => {
+      threadsSnapshot.docs.forEach((threadDoc) => {
         const threadId = threadDoc.id;
         const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
+
         onSnapshot(messagesCollectionRef, (messagesSnapshot) => {
           const threadMessages = messagesSnapshot.docs
             .map(doc => doc.data())
-            .filter(message => message['content']);
+            .filter(message => message['content'] && message['time'])
+            .sort((a, b) => new Date(a['time']).getTime() - new Date(b['time']).getTime());
+
           totalMessagesCount = threadMessages.length;
           if (threadMessages.length > 0) {
             const lastMessage = threadMessages[threadMessages.length - 1];
@@ -60,50 +95,11 @@ export class ChatServiceService {
     });
   }
 
-  async loadThreads(channelId: string, messageId: string): Promise<any> {
-    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    return await getDocs(threadsCollectionRef);
-  }
-
-  // Threads verarbeiten
-  async processThreads(threadsSnapshot: any, channelId: string, messageId: string): Promise<{ totalMessagesCount: number, lastMessageTime: string | null }> {
-    let totalMessagesCount = 0;
-    let lastMessageTime: string | null = null;
-
-    for (const threadDoc of threadsSnapshot.docs) {
-      const { threadMessages, lastMessageInThread } = await this.loadThreadMessages(channelId, messageId, threadDoc.id);
-      totalMessagesCount += threadMessages.length;
-      lastMessageTime = this.updateLastMessageTime(lastMessageInThread, lastMessageTime);
-    }
-    return { totalMessagesCount, lastMessageTime };
-  }
-
-  // Thread-Nachrichten laden und Anzahl/letzte Nachricht ermitteln
-  async loadThreadMessages(channelId: string, messageId: string, threadId: string): Promise<{ threadMessages: any[], lastMessageInThread: any }> {
-    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
-    const messagesSnapshot = await getDocs(messagesCollectionRef);
-
-    const threadMessages = messagesSnapshot.docs
-      .map(doc => doc.data())
-      .filter(message => message['content']);
-
-    const lastMessageInThread = threadMessages.length > 0 ? threadMessages[threadMessages.length - 1] : null;
-    return { threadMessages, lastMessageInThread };
-  }
-
-  // Zeit der letzten Nachricht aktualisieren
-  updateLastMessageTime(lastMessageInThread: any, lastMessageTime: string | null): string | null {
-    if (lastMessageInThread && (!lastMessageTime || lastMessageInThread['time'] > lastMessageTime)) {
-      return lastMessageInThread['time'];
-    }
-    return lastMessageTime;
-  }
 
   async updateChannelThreadState(channelId: string, isVisible: boolean): Promise<void> {
     const channelDocRef = doc(this.firestore, `channels/${channelId}`);
-    await updateDoc(channelDocRef, { openedThread: isVisible });
+    await updateDoc(channelDocRef, { thread_open: isVisible });
   }
-
 
   async loadActiveChannel(): Promise<void> {
     this.getActiveChannel().subscribe({
@@ -123,14 +119,14 @@ export class ChatServiceService {
   async loadMessageData(channelId: string, messageId: string): Promise<any> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages`, messageId);
     const messageSnapshot = await getDoc(messageDocRef);
-
     if (messageSnapshot.exists()) {
       const messageData = messageSnapshot.data();
       return {
         content: messageData?.['content'],
         senderId: messageData?.['senderId'],
         time: messageData?.['time'],
-        name: messageData?.['name']
+        name: messageData?.['name'],
+        reactions: messageData?.['reactions']
       };
     } else {
       throw new Error('Nachricht nicht gefunden');
@@ -144,7 +140,8 @@ export class ChatServiceService {
 
   async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<void> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
-    await addDoc(messagesCollectionRef, message.toJSON());
+    const docRef = await addDoc(messagesCollectionRef, message.toJSON());
+    await updateDoc(docRef, { id: docRef.id });
   }
 
   loadMessagesFromPath(path: string): Observable<any[]> {
@@ -153,8 +150,8 @@ export class ChatServiceService {
       onSnapshot(messagesCollectionRef, (snapshot) => {
         const messages = snapshot.docs
           .map(doc => doc.data())
-          .filter(message => message['content'])  // Filtern von leeren Nachrichten
-          .sort((a, b) => a['time'].localeCompare(b['time'])); // Sortieren nach Zeit
+          .filter(message => message['content'])
+          .sort((a, b) => a['time'].localeCompare(b['time']));
         observer.next(messages);
       }, (error) => observer.error(error));
     });
@@ -173,7 +170,8 @@ export class ChatServiceService {
       senderId: messageData.senderId,
       time: messageData.time,
       name: messageData.name,
-      createdAt: new Date()
+      reactions: messageData.reactions,
+      createdAt: new Date(),
     });
 
     await updateDoc(threadDocRef, { threadId: threadDocRef.id });
@@ -184,7 +182,6 @@ export class ChatServiceService {
     try {
       const userDocRef = doc(this.firestore, `users/${uid}`);
       const userSnapshot = await getDoc(userDocRef);
-
       if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
         return userData?.['name'] || 'Unbekannt';
@@ -201,7 +198,6 @@ export class ChatServiceService {
     try {
       const threadDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads`, threadId);
       const threadSnapshot = await getDoc(threadDocRef);
-
       if (threadSnapshot.exists()) {
         const threadData = threadSnapshot.data();
         this.pickedThreadSubject.next({
@@ -227,7 +223,6 @@ export class ChatServiceService {
   async getExistingThreadId(channelId: string, messageId: string, senderId: string): Promise<string | null> {
     const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
     const querySnapshot = await getDocs(query(threadsCollectionRef, where('senderId', '==', senderId)));
-
     if (!querySnapshot.empty) {
       const threadDoc = querySnapshot.docs[0];
       return threadDoc.id;
@@ -306,9 +301,6 @@ export class ChatServiceService {
     });
   }
 
-  /**
-   * Lädt die aktive Channel-ID.
-   */
   getActiveChannel(): Observable<any> {
     const channelsCollectionRef = this.mainService.getChannelRef('channels');
     const q = query(channelsCollectionRef, where('chosen', '==', true));
@@ -331,7 +323,6 @@ export class ChatServiceService {
     const messageData = snapshot.data();
     const reactions = messageData?.['reactions'] || [];
     const hasReacted = await this.hasUserReacted(reactions, reactionType, userId);
-
     if (!hasReacted) {
       const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, userId, reactionPath);
       await updateDoc(messageDocRef, { reactions: updatedReactions });

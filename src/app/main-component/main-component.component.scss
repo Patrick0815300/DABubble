@@ -2,17 +2,20 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  > main {
+
+  >main {
     display: flex;
     flex-grow: 1;
     padding-bottom: 1rem;
     gap: 1rem;
     padding-inline: 1rem;
     position: relative;
-    > .app-middle-wrapper {
+
+    >.app-middle-wrapper {
       flex-grow: 1;
     }
-    > .toggle-side-menu {
+
+    >.toggle-side-menu {
       font-family: 'Nunito';
       display: flex;
       align-items: center;
@@ -34,30 +37,37 @@
       width: 282px;
       border: transparent;
       transition: all 250ms ease-in-out;
-      > span {
+
+      >span {
         transition: all 250ms ease-in-out;
       }
-      > img {
+
+      >img {
         transition: all 250ms ease-in-out;
         transform: rotate(90deg);
       }
+
       &:hover {
-        > span {
+        >span {
           color: #535af1;
         }
-        > img {
+
+        >img {
           filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
         }
       }
     }
   }
 }
+
 .left-pad {
   padding-left: 3px;
 }
+
 .hide-navigation {
   transform: translateX(-291px);
 }
+
 .show-navigation {
   transform: translateX(291px);
 }
@@ -67,10 +77,6 @@
   z-index: 2;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.2);
-}
-
-.app-right-wrapper {
-  display: none;
 }
 
 // /// NEW CHANNEL CSS
@@ -88,31 +94,38 @@ form {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  > input {
+
+  >input {
     padding-left: 1rem;
   }
-  > .ch-creation {
+
+  >.ch-creation {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    > span {
+
+    >span {
       font-weight: 700;
       font-size: 18px;
     }
-    > span::first-letter {
+
+    >span::first-letter {
       text-transform: capitalize;
     }
   }
 }
+
 .ch-info-input {
   position: relative;
   display: flex;
   align-items: center;
-  > img {
+
+  >img {
     position: absolute;
     left: 0.75rem;
   }
 }
+
 .input {
   height: 50px;
   width: 100%;
@@ -122,6 +135,7 @@ form {
   font-family: 'Nunito';
   font-size: 16px;
 }
+
 .input:first-child {
   padding-left: 2.5rem;
 }
@@ -133,7 +147,8 @@ form {
 
 .btn-container {
   align-self: end;
-  > .btn {
+
+  >.btn {
     font-family: 'Nunito';
     padding: 0.75rem 1rem;
     background-color: #444df2;
@@ -149,18 +164,20 @@ form {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+
   &:hover {
     background-color: #eceefe;
   }
 }
 
 .title-container {
-  > span:first-child {
+  >span:first-child {
     font-weight: 700;
     font-size: 16px;
     text-transform: capitalize;
   }
-  > .optional {
+
+  >.optional {
     color: gray;
   }
 }
@@ -180,27 +197,33 @@ form {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  > .input-user {
+
+  >.input-user {
     padding-left: 1rem;
   }
-  > .ch-creation-user {
+
+  >.ch-creation-user {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    > span {
+
+    >span {
       font-weight: 700;
       font-size: 18px;
     }
-    > span::first-letter {
+
+    >span::first-letter {
       text-transform: capitalize;
     }
   }
 }
+
 .ch-info-input-user {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
+
 .input-user {
   width: 32px;
   border: 1px solid #adb0d9;
@@ -211,7 +234,8 @@ form {
 
 .btn-container-user {
   align-self: end;
-  > .btn {
+
+  >.btn {
     padding: 0.75rem 1rem;
     background-color: #444df2;
     color: white;
@@ -235,6 +259,7 @@ a {
   font-family: 'Nunito';
   font-size: 16px;
   padding-left: 1rem;
+
   &::placeholder {
     font-family: 'Nunito';
     font-size: 16px;
@@ -242,14 +267,17 @@ a {
 }
 
 @media (width<500px) {
+
   .app-middle-wrapper,
   .app-right-wrapper,
   .toggle-side-menu {
     display: none !important;
   }
+
   main {
     background-color: white;
   }
+
   .toggle-display {
     width: 100%;
   }

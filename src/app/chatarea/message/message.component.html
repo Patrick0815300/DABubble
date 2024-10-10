@@ -14,11 +14,17 @@
           <span class="time">Letzte Antwort {{ lastAnswerTime }}</span>
         </div>
         <div class="reaction-container" *ngIf="message.reactions?.length > 0">
-          <div class="reaction" *ngFor="let reaction of message.reactions">
+          <div class="reaction" *ngFor="let reaction of message.reactions; let i = index">
             <img [src]="reaction.path">
             <span>{{ reaction.count }}</span>
+            <div class="bubble">
+              <img [src]="reaction.path">
+              <h3>{{ reactionNames[i] }}</h3>
+              <span>hat reagiert</span>
+          </div>
           </div>
         </div>
+
       </div>
   
       <div class="reaction-bar">

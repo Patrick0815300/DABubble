@@ -1,28 +1,28 @@
 export class Channel {
-  id: string;
-  name: string;
+  channel_id: string;
+  channel_name: string;
   description: string;
   admin: string;
   chosen: boolean;
-  openedThread: boolean;
+  thread_open: boolean;
 
   constructor(obj?: any) {
-    this.id = obj && obj.id ? obj.id : '';
-    this.name = obj && obj.name ? obj.name : '';
+    this.channel_id = obj && obj.channel_id ? obj.channel_id : '';
+    this.channel_name = obj && obj.channel_name ? obj.channel_name : '';
     this.description = obj && obj.description ? obj.description : '';
     this.admin = obj && obj.admin ? obj.admin : '';
     this.chosen = obj && obj.chosen ? obj.chosen : false;
-    this.openedThread = obj && obj.openedThread ? obj.openedThread : false;
+    this.thread_open = obj && obj.thread_open ? obj.thread_open : false;
   }
 
   toJSON() {
     return {
-      id: this.id,
-      name: this.name,
+      channel_id: this.channel_id,
+      channel_namename: this.channel_name,
       description: this.description,
       admin: this.admin,
       chosen: this.chosen,
-      openedThread: this.openedThread
+      thread_open: this.thread_open
     };
   }
 }

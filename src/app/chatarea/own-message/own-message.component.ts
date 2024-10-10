@@ -37,6 +37,7 @@ export class OwnMessageComponent implements OnInit {
   channelId: string = '';
   answerCount: number = 0;
   lastAnswerTime: string | null = null;
+  reactionNames: string[] = [];
 
   private fireService = inject(ChatareaServiceService);
   constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService) {
@@ -47,13 +48,24 @@ export class OwnMessageComponent implements OnInit {
     this.loadActiveChannelMessages();
     this.renderReact();
     this.loadActiveChannelId();
+    this.loadReactionNames();
+  }
+
+  async loadReactionNames() {
+    if (this.message.reactions && this.message.reactions.length > 0) {
+      for (let reaction of this.message.reactions) {
+        const name = await this.chatService.getUserNameByUid(reaction.userId);
+        this.reactionNames.push(name);
+      }
+    }
   }
 
   loadThreadDetails() {
+    this.lastAnswerTime = '';
     if (this.message && this.channelId) {
-      this.chatService.getThreadDetailsInRealTime(this.channelId, this.message.id, (count, lastMessageTime) => {
-        this.answerCount = count; // Setze die Anzahl der Antworten
-        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null; // Formatiere die Zeit der letzten Nachricht
+      this.chatService.getThreadDetails(this.channelId, this.message.id, (count, lastMessageTime) => {
+        this.answerCount = count;
+        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
       });
     }
   }
@@ -99,7 +111,6 @@ export class OwnMessageComponent implements OnInit {
   reactToMessage(messageId: string, reactionType: string, path: string) {
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
   }
-
 
   editMessage(messageId: string) {
     this.editMode[messageId] = true;

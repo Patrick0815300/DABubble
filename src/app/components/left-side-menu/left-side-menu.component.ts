@@ -3,15 +3,11 @@ import { ProfileComponent } from '../../shared/profile/profile.component';
 import { WrapperComponent } from '../../shared/wrapper/wrapper.component';
 import { CommonModule } from '@angular/common';
 import { NavService } from '../../modules/nav.service';
-<<<<<<< HEAD
-import { ChannelService } from '../../firestore-service/channel.service';
-=======
 import { DatabaseServiceService } from '../../database-service.service';
 import { User, Channel, Message } from '../../modules/database.model';
 import { combineLatest, Observable, of, switchMap, map } from 'rxjs';
 import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
->>>>>>> origin/Ibrahim-dev-branch
 
 @Component({
   selector: 'app-left-side-menu',
@@ -64,9 +60,6 @@ export class LeftSideMenuComponent implements OnInit {
     //this.channelService.loadChannels();
   }
 
-<<<<<<< HEAD
-
-=======
   ngOnInit(): void {
     this.databaseService.onlineUsers$.subscribe(users => {
       this.onlineUsers = users;
@@ -211,7 +204,6 @@ export class LeftSideMenuComponent implements OnInit {
   /**
    * open the dialog for creating a new channel
    */
->>>>>>> origin/Ibrahim-dev-branch
   onOpen() {
     this.navService.createChannel();
   }
