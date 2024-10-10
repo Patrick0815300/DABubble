@@ -7,16 +7,22 @@
     gap: 16px;
     font-size: 24px;
     font-weight: 700;
-    transform:scale(1.2);
+    transform: scale(1.2);
+
+
+    .name {
+        transform: scale(1.2);
+        margin-left: 20px;
+        font-family:nunito, sans-serif;
+    }
 
     &:hover {
         cursor: default;
     }
 
     img {
-        width: 70px;
-        height: auto;
-        margin-right:10px;
+        width: auto;
+        height: 70px;
     }
 }
 
