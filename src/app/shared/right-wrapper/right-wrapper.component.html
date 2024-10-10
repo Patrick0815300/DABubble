@@ -1,7 +1,10 @@
 <div class="container">
     <mat-card class="card" *ngIf="isVisible">
         <mat-card-header>
-            <mat-card-title>Thread</mat-card-title>
+            <mat-card-title>
+                Thread
+                <span># {{ channelName }}</span>
+            </mat-card-title>
             <mat-icon class="close" (click)="toggleThread()">close</mat-icon>
         </mat-card-header>
 
@@ -18,11 +21,10 @@
                     [thread]="threadData">
                 </app-message-thread>
                 <div *ngIf="threadMessages.length > 0" class="message-divider">
-                    <div class="devider"></div>
                     <span>
-                      {{ threadMessages.length }} 
-                      {{ threadMessages.length === 1 ? 'Antwort' : 'Antworten' }}
-                    </span>
+                        {{ threadMessages.length }} 
+                        {{ threadMessages.length === 1 ? 'Antwort' : 'Antworten' }}
+                      </span>
                     <div class="devider"></div>
                 </div>
             </ng-container>

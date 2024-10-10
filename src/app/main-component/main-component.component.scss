@@ -123,6 +123,8 @@ form {
   >img {
     position: absolute;
     left: 0.75rem;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -137,7 +139,7 @@ form {
 }
 
 .input:first-child {
-  padding-left: 2.5rem;
+  padding-left: 2rem;
 }
 
 .input::placeholder {
@@ -264,6 +266,23 @@ a {
     font-family: 'Nunito';
     font-size: 16px;
   }
+}
+
+.search-section {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  > input {
+    width: 100%;
+  }
+  > .app-search-user {
+    position: absolute;
+    transform: translateY(145px);
+  }
+}
+.bold-ex {
+  font-weight: 700;
 }
 
 @media (width<500px) {

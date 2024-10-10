@@ -29,7 +29,7 @@ export class EditChannelComponent implements OnInit {
     });
 
     this.databaseService.getChannelAdmin(this.channel.admin).subscribe(admin => {
-      this.admin_name = `${admin.first_name} ${admin.last_name}`;
+      this.admin_name = admin.name;
     });
 
     this.databaseService.authenticatedUser().subscribe(user => {

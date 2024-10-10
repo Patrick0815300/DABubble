@@ -1,45 +1,38 @@
-import { Component, OnInit } from '@angular/core';
-import { ProfileComponent } from '../../shared/profile/profile.component';
-import { LogOutService } from '../../modules/log-out.service';
-import { Channel, User } from '../../modules/database.model';
-import { DatabaseServiceService } from '../../database-service.service';
-import { FormsModule } from '@angular/forms';
-import { ChannelService } from '../../modules/channel.service';
-import { SearchDevspaceComponent } from '../search-devspace/search-devspace.component';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavService } from '../../modules/nav.service';
+import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { SearchDevspaceComponent } from '../search-devspace/search-devspace.component';
+import { DatabaseServiceService } from '../../database-service.service';
+import { Channel, User } from '../../modules/database.model';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
-  selector: 'app-nav-bar',
+  selector: 'app-dev-new-message',
   standalone: true,
-  imports: [ProfileComponent, FormsModule, SearchDevspaceComponent, CommonModule],
-  templateUrl: './nav-bar.component.html',
-  styleUrl: './nav-bar.component.scss',
+  imports: [MiddleWrapperComponent, FormsModule, CommonModule, SearchDevspaceComponent],
+  templateUrl: './dev-new-message.component.html',
+  styleUrl: './dev-new-message.component.scss',
 })
-export class NavBarComponent implements OnInit {
-  avatar = 'Elise_Roth.svg';
-  open_logout!: boolean;
-  authenticatedUser: User | undefined;
-  search_input: string = '';
+export class DevNewMessageComponent implements OnInit {
+  devSearchState: boolean = false;
+  message_content: string = '';
+  showSearchUserName: boolean = false;
   all_users: User[] = [];
+  all_channels: Channel[] = [];
+  input_value: string = '';
+  search_input: string = '';
   filtered_users: User[] = [];
   filteredChannels: Channel[] = [];
-  all_channels: Channel[] = [];
-  searchUser: User[] = [];
   PickedArray: string[] = [];
-  showSearchUserName: boolean = false;
-  input_value: string = '';
 
-  constructor(private logOutService: LogOutService, public databaseService: DatabaseServiceService, private channelService: ChannelService, private navService: NavService) {
-    this.logOutService.open_logout$.subscribe(state => {
-      this.open_logout = state;
-    });
-  }
-
+  constructor(private navService: NavService, private databaseService: DatabaseServiceService, private channelService: ChannelService) {}
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    this.navService.stateOpenDevSearch$.subscribe(state => {
+      this.devSearchState = state;
     });
+
     this.databaseService.users$.subscribe(users => {
       this.all_users = users;
     });
@@ -52,10 +45,6 @@ export class NavBarComponent implements OnInit {
     });
   }
 
-  onOpenLogOut() {
-    this.logOutService.updateProfile();
-  }
-
   sendSearchInput(input: string) {
     this.navService.emitSearchInput(input);
   }
@@ -66,9 +55,11 @@ export class NavBarComponent implements OnInit {
       if (this.search_input.length == 1) {
         this.filtered_users = this.all_users;
         this.channelService.emitFilteredUsers(this.filtered_users);
+        console.log('for 1', this.filtered_users);
       } else if (this.search_input.length > 1 && this.search_input[0] === '@') {
+        console.log('For more1', this.filtered_users);
         this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
-
+        console.log('For more', this.filtered_users);
         this.channelService.emitFilteredUsers(this.filtered_users);
       }
     } else if (this.search_input && this.search_input[0] !== '@') {

@@ -6,8 +6,8 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { reactionList } from '../../models/reactions/reaction-list.model';
-import { ReactionServiceService } from '../../firestore-service/reaction-service.service';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
+import { MainServiceService } from '../../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-own-message',
@@ -32,7 +32,7 @@ export class OwnMessageComponent implements OnInit {
   allReactions: boolean = false;
   selectedReactionPath: string = '';
   previousMessageDate: string | null = null;
-  uid: string = 'tsvZAtPmhQsbvuAp6mi6'
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
   editMode: { [messageId: string]: boolean } = {};
   channelId: string = '';
   answerCount: number = 0;
@@ -40,7 +40,7 @@ export class OwnMessageComponent implements OnInit {
   reactionNames: string[] = [];
 
   private fireService = inject(ChatareaServiceService);
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService) {
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService) {
     this.fireService.loadReactions();
   }
 
@@ -54,8 +54,27 @@ export class OwnMessageComponent implements OnInit {
   async loadReactionNames() {
     if (this.message.reactions && this.message.reactions.length > 0) {
       for (let reaction of this.message.reactions) {
-        const name = await this.chatService.getUserNameByUid(reaction.userId);
-        this.reactionNames.push(name);
+        const names = [];
+        let currentUserIncluded = false;
+        for (let id of reaction.userId) {
+          if (id === this.uid) {
+            currentUserIncluded = true;
+          } else {
+            const name = await this.chatService.getUserNameByUid(id);
+            names.push(name);
+          }
+        }
+        if (currentUserIncluded) {
+          if (names.length === 0) {
+            this.reactionNames.push('Du');
+          } else if (names.length === 1) {
+            this.reactionNames.push(`Du und ${names[0]}`);
+          } else {
+            this.reactionNames.push(`Du und ${names.length} weitere`);
+          }
+        } else {
+          this.reactionNames.push(names.join(' und '));
+        }
       }
     }
   }
@@ -65,7 +84,7 @@ export class OwnMessageComponent implements OnInit {
     if (this.message && this.channelId) {
       this.chatService.getThreadDetails(this.channelId, this.message.id, (count, lastMessageTime) => {
         this.answerCount = count;
-        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
+        this.lastAnswerTime = lastMessageTime ? this.mainService.formatTime(lastMessageTime) : null;
       });
     }
   }
@@ -79,9 +98,6 @@ export class OwnMessageComponent implements OnInit {
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
-      },
-      error: (err) => {
-        console.error('Fehler beim Laden des aktiven Channels:', err);
       }
     });
   }
@@ -140,9 +156,6 @@ export class OwnMessageComponent implements OnInit {
       next: (channel: any) => {
         const channelId = channel.id;
         this.loadMessages(channelId);
-      },
-      error: (err) => {
-        console.error('Kein aktiver Channel gefunden:', err);
       }
     });
   }
@@ -157,26 +170,6 @@ export class OwnMessageComponent implements OnInit {
     });
   }
 
-  formatTime(timeString: string): string {
-    const date = new Date(timeString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const today = new Date();
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return 'heute';
-    }
-    return date.toLocaleDateString('de-DE'); // Format: "TT.MM.JJJJ"
-  }
-
   shouldShowDivider(currentMessageTime: string, index: number): boolean {
     const currentMessageDate = new Date(currentMessageTime).toLocaleDateString();
     if (index === 0 || this.previousMessageDate !== currentMessageDate) {
@@ -184,6 +177,14 @@ export class OwnMessageComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  formatTime(timeString: string): string {
+    return this.mainService.formatTime(timeString);
+  }
+
+  formatDate(dateString: string): string {
+    return this.mainService.formatDate(dateString);
   }
 
   onMenuOpened(messageId: string) {
@@ -207,5 +208,4 @@ export class OwnMessageComponent implements OnInit {
       });
     }
   }
-
 }

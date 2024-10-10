@@ -25,7 +25,7 @@ export class ChannelMessagesComponent implements OnInit {
   ChannelMembers: ChannelMember[] = [];
   userByIdMap: { [userId: string]: any } = {};
   open_edit_channel: boolean = false;
-  constructor(private userService: UserService, private channelService: ChannelService, private databaseService: DatabaseServiceService) {}
+  constructor(private userService: UserService, private channelService: ChannelService, private databaseService: DatabaseServiceService) { }
 
   ngOnInit(): void {
     this.databaseService.authenticatedUser().subscribe(user => {
@@ -35,7 +35,7 @@ export class ChannelMessagesComponent implements OnInit {
     this.userService.channel$.subscribe(channel => {
       this.channel = channel;
       this.show_error_message = false;
-      console.log('current channel', this.channel);
+      //console.log('current channel', this.channel);
     });
 
     this.channelService.channelMembers$.subscribe(members => {
@@ -47,7 +47,7 @@ export class ChannelMessagesComponent implements OnInit {
       this.channelChat = msg.sort((a, b) => b.send_date - a.send_date);
       this.groupedChat = this.groupMessagesByDate(this.channelChat);
       this.loadChatData(this.groupedChat, this.channel.channel_id);
-      console.log('Group channel', this.groupMessagesByDate(this.channelChat));
+      //console.log('Group channel', this.groupMessagesByDate(this.channelChat));
     });
 
     this.channelService.open_update_channel$.subscribe(state => {
@@ -94,12 +94,12 @@ export class ChannelMessagesComponent implements OnInit {
 
   checkDateIfToday(date: Date) {
     const formattedDate = formatDate(date, 'EEEE, dd MMMM y', 'de-DE');
-    return formattedDate === this.today ? 'heute' : formattedDate;
+    return formattedDate === this.today ? 'Heute' : formattedDate;
   }
 
   setChannelCreateDate(date: number) {
     if (date) {
-      return this.checkDateIfToday(new Date(date)) === 'heute' ? 'heute' : `am ${this.checkDateIfToday(new Date(date))}`;
+      return this.checkDateIfToday(new Date(date)) === 'Heute' ? 'heute' : `am ${this.checkDateIfToday(new Date(date))}`;
     } else {
       return '';
     }

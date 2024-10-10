@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
@@ -8,7 +8,6 @@ import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thr
 import { ActivatedRoute } from '@angular/router';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { Channel } from '../../models/channels/entwickler-team.model';
-import { Message } from '../../models/messages/channel-message.model';
 
 @Component({
   selector: 'app-right-wrapper',
@@ -26,7 +25,7 @@ import { Message } from '../../models/messages/channel-message.model';
   styleUrl: './right-wrapper.component.scss'
 })
 export class RightWrapperComponent {
-  isVisible: boolean = true;
+  isVisible: boolean = false;
   selectedThread: any;
   threads: any[] = [];
   uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
@@ -38,6 +37,7 @@ export class RightWrapperComponent {
   threadId: string = '';
   ownMessage: boolean = false;
   answers: string = '';
+  channelName: string = '';
 
   private route = inject(ActivatedRoute);
   private chatService = inject(ChatServiceService);
@@ -59,6 +59,7 @@ export class RightWrapperComponent {
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
         this.currentChannel = channel;
+        this.channelName = channel.channel_name
         this.isVisible = channel.thread_open;
       }
     });
@@ -75,7 +76,6 @@ export class RightWrapperComponent {
       });
     });
   }
-
 
   toggleThread() {
     this.isVisible = !this.isVisible;

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { OwnMessageComponent } from '../own-message/own-message.component';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
+import { MainServiceService } from '../../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-message',
@@ -23,7 +24,7 @@ export class MessageComponent {
   allReactions: boolean = false;
   reactionNames: string[] = [];
 
-  constructor(private chatService: ChatServiceService) { }
+  constructor(private chatService: ChatServiceService, private mainService: MainServiceService) { }
 
   ngOnInit() {
     this.loadActiveChannelId();
@@ -33,8 +34,27 @@ export class MessageComponent {
   async loadReactionNames() {
     if (this.message.reactions && this.message.reactions.length > 0) {
       for (let reaction of this.message.reactions) {
-        const name = await this.chatService.getUserNameByUid(reaction.userId);
-        this.reactionNames.push(name);
+        const names = [];
+        let currentUserIncluded = false;
+        for (let id of reaction.userId) {
+          if (id === this.uid) {
+            currentUserIncluded = true;
+          } else {
+            const name = await this.chatService.getUserNameByUid(id);
+            names.push(name);
+          }
+        }
+        if (currentUserIncluded) {
+          if (names.length === 0) {
+            this.reactionNames.push('Du');
+          } else if (names.length === 1) {
+            this.reactionNames.push(`Du und ${names[0]}`);
+          } else {
+            this.reactionNames.push(`Du und ${names.length} weitere`);
+          }
+        } else {
+          this.reactionNames.push(names.join(' und '));
+        }
       }
     }
   }
@@ -43,7 +63,7 @@ export class MessageComponent {
     if (this.message && this.channelId) {
       this.chatService.getThreadDetails(this.channelId, this.message.id, (count, lastMessageTime) => {
         this.answerCount = count;
-        this.lastAnswerTime = lastMessageTime ? this.chatService.formatTime(lastMessageTime) : null;
+        this.lastAnswerTime = lastMessageTime ? this.mainService.formatTime(lastMessageTime) : null;
       });
     }
   }
@@ -78,10 +98,10 @@ export class MessageComponent {
   }
 
   formatTime(timeString: string): string {
-    return this.chatService.formatTime(timeString);
+    return this.mainService.formatTime(timeString);
   }
 
   formatDate(dateString: string): string {
-    return this.chatService.formatDate(dateString);
+    return this.mainService.formatDate(dateString);
   }
 }

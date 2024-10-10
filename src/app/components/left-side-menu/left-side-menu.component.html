@@ -4,7 +4,7 @@
       <img src="assets/img/icons/workspace-logo.svg" alt="" />
       <span class="main-title">Devspace</span>
     </div>
-    <button class="closeDialDev">
+    <button class="closeDialDev" (click)="onToggleDevSearch(true)">
       <img class="edit-square" src="assets/img/icons/edit_square.svg" alt="" />
     </button>
   </div>
@@ -30,7 +30,15 @@
         <li
           *ngFor="let channel of channels$ | async; let i = index"
           [class.activeChannel]="selectedChannelIndex == i"
-          (click)="selectChannel(i); loadChannelMembers(channel.channel_id); sendChannel(channel); showChannelMessages(true); loadChannelMessages(channel.channel_id)"
+          (click)="
+            selectChannel(i);
+            loadChannelMembers(channel.channel_id);
+            onToggleDevSearch(false);
+            sendChannel(channel);
+            showChannelMessages(true);
+            loadChannelMessages(channel.channel_id);
+            handleChosen(channel.channel_id)
+          "
           class="d-flex gp l-mg-2"
         >
           <img class="icon-small" src="assets/img/icons/hash_tag.svg" alt="" />
@@ -61,25 +69,33 @@
         (click)="
           selectUser(0);
           sendSelectedUser(authenticatedUser!);
+          onToggleDevSearch(false);
           showChannelMessages(false);
           sendUserId(authenticatedUser?.user_id!);
           loadMessages(authenticatedUser?.user_id!, authenticatedUser?.user_id!)
         "
         class="d-flex capitilize gp l-mg-2"
       >
-        <app-profile class="app-profile" [left_side_profile]="true" [image_user]="authenticatedUser?.image_file" />
-        <span> {{ authenticatedUser?.first_name }} <span> </span>{{ authenticatedUser?.last_name }}</span>
+        <app-profile class="app-profile" [left_side_profile]="true" *ngIf="authenticatedUser?.image_file" [image_user]="authenticatedUser?.image_file" />
+        <span> {{ authenticatedUser?.name }}</span>
         <span *ngIf="authenticatedUser?.online === true">(Du)</span>
       </li>
       <ng-container *ngFor="let user of users$ | async; let i = index">
         <li
           *ngIf="user.user_id !== authenticatedUser?.user_id"
           [class.active]="selectedIndex == i + 1"
-          (click)="selectUser(i + 1); sendSelectedUser(user); showChannelMessages(false); sendUserId(user.user_id); loadMessages(onlineUsers[0]?.user_id, user.user_id)"
+          (click)="
+            selectUser(i + 1);
+            sendSelectedUser(user);
+            onToggleDevSearch(false);
+            showChannelMessages(false);
+            sendUserId(user.user_id);
+            loadMessages(onlineUsers[0]?.user_id, user.user_id)
+          "
           class="d-flex capitilize gp l-mg-2"
         >
-          <app-profile class="app-profile" [left_side_profile]="true" [image_user]="user.image_file" />
-          <span> {{ user.first_name }} <span> </span>{{ user.last_name }}</span>
+          <app-profile class="app-profile" [left_side_profile]="true" *ngIf="user.image_file" [image_user]="user.image_file" />
+          <span> {{ user.name }}</span>
           <span *ngIf="user.online === true">(Du)</span>
         </li>
       </ng-container>

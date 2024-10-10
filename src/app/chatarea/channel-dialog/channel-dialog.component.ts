@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -40,7 +40,7 @@ export class ChannelDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ChannelDialogComponent>,
-    private fireService: ChatareaServiceService
+    private fireService: ChatareaServiceService,
   ) {
     this.loadActiveChannel();
   }
@@ -49,10 +49,6 @@ export class ChannelDialogComponent {
     this.dialogRef.close();
   }
 
-
-
-
-
   loadActiveChannel() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
@@ -60,28 +56,21 @@ export class ChannelDialogComponent {
         this.name = channel.channel_name;
         this.description = channel.description;
         this.admin = channel.admin;
-      },
-      error: (err) => {
-        console.error('Fehler beim Laden des aktiven Channels:', err);
       }
     });
   }
 
-  leaveChannel() {
+  async leaveChannel() {
     this.fireService.leaveActiveChannel().subscribe({
       next: () => {
-        console.log('Channel erfolgreich verlassen.');
         this.closeDialog();
-      },
-      error: (err) => {
-        console.error('Fehler beim Verlassen des Channels:', err);
       }
     });
   }
 
   editChannelName() {
     if (this.channelNameEdit) {
-      this.saveChanges({ name: this.name });
+      this.saveChanges({ channel_name: this.name });
     }
     this.channelNameEdit = !this.channelNameEdit;
   }

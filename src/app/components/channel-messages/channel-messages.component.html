@@ -1,7 +1,7 @@
 <app-middle-wrapper [hasDefaultPadding]="false" class="app-middle-wrapper">
   <div class="chat-content">
-    <div class="current-nav-user cursor-effect" (click)="onOpenEditChannel()">
-      <div>
+    <div class="current-nav-user cursor-effect">
+      <div (click)="onOpenEditChannel()">
         <img class="sender" src="assets/img/icons/hash_tag.svg" alt="" />
         <span>{{ channel.channel_name }}</span>
         <img class="arrow" src="assets/img/icons/arrow_expand.svg" alt="" />
@@ -25,7 +25,7 @@
             </div>
             <div class="name-date-line">
               <div>
-                <span>{{ getCachedUser(message?.from_user)?.first_name }} {{ getCachedUser(message?.from_user)?.last_name }}</span>
+                <span>{{ getCachedUser(message?.from_user)?.name }}</span>
                 <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
               </div>
               <p>{{ message.message_content }}</p>

@@ -117,6 +117,7 @@ export class MessagesComponent implements OnInit {
   //   let user = {
   //     first_name: 'Validate',
   //     last_name: 'validate_last_name',
+  //      name:'',
   //     email: 'validate@gmail.com',
   //     image_file: 'avatar.svg',
   //     password: '33333',

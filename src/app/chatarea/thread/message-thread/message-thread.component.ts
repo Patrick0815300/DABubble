@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatServiceService } from '../../../firestore-service/chat-service.service';
 import { MatMenu } from '@angular/material/menu';
+import { MainServiceService } from '../../../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-message-thread',
@@ -19,7 +20,7 @@ export class MessageThreadComponent {
   threadData: any;
   threadMessages: any[] = [];
 
-  constructor(private chatService: ChatServiceService) {
+  constructor(private chatService: ChatServiceService, private mainService: MainServiceService) {
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -51,12 +52,11 @@ export class MessageThreadComponent {
     }
   }
 
-
   formatTime(timeString: string): string {
-    return this.chatService.formatTime(timeString);
+    return this.mainService.formatTime(timeString);
   }
 
   formatDate(dateString: string): string {
-    return this.chatService.formatDate(dateString);
+    return this.mainService.formatDate(dateString);
   }
 }

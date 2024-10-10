@@ -46,6 +46,7 @@ export class LeftSideMenuComponent implements OnInit {
   userById: any | null = null;
   userByIdMap: { [userId: string]: any } = {};
   chatMap: { [key: string]: any[] } = {};
+  openDevSearch: boolean = false;
 
   /**
    * @constructor
@@ -64,6 +65,9 @@ export class LeftSideMenuComponent implements OnInit {
     this.databaseService.onlineUsers$.subscribe(users => {
       this.onlineUsers = users;
     });
+    this.navService.stateOpenDevSearch$.subscribe(state => {
+      this.openDevSearch = state;
+    });
 
     this.users$ = this.databaseService.snapUsers();
     this.channels$ = this.databaseService.snapChannels();
@@ -71,6 +75,19 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.databaseService.channels$.subscribe(channel => {
       this.all_channel = channel;
+      if (this.all_channel.length === 0) {
+        this.selectUser(0);
+        this.sendSelectedUser(this.authenticatedUser!);
+        this.showChannelMessages(false);
+        this.sendUserId(this.authenticatedUser?.user_id!);
+        this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
+      } else {
+        this.selectChannel(0);
+        this.loadChannelMembers(this.all_channel[0].channel_id);
+        this.sendChannel(this.all_channel[0]);
+        this.showChannelMessages(true);
+        this.loadChannelMessages(this.all_channel[0].channel_id);
+      }
     });
 
     this.databaseService.authenticatedUser().subscribe(user => {
@@ -142,6 +159,13 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
+  handleChosen(currentChannelId: string) {
+    this.channelService.updateChannelData('channels', 'chosen', true, { chosen: false });
+    this.channelService.updateChannelData('channels', 'channel_id', currentChannelId, { chosen: true });
+  }
+
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
+
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     console.log('I load again msg');
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
@@ -160,7 +184,7 @@ export class LeftSideMenuComponent implements OnInit {
   loadChannelMembers(channel_id: string) {
     this.databaseService.getChannelMembers(channel_id, members => {
       if (members) {
-        console.log('channel Members', members);
+        //console.log('channel Members', members);
 
         this.channelService.emitChannelMembers(members);
       } else {
@@ -170,10 +194,10 @@ export class LeftSideMenuComponent implements OnInit {
   }
 
   loadChannelMessages(targetChannelId: string) {
-    console.log('I load again msg');
+    //console.log('I load again msg');
     this.databaseService.getChannelMessages(targetChannelId, messages => {
       if (messages) {
-        console.log('Channel Msg', messages);
+        //console.log('Channel Msg', messages);
         this.userService.emitChannelMessage(messages);
       } else {
         this.userService.emitChannelMessage([]);
@@ -185,9 +209,9 @@ export class LeftSideMenuComponent implements OnInit {
     this.userService.emitUserId(to_id);
   }
 
-  // sendChannelId(id: string) {
-  //   this.userService.emitChannelId(id);
-  // }
+  onToggleDevSearch(bool: boolean) {
+    this.navService.emitOpenDevSearch(bool);
+  }
 
   sendChannel(channel: Channel) {
     this.userService.emitChannel(channel);
@@ -197,6 +221,14 @@ export class LeftSideMenuComponent implements OnInit {
     this.channelService.emitChannelView(isShown);
   }
 
+  // sendChosen() {
+  //   this.channelService.emitChosen();
+  // }
+
+  /**
+   * This function actualize the value of the selected user defined in userService
+   * @param {User} user - current selected user from the navigation
+   */
   sendSelectedUser(user: User) {
     this.userService.emitSelectedUser(user);
   }
@@ -222,6 +254,7 @@ export class LeftSideMenuComponent implements OnInit {
    */
   selectUser(index: number) {
     this.selectedIndex = index;
+    this.selectedChannelIndex = -1;
   }
 
   /**
@@ -230,6 +263,7 @@ export class LeftSideMenuComponent implements OnInit {
    */
   selectChannel(index: number) {
     this.selectedChannelIndex = index;
+    this.selectedIndex = -1;
   }
 
   /**
