@@ -28,7 +28,6 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
   styleUrls: ['./channel-dialog.component.scss']
 })
 export class ChannelDialogComponent {
-
   admin: string = '';
   description: string = '';
   name: string = ''; // Name des Channels

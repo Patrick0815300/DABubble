@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -10,10 +10,10 @@ import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.
 import { MessageComponent } from "./message/message.component";
 import { OwnMessageComponent } from "./own-message/own-message.component";
 import { MessageBoxComponent } from "./message-box/message-box.component";
-import { Firestore } from '@angular/fire/firestore';
 import { User } from '../models/user/user.model';
 import { ChatareaServiceService } from '../firestore-service/chatarea-service.service';
 import { MainServiceService } from '../firestore-service/main-service.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-chatarea',
@@ -42,7 +42,7 @@ export class ChatareaComponent {
   previousMessageDate: string | null = null;
   allChannelsAreFalse: boolean = false;
 
-  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService) { }
+  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService, private cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.loadActiveChannelData();
@@ -76,7 +76,7 @@ export class ChatareaComponent {
 
   loadMessages(channelId: string) {
     if (!channelId) {
-      this.messages = []; // Sicherstellen, dass die Nachrichten zurückgesetzt werden
+      this.messages = [];
       return;
     }
 
@@ -95,6 +95,7 @@ export class ChatareaComponent {
         this.memberIds = channel.member || [];
         this.loadMembers();
         this.loadActiveChannelMessages();
+        this.cdRef.detectChanges();
       }
     });
   }
