@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-message-box',
@@ -14,18 +15,52 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   styleUrl: './message-box.component.scss'
 })
 export class MessageBoxComponent {
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
   messageContent: string = '';
   channelName: string = '';
   selectedFile: File | null = null;
-  fileURL: string | null = null;
+  fileURL: SafeResourceUrl | null = null;
   fileName: string | null = null;
   uploadProgress: number = 0;
   isUploading: boolean = false;
+  fileType: string | null = null;
   private fireService = inject(ChatareaServiceService);
   public fileUploadService = inject(FileUploadService);
+  private sanitizer = inject(DomSanitizer);
 
   ngOnInit() {
     this.loadActiveChannelName();
+  }
+
+  deleteUploadedFile() {
+    if (this.fileURL) {
+      const filePath = `uploads/${this.uid}/${this.fileName}`;
+      this.fileUploadService.deleteFile(filePath).then(() => {
+        this.fileURL = null;
+        this.fileName = null;
+      }).catch((error) => {
+        console.error('Fehler beim Löschen der Datei:', error);
+      });
+    }
+  }
+
+  getFileTypeFromFileName(fileName: string): string | null {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return 'image';
+      case 'pdf':
+        return 'pdf';
+      case 'mp4':
+      case 'webm':
+      case 'ogg':
+        return 'video';
+      default:
+        return 'unknown';
+    }
   }
 
   onFileSelected(event: Event) {
@@ -38,57 +73,48 @@ export class MessageBoxComponent {
 
   uploadFile() {
     if (this.selectedFile) {
-      this.isUploading = true;  // Gesamter Prozess beginnt
-      const userId = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'; // Beispiel-User-ID
-      this.fileUploadService.uploadFile(this.selectedFile, userId, (progress) => {
-        this.uploadProgress = progress;  // Fortschritt in Prozent aktualisieren
+      this.isUploading = true;
+      this.fileType = this.getFileTypeFromFileName(this.selectedFile.name);
+      this.fileUploadService.uploadFile(this.selectedFile, this.uid, (progress) => {
+        this.uploadProgress = progress;
       }).then((result: { url: string, fileName: string }) => {
-        this.fileURL = result.url;  // URL der hochgeladenen Datei speichern
-        this.fileName = result.fileName;  // Dateiname speichern
+        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+        this.fileName = result.fileName;
         setTimeout(() => {
-          this.isUploading = false;  // Gesamter Prozess abgeschlossen, Fortschrittsanzeige ausblenden
-        }, 1000);  // 1 Sekunde Verzögerung nach dem Abschluss des gesamten Prozesses
+          this.isUploading = false;
+        }, 1000);
       }).catch((error) => {
         console.error('Fehler beim Hochladen der Datei:', error);
-        this.isUploading = false;  // Bei Fehler Fortschrittsanzeige ausblenden
+        this.isUploading = false;
       });
-      this.selectedFile = null; // Zurücksetzen nach dem Upload
-    } else {
-      console.error('Keine Datei ausgewählt.');
+      this.selectedFile = null;
     }
   }
 
+
   sendMessage() {
-    if (this.messageContent.trim() === '' && !this.fileURL) return;  // Nachricht darf nicht leer sein, es sei denn, es gibt eine Datei
-
-    const senderId = "cYNWHsbhyTZwZHCZnGD3ujgD2Db2";
-
-    this.fireService.loadDocument('users', senderId).subscribe({
+    if (this.messageContent.trim() === '' && !this.fileURL) {
+      return;
+    }
+    this.fireService.loadDocument('users', this.uid).subscribe({
       next: (user: any) => {
         const userName = `${user.name}`;
-
         this.fireService.getActiveChannel().subscribe({
           next: (channel: any) => {
             let content = this.messageContent;
-
-            // Wenn eine Datei hochgeladen wurde, erstelle den HTML-String für den Download-Link
-            if (this.fileURL && this.fileName) {
-              content = `<div class="upload">Datei: <a href="${this.fileURL}" target="_blank">${this.fileName}</a></div>`;
-            }
-
             const messageData = {
-              content: content,  // Nachricht oder Datei-Link
+              content: content,
               name: userName,
               time: new Date().toISOString(),
               reactions: [],
-              senderId: senderId
+              senderId: this.uid,
+              fileUrl: this.fileURL ? this.fileURL.toString() : null,
+              fileName: this.fileName || null
             };
-
-            // Nachricht mit Text oder Datei-Link in Firestore speichern
             this.fireService.addMessage(channel.id, messageData).then(() => {
-              this.messageContent = '';  // Eingabefeld zurücksetzen
-              this.fileURL = null;       // Datei-URL zurücksetzen
-              this.fileName = null;      // Dateiname zurücksetzen
+              this.messageContent = '';
+              this.fileURL = null;
+              this.fileName = null;
             });
           }
         });

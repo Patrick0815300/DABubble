@@ -28,6 +28,20 @@
         cursor: pointer;
     }
 
+    .delete-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        padding: 10px;
+        border-radius: 20px;
+        transition: ease-in 80ms;
+
+        &:hover {
+            background-color: #eceefe;
+            color: #535af1;
+        }
+    }
+
     textarea {
         border: none;
         width: 100%;

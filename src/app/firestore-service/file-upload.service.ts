@@ -1,10 +1,26 @@
 import { Injectable } from '@angular/core';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
+import { deleteObject } from 'firebase/storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileUploadService {
+
+  deleteFile(filePath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage();
+      const fileRef = ref(storage, filePath);
+
+      deleteObject(fileRef).then(() => {
+        console.log('Datei erfolgreich gelöscht');
+        resolve();  // Erfolgreich gelöscht
+      }).catch((error) => {
+        console.error('Fehler beim Löschen der Datei:', error);
+        reject(error);  // Fehler beim Löschen
+      });
+    });
+  }
 
   uploadFile(file: File, userId: string, onProgress: (progress: number) => void): Promise<{ url: string, fileName: string }> {
     return new Promise((resolve, reject) => {
