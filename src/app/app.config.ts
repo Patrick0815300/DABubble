@@ -1,11 +1,14 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
 import { routes } from './app.routes';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { getDatabase, provideDatabase } from '@angular/fire/database';
+
+registerLocaleData(localeDe);
 
 const config = {
   projectId: 'dabubble-57387',

@@ -1,24 +1,20 @@
-<div>
-    <div class="message-container">
-      <div class="img-container">
-        <img src="../../../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
-      </div>
-      <div class="message">
-        <div class="name-time">
-          <span class="name">Elias_Neumann</span>
-          <span class="time">Time</span>
-        </div>
-        <span class="text">Hallo das ist der Content der Nachricht</span>
-        <div class="reactions">
-          <div><img src="../../../../assets/img/04_chats-message/emoji_nerd_face_.png">2</div>
-          <mat-icon>add_reaction</mat-icon>
-        </div>
-      </div>
+<div *ngIf="thread">
+  <div class="message-container">
+    <div class="img-container">
+      <img src="../../../../assets/img/00_general-buttons/characters/Elias_Neumann.png">
     </div>
-    <div class="message-divider">
-      <div class="devider"></div>
-      <span>2 Antworten</span>
-      <div class="devider"></div>
+    <div class="message">
+      <div class="name-time">
+        <span class="name">{{ thread.name }}</span>
+        <span class="time">{{ formatTime(thread.time) }}</span>
+      </div>
+      <span class="text">{{ thread.content }}</span>
+      <div class="reactions">
+        <div><img src="../../../../assets/img/04_chats-message/emoji_nerd_face_.png">2</div>
+        <mat-icon>add_reaction</mat-icon>
+      </div>
     </div>
   </div>
-  
+</div>
+
+

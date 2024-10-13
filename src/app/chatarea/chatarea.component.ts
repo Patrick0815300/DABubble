@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -10,9 +10,10 @@ import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.
 import { MessageComponent } from "./message/message.component";
 import { OwnMessageComponent } from "./own-message/own-message.component";
 import { MessageBoxComponent } from "./message-box/message-box.component";
-import { Firestore } from '@angular/fire/firestore';
 import { User } from '../models/user/user.model';
 import { ChatareaServiceService } from '../firestore-service/chatarea-service.service';
+import { MainServiceService } from '../firestore-service/main-service.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-chatarea',
@@ -33,16 +34,37 @@ import { ChatareaServiceService } from '../firestore-service/chatarea-service.se
 export class ChatareaComponent {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
 
-  firestore: Firestore = inject(Firestore);
   channelName: string = '';
   memberIds: string[] = [];
   members: User[] = [];
   messages: any[] = [];
   uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
   previousMessageDate: string | null = null;
+  allChannelsAreFalse: boolean = false;
 
-  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService) {
+  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService, private cdRef: ChangeDetectorRef) { }
+
+  ngOnInit() {
     this.loadActiveChannelData();
+    this.checkChannelsStatus();
+  }
+
+  checkChannelsStatus() {
+    this.fireService.checkIfAllChannelsAreFalse().subscribe({
+      next: (allFalse: boolean) => {
+        this.allChannelsAreFalse = allFalse;
+        if (allFalse) {
+          this.clearChannelData();
+        }
+      }
+    });
+  }
+
+  clearChannelData() {
+    this.channelName = '';
+    this.memberIds = [];
+    this.members = [];
+    this.messages = [];
   }
 
   loadActiveChannelMessages() {
@@ -53,24 +75,27 @@ export class ChatareaComponent {
   }
 
   loadMessages(channelId: string) {
+    if (!channelId) {
+      this.messages = [];
+      return;
+    }
+
     this.fireService.loadMessages(channelId).subscribe((messages) => {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
         this.scrollToBottom();
-      }, 0);
+      }, 250);
     });
   }
 
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelName = channel.name;
-        this.loadActiveChannelMessages();
+        this.channelName = channel.channel_name;
         this.memberIds = channel.member || [];
         this.loadMembers();
-      },
-      error: (err) => {
-        console.error('Kein aktiver Channel gefunden:', err);
+        this.loadActiveChannelMessages();
+        this.cdRef.detectChanges();
       }
     });
   }
@@ -94,25 +119,20 @@ export class ChatareaComponent {
     return false;
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const today = new Date();
-
-    if (date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()) {
-      return 'heute';
-    }
-
-    return date.toLocaleDateString('de-DE');  // TT.MM.JJJJ Format
-  }
-
   scrollToBottom(): void {
     try {
       this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
     } catch (err) {
       console.error('Fehler beim automatischen Scrollen:', err);
     }
+  }
+
+  formatTime(timeString: string): string {
+    return this.mainService.formatTime(timeString);
+  }
+
+  formatDate(dateString: string): string {
+    return this.mainService.formatDate(dateString);
   }
 
   openChannelDialog() {

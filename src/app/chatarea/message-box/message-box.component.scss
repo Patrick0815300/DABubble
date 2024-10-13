@@ -5,8 +5,41 @@
     margin-left: 35px;
     margin-right: 35px;
 
+    .upload {
+        width: fit-content;
+        padding: 10px 20px;
+        margin-bottom: 16px;
+        color: black;
+        background-color: #ECEEFE;
+        border-radius: 20px;
+        font-size: 18px;
+
+        a {
+            text-decoration: none;
+            color: black;
+
+            &:hover {
+                color: #535AF1;
+            }
+        }
+    }
+
     mat-icon {
         cursor: pointer;
+    }
+
+    .delete-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        padding: 10px;
+        border-radius: 20px;
+        transition: ease-in 80ms;
+
+        &:hover {
+            background-color: #eceefe;
+            color: #535af1;
+        }
     }
 
     textarea {

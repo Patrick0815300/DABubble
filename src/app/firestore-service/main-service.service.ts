@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, doc, updateDoc, getDocs } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MainServiceService {
-
   uid: string = '';
 
   constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router) { }
@@ -16,21 +14,36 @@ export class MainServiceService {
    * This function extracts the last segment of the current URL (e.g., the UID) and stores it.
    */
   extractLastUrlSegment(): void {
-    const currentUrl = this.router.url; // Gibt die aktuelle URL zurück
-    const urlSegments = currentUrl.split('/'); // Zerlegt die URL in Teile basierend auf "/"
-    this.uid = urlSegments[urlSegments.length - 1]; // Nimmt den letzten Teil der URL
-    console.log('Letzter Teil der URL:', this.uid);
-    // Hier kannst du die lastSegment verwenden (z.B. in Firestore speichern oder für weitere Logik nutzen)
+    const currentUrl = this.router.url;
+    const urlSegments = currentUrl.split('/');
+    this.uid = urlSegments[urlSegments.length - 1];
+    console.log('Last Part of URL: ', this.uid);
   }
 
+  /**
+ * Returns a reference to a Firestore collection based on the provided collection ID.
+ * @param {string} colId - The ID of the collection.
+ * @returns {CollectionReference} A reference to the specified Firestore collection.
+ */
   getChannelRef(colId: string) {
     return collection(this.firestore, colId);
   }
 
+  /**
+   * Returns a reference to a Firestore document within a collection based on the provided collection and document IDs.
+   * @param {string} colId - The ID of the collection.
+   * @param {string} docId - The ID of the document within the collection.
+   * @returns {DocumentReference} A reference to the specified Firestore document.
+   */
   getSingleChannelRef(colId: string, docId: string) {
     return doc(collection(this.firestore, colId), docId);
   }
 
+  /**
+   * Retrieves all document IDs from a specific Firestore collection.
+   * @param {string} colId - The ID of the collection.
+   * @returns {Promise<string[]>} A promise that resolves to an array of document IDs.
+   */
   async getDocIdsByColId(colId: string): Promise<string[]> {
     const collectionRef = collection(this.firestore, colId);
     const snapshot = await getDocs(collectionRef);
@@ -38,16 +51,47 @@ export class MainServiceService {
     return docIds;
   }
 
+  /**
+   * Updates a Firestore document by assigning a document ID to the specified field.
+   * @param {string} colId - The ID of the collection.
+   * @param {string} docId - The ID of the document to update.
+   * @returns {Promise<void>} A promise that resolves when the document is updated.
+   */
   async assignDocId(colId: string, docId: string): Promise<void> {
-    const docRef = this.getSingleChannelRef(colId, docId)
+    const docRef = this.getSingleChannelRef(colId, docId);
     return updateDoc(docRef, {
       docId: docId
-    })
-      .then(() => {
-        console.log(`docId erfolgreich zugewiesen: ${docId}`);
-      })
-      .catch((error) => {
-        console.error('Fehler beim Zuweisen der docId: ', error);
-      });
+    });
   }
+
+  /**
+   * Formats a time string into HH:MM format.
+   * @param {string} timeString - The time string to format.
+   * @returns {string} The formatted time string.
+   */
+  formatTime(timeString: string): string {
+    const date = new Date(timeString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  /**
+   * Formats a date string into 'heute' if the date is today, otherwise returns a localized date string.
+   * @param {string} dateString - The date string to format.
+   * @returns {string} The formatted date string.
+   */
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const today = new Date();
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return 'heute';
+    }
+    return date.toLocaleDateString('de-DE');
+  }
+
 }

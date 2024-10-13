@@ -2,15 +2,16 @@
   <nav>
     <img src="assets/img/icons/logo.svg" alt="Logo" />
     <div class="current-user">
-      <span>Frederik Beck</span>
-      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="avatar" />
+      <span class="to_upper">{{ authenticatedUser?.name }}</span>
+      <app-profile class="app-profile" [left_side_profile]="false" *ngIf="authenticatedUser?.image_file" [image_user]="authenticatedUser?.image_file" />
       <button class="btn-arrow" (click)="onOpenLogOut()">
         <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
       </button>
     </div>
   </nav>
   <div class="input-search">
-    <input type="text" name="search-field" placeholder="Devspace durchsuchen" />
+    <input [(ngModel)]="search_input" (input)="onSearchInDevspace(); sendSearchInput(search_input)" type="text" name="search-field" placeholder="Devspace durchsuchen" />
     <img src="assets/img/icons/search.svg" alt="" />
   </div>
+  <app-search-devspace *ngIf="showSearchUserName === true" />
 </header>

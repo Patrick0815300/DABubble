@@ -1,23 +1,23 @@
-<section>
+<section [class.nav-section]="isNavBar === true">
   <div class="ch-creation">
     <span>profil</span>
-    <img class="cursor-effect" (click)="onCloseShowProfil()" src="assets/img/icons/close.svg" alt="" />
+    <img class="cursor-effect close-btn" (click)="onCloseShowProfil()" src="assets/img/icons/close.svg" alt="" />
   </div>
-  <img class="user-profile-img" src="assets/img/profiles/Elise_Roth.svg" alt="" />
+  <img class="user-profile-img" src="assets/img/profiles/{{ isNavBar === true ? authenticatedUser?.image_file : selectedUser.image_file }}" alt="" />
   <div class="user-name-update">
-    <span>Frederik Beck</span>
-    <button (click)="onOpenUpdateProfil()">bearbeiten</button>
+    <span>{{ isNavBar === true ? authenticatedUser?.name : selectedUser.name }}</span>
+    <button *ngIf="selectedUser.user_id === authenticatedUser?.user_id" (click)="onOpenUpdateProfil()">bearbeiten</button>
   </div>
   <div class="single-user-info">
     <img class="online" src="assets/img/icons/Online.svg" alt="" />
-    <span>activ</span>
+    <span>aktiv</span>
   </div>
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <span class="mail-address">beckmail.com</span>
-  <div class="btn-container">
+  <span class="mail-address">{{ isNavBar === true ? authenticatedUser?.email : selectedUser.email }}</span>
+  <div *ngIf="selectedUser.user_id !== authenticatedUser?.user_id" class="btn-container">
     <button class="btn">
       <img src="assets/img/icons/mode_comment.svg" alt="" />
       <span>Nachrichten</span>

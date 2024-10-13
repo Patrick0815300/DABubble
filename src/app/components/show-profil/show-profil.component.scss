@@ -67,6 +67,21 @@ section {
     }
   }
 }
+
+.close-btn {
+  border-radius: 50%;
+  &:hover {
+    background-color: #eceefe;
+  }
+}
+
+.nav-section {
+  top: 88px !important;
+  left: unset !important;
+  right: 1rem !important;
+  transform: unset !important;
+}
+
 .single-user-info {
   display: flex;
   align-items: center;
@@ -77,8 +92,8 @@ section {
     height: 10px;
   }
   > .mail {
-    width: 30px;
-    height: 30px;
+    width: 23px;
+    height: 23px;
   }
   > span:not(.address) {
     color: #92c83e;
@@ -89,7 +104,8 @@ section {
 }
 
 .mail-address {
-  padding-left: 2.5rem;
+  padding-left: 2rem;
+  color: #1381ff;
 }
 .btn-container {
   > .btn {

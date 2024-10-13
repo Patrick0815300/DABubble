@@ -6,8 +6,10 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { reactionList } from '../../models/reactions/reaction-list.model';
-import { ReactionServiceService } from '../../firestore-service/reaction-service.service';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
+import { MainServiceService } from '../../firestore-service/main-service.service';
+import { FileUploadService } from '../../firestore-service/file-upload.service';
+import { SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-own-message',
@@ -29,14 +31,22 @@ export class OwnMessageComponent implements OnInit {
 
   messages: any[] = [];
   reactions: any[] = [];
+  allReactions: boolean = false;
   selectedReactionPath: string = '';
   previousMessageDate: string | null = null;
-  uid: string = 'tsvZAtPmhQsbvuAp6mi6'
+  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
   editMode: { [messageId: string]: boolean } = {};
   channelId: string = '';
+  answerCount: number = 0;
+  lastAnswerTime: string | null = null;
+  reactionNames: string[] = [];
+  fileType: string | null = null;
+  fileURL: SafeResourceUrl | null = null;
+  fileName: string | null = null;
 
   private fireService = inject(ChatareaServiceService);
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService) {
+
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService) {
     this.fireService.loadReactions();
   }
 
@@ -44,31 +54,74 @@ export class OwnMessageComponent implements OnInit {
     this.loadActiveChannelMessages();
     this.renderReact();
     this.loadActiveChannelId();
+    this.loadReactionNames();
+    this.loadFileUpload()
+  }
+
+  loadFileUpload() {
+    if (this.message.fileName) {
+      this.fileName = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
+      this.fileURL = this.message.fileUrl
+    }
+  }
+
+  async loadReactionNames() {
+    if (this.message.reactions && this.message.reactions.length > 0) {
+      for (let reaction of this.message.reactions) {
+        const names = [];
+        let currentUserIncluded = false;
+        for (let id of reaction.userId) {
+          if (id === this.uid) {
+            currentUserIncluded = true;
+          } else {
+            const name = await this.chatService.getUserNameByUid(id);
+            names.push(name);
+          }
+        }
+        if (currentUserIncluded) {
+          if (names.length === 0) {
+            this.reactionNames.push('Du');
+          } else if (names.length === 1) {
+            this.reactionNames.push(`Du und ${names[0]}`);
+          } else {
+            this.reactionNames.push(`Du und ${names.length} weitere`);
+          }
+        } else {
+          this.reactionNames.push(names.join(' und '));
+        }
+      }
+    }
+  }
+
+  loadThreadDetails() {
+    this.lastAnswerTime = '';
+    if (this.message && this.channelId) {
+      this.chatService.getThreadDetails(this.channelId, this.message.id, (count, lastMessageTime) => {
+        this.answerCount = count;
+        this.lastAnswerTime = lastMessageTime ? this.mainService.formatTime(lastMessageTime) : null;
+      });
+    }
   }
 
   openThread(messageId: string) {
-    const threadInfo = {
-      channelId: this.channelId,
-      messageId: messageId,
-      //senderId: senderId
-    };
-    console.log('Thread geöffnet mit:', threadInfo);
-    // Hier kannst du threadInfo in einem Service oder lokalen Speicher speichern
-    //this.chatService.setThreadData(threadInfo);
+    this.chatService.setThreadDataFromMessage(this.channelId, messageId);
   }
 
   loadActiveChannelId() {
     this.chatService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelId = channel.id; // Dynamische Channel-ID
-      },
-      error: (err) => {
-        console.error('Fehler beim Laden des aktiven Channels:', err);
+        this.channelId = channel.id;
+        this.loadThreadDetails();
       }
     });
   }
 
+  openReactions() {
+    this.allReactions = !this.allReactions;
+  }
+
   onReactionClick(reactionName: string) {
+    this.openReactions();
     const selectedReaction = reactionList.find(reaction => reaction.name === reactionName);
     if (selectedReaction) {
       this.selectedReactionPath = selectedReaction.path;
@@ -86,15 +139,8 @@ export class OwnMessageComponent implements OnInit {
   }
 
   reactToMessage(messageId: string, reactionType: string, path: string) {
-    if (!this.channelId) {
-      console.error('Keine Channel-ID vorhanden.');
-      return;
-    }
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
-      .then(() => console.log('Reaktion hinzugefügt'))
-      .catch(error => console.error('Fehler beim Hinzufügen der Reaktion:', error));
   }
-
 
   editMessage(messageId: string) {
     this.editMode[messageId] = true;
@@ -124,9 +170,6 @@ export class OwnMessageComponent implements OnInit {
       next: (channel: any) => {
         const channelId = channel.id;
         this.loadMessages(channelId);
-      },
-      error: (err) => {
-        console.error('Kein aktiver Channel gefunden:', err);
       }
     });
   }
@@ -138,27 +181,9 @@ export class OwnMessageComponent implements OnInit {
         .filter(message => message.isOwnMessage)
         .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       this.cdr.detectChanges();
+      console.log(this.messages);
+
     });
-  }
-
-  formatTime(timeString: string): string {
-    const date = new Date(timeString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const today = new Date();
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return 'heute';
-    }
-    return date.toLocaleDateString('de-DE'); // Format: "TT.MM.JJJJ"
   }
 
   shouldShowDivider(currentMessageTime: string, index: number): boolean {
@@ -168,6 +193,14 @@ export class OwnMessageComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  formatTime(timeString: string): string {
+    return this.mainService.formatTime(timeString);
+  }
+
+  formatDate(dateString: string): string {
+    return this.mainService.formatDate(dateString);
   }
 
   onMenuOpened(messageId: string) {
@@ -191,5 +224,4 @@ export class OwnMessageComponent implements OnInit {
       });
     }
   }
-
 }

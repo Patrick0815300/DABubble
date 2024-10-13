@@ -1,24 +1,92 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
 import { LogOutService } from '../../modules/log-out.service';
+import { Channel, User } from '../../modules/database.model';
+import { DatabaseServiceService } from '../../database-service.service';
+import { FormsModule } from '@angular/forms';
+import { ChannelService } from '../../modules/channel.service';
+import { SearchDevspaceComponent } from '../search-devspace/search-devspace.component';
+import { CommonModule } from '@angular/common';
+import { NavService } from '../../modules/nav.service';
 
 @Component({
   selector: 'app-nav-bar',
   standalone: true,
-  imports: [ProfileComponent],
+  imports: [ProfileComponent, FormsModule, SearchDevspaceComponent, CommonModule],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.scss',
 })
-export class NavBarComponent {
+export class NavBarComponent implements OnInit {
   avatar = 'Elise_Roth.svg';
   open_logout!: boolean;
-  constructor(private logOutService: LogOutService) {
+  authenticatedUser: User | undefined;
+  search_input: string = '';
+  all_users: User[] = [];
+  filtered_users: User[] = [];
+  filteredChannels: Channel[] = [];
+  all_channels: Channel[] = [];
+  searchUser: User[] = [];
+  PickedArray: string[] = [];
+  showSearchUserName: boolean = false;
+  input_value: string = '';
+
+  constructor(private logOutService: LogOutService, public databaseService: DatabaseServiceService, private channelService: ChannelService, private navService: NavService) {
     this.logOutService.open_logout$.subscribe(state => {
       this.open_logout = state;
     });
   }
 
+  ngOnInit(): void {
+    this.databaseService.authenticatedUser().subscribe(user => {
+      this.authenticatedUser = user;
+    });
+    this.databaseService.users$.subscribe(users => {
+      this.all_users = users;
+    });
+
+    this.navService.search_input$.subscribe(val => {
+      this.input_value = val;
+    });
+    this.databaseService.channels$.subscribe(channel => {
+      this.all_channels = channel;
+    });
+  }
+
   onOpenLogOut() {
     this.logOutService.updateProfile();
+  }
+
+  sendSearchInput(input: string) {
+    this.navService.emitSearchInput(input);
+  }
+
+  onSearchInDevspace() {
+    if (this.search_input.length >= 1 && this.search_input[0] === '@') {
+      this.showSearchUserName = true;
+      if (this.search_input.length == 1) {
+        this.filtered_users = this.all_users;
+        this.channelService.emitFilteredUsers(this.filtered_users);
+      } else if (this.search_input.length > 1 && this.search_input[0] === '@') {
+        this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
+
+        this.channelService.emitFilteredUsers(this.filtered_users);
+      }
+    } else if (this.search_input && this.search_input[0] !== '@') {
+      if (this.search_input[0] === '#' && this.search_input.length == 1) {
+        this.showSearchUserName = true;
+        this.filteredChannels = this.all_channels;
+        this.channelService.emitFilteredChannels(this.filteredChannels);
+      } else if (this.search_input[0] === '#' && this.search_input.length > 1) {
+        this.showSearchUserName = true;
+        this.filteredChannels = this.all_channels.filter(u => u.channel_name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
+        this.channelService.emitFilteredChannels(this.filteredChannels);
+      } else {
+        this.showSearchUserName = true;
+        this.filtered_users = this.all_users.filter(u => u.email.toLowerCase().includes(this.search_input.toLowerCase()));
+        this.channelService.emitFilteredUsers(this.filtered_users);
+      }
+    } else {
+      this.showSearchUserName = false;
+    }
   }
 }
