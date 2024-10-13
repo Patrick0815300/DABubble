@@ -1,7 +1,7 @@
 import { Message, User } from './../../modules/database.model';
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
-import { addDoc, collection, Firestore, FirestoreModule, onSnapshot } from '@angular/fire/firestore';
+import { FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
 import { DatabaseServiceService } from '../../database-service.service';
 import { CommonModule, formatDate } from '@angular/common';
@@ -9,12 +9,14 @@ import { FormsModule } from '@angular/forms';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 import { UserService } from '../../modules/user.service';
 import { ShowProfilService } from '../../modules/show-profil.service';
+import { ChannelService } from '../../modules/channel.service';
 @Component({
   selector: 'app-messages',
   standalone: true,
   imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MessagesComponent implements OnInit {
   message_content = '';
@@ -29,8 +31,18 @@ export class MessagesComponent implements OnInit {
   today!: string;
   open_show_profile!: boolean;
   selectedUser: User = new User();
+  show_delete_msg!: number;
+  showEmojiPicker = false;
+  update_message: string = '';
+  is_update_msg: boolean = false;
+  update_point!: number;
 
-  constructor(private showProfileService: ShowProfilService, private userService: UserService, private databaseService: DatabaseServiceService) {
+  constructor(
+    private channelService: ChannelService,
+    private showProfileService: ShowProfilService,
+    private userService: UserService,
+    private databaseService: DatabaseServiceService
+  ) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
     });
@@ -113,23 +125,6 @@ export class MessagesComponent implements OnInit {
     return this.databaseService.messages;
   }
 
-  // onAddUser() {
-  //   let user = {
-  //     first_name: 'Validate',
-  //     last_name: 'validate_last_name',
-  //      name:'',
-  //     email: 'validate@gmail.com',
-  //     image_file: 'avatar.svg',
-  //     password: '33333',
-  //     user_id: 'cc8e',
-  //     online: false,
-  //   };
-
-  //   let newUser = new User(user);
-  //   let userOject = newUser.toObject();
-  //   this.databaseService.addUser(userOject);
-  // }
-
   onAddMessage(currentUser_id: string | undefined, to_user_id: string) {
     let msg = {
       message_content: this.message_content,
@@ -144,6 +139,14 @@ export class MessagesComponent implements OnInit {
     this.message_content = '';
   }
 
+  onAddEmoji(event: any) {
+    this.message_content += event.detail.unicode;
+  }
+
+  sendMessage() {
+    console.log('Message sent:', this.message_content);
+    this.message_content = '';
+  }
   groupMessagesByDate(messages: any[]) {
     const groupedMessages: { [key: string]: any[] } = {};
 
@@ -175,4 +178,37 @@ export class MessagesComponent implements OnInit {
   sendSelectedUser(user: User) {
     this.userService.emitSelectedUser(user);
   }
+
+  onShowDeleteDialog(index: number) {
+    if (this.show_delete_msg === index) {
+      this.show_delete_msg = -1;
+    } else {
+      this.show_delete_msg = index;
+    }
+  }
+
+  onDeleteMessage(msgId: string) {
+    this.databaseService.deleteDocument('messages', 'message_id', msgId);
+    this.show_delete_msg = -1;
+  }
+
+  onUpdateMessage(msgContent: string, index: number) {
+    this.update_point = index;
+    this.update_message = msgContent;
+    this.show_delete_msg = -1;
+  }
+  handleUpdateMsg(currentMsgId: string) {
+    this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { message_content: this.update_message });
+    this.onCancelUpdateMsg();
+  }
+
+  onCancelUpdateMsg() {
+    this.update_point = -1;
+  }
+
+  onRespond(index: number) {
+    // this.update_point = index;
+    // this.show_delete_msg = -1;
+  }
+  handleResponse() {}
 }

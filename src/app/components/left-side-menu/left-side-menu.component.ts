@@ -22,7 +22,7 @@ export class LeftSideMenuComponent implements OnInit {
   state: boolean = false;
   active: boolean = false;
   show_channel_msg!: boolean;
-  selectedIndex!: number;
+  selectedIndex: number = 0;
   selectedChannelIndex!: number;
   collapse: boolean = false;
   expand: boolean = false;
@@ -57,6 +57,18 @@ export class LeftSideMenuComponent implements OnInit {
     this.navService.state$.subscribe(state => {
       this.state = state;
     });
+
+    this.showChannelMessages(false);
+    // if (this.all_channel.length === 0) {
+    //   this.sendSelectedUser(this.authenticatedUser!);
+    //   this.sendUserId(this.authenticatedUser?.user_id!);
+    //   this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
+    // } else {
+    //   this.loadChannelMembers(this.all_channel[0].channel_id);
+    //   this.sendChannel(this.all_channel[0]);
+    //   this.showChannelMessages(true);
+    //   this.loadChannelMessages(this.all_channel[0].channel_id);
+    // }
   }
 
   ngOnInit(): void {
@@ -73,19 +85,6 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.databaseService.channels$.subscribe(channel => {
       this.all_channel = channel;
-      if (this.all_channel.length === 0) {
-        this.selectUser(0);
-        this.sendSelectedUser(this.authenticatedUser!);
-        this.showChannelMessages(false);
-        this.sendUserId(this.authenticatedUser?.user_id!);
-        this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
-      } else {
-        this.selectChannel(0);
-        this.loadChannelMembers(this.all_channel[0].channel_id);
-        this.sendChannel(this.all_channel[0]);
-        this.showChannelMessages(true);
-        this.loadChannelMessages(this.all_channel[0].channel_id);
-      }
     });
 
     this.databaseService.authenticatedUser().subscribe(user => {

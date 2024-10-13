@@ -11,16 +11,37 @@
           <span>{{ chatGroup.date }} </span>
           <div class="line"></div>
         </div>
-        <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.user_id">
+        <div *ngFor="let message of chatGroup.messages; let i = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.user_id">
           <div class="image-message">
             <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
           </div>
-          <div class="name-date-line">
-            <div>
+          <div class="name-date-line" [class.update_msg]="update_point === i">
+            <div *ngIf="update_point !== i">
               <span>{{ getCachedUser(message?.from_user)?.name }}</span>
               <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
             </div>
-            <p>{{ message.message_content }}</p>
+            <p *ngIf="update_point !== i">{{ message.message_content }}</p>
+            <input class="update_message" *ngIf="update_point === i" [(ngModel)]="update_message" type="text" name="update_message" />
+            <div class="btn-line" *ngIf="update_point === i">
+              <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+              <div class="btn-container">
+                <button class="btn btn-white" (click)="onCancelUpdateMsg()" type="button">Abbrechen</button>
+                <button class="btn btn-info" (click)="handleUpdateMsg(message?.message_id)" type="button">Speichern</button>
+              </div>
+            </div>
+          </div>
+          <div class="emoji-container" [class.align-box-right]="message?.from_user !== authenticatedUser?.user_id" *ngIf="update_point !== i">
+            <div class="img-group">
+              <img src="assets/img/icons/emoji_white_heavy_check_mark_.svg" alt="" />
+              <img src="assets/img/icons/emoji_person_hand_celebrate_.svg" alt="" />
+              <img src="assets/img/icons/add_reaction.svg" alt="" />
+              <img (click)="onRespond(i)" src="assets/img/icons/comment.svg" alt="" />
+              <img (click)="onShowDeleteDialog(i)" src="assets/img/icons/more_vert.svg" alt="" />
+              <div *ngIf="show_delete_msg === i" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser?.user_id">
+                <button class="btn" (click)="onUpdateMessage(message?.message_content, i)">Nachricht bearbeiten</button>
+                <button class="btn" (click)="onDeleteMessage(message?.message_id)">Nachricht löschen</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -50,15 +71,17 @@
 
     <div class="input-wrapper">
       <div class="input-form">
-        <input class="message-input" [(ngModel)]="message_content" type="text" name="meassage" placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}" />
+        <emoji-picker class="emoji" *ngIf="showEmojiPicker" (emoji-click)="onAddEmoji($event)"></emoji-picker>
+        <input class="message-input" [(ngModel)]="message_content" type="text" name="message" placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}" />
         <div class="send-line">
           <div class="alternate-line">
             <img class="icons" src="assets/img/icons/input_add.svg" alt="" />
             <div class="sep-line"></div>
-            <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+            <img class="icons" (click)="showEmojiPicker = !showEmojiPicker" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
             <img class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
           </div>
-          <button (click)="onAddMessage(authenticatedUser?.user_id, toUserId)">
+          <!-- <button (click)="onAddMessage(authenticatedUser?.user_id, toUserId)"> -->
+          <button (click)="sendMessage()">
             <img src="assets/img/icons/send.svg" alt="Send message" />
           </button>
         </div>
