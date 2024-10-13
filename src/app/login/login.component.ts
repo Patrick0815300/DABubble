@@ -11,12 +11,23 @@ import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { NgIf } from '@angular/common';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { UserService } from '../service/user.service/user.service';
 import { Firestore } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [MatToolbarModule, MatCardModule, MatIconModule, MatFormFieldModule, RouterModule, FooterComponent, HeaderComponent, FormsModule, NgIf],
+  imports: [
+    MatToolbarModule,
+    MatCardModule,
+    MatIconModule,
+    MatFormFieldModule,
+    RouterModule,
+    FooterComponent,
+    HeaderComponent,
+    FormsModule,
+    NgIf
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -25,7 +36,7 @@ export class LoginComponent {
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
 
-  constructor(private firebase: FirebaseLoginService, private router: Router, private firestore: Firestore, private auth: Auth) {}
+  constructor(private firebase: FirebaseLoginService, private router: Router, private userService: UserService, private firestore: Firestore, private auth: Auth) { }
 
   private googleProvider = new GoogleAuthProvider();
 
@@ -35,12 +46,24 @@ export class LoginComponent {
   async login() {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
+      await this.createNewUserObject(userCredential);
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);
     } catch (error) {
       this.displayWrongMailOrPasswordErrorMessage();
       this.resetInputs();
     }
+  }
+
+  /**
+   * This function sets a user in the userService for other components to get the data
+   * @param userCredential user data 
+   */
+  async createNewUserObject(userCredential: any) {
+    let userRef = this.firebase.getSingleUserRef('users', userCredential.user.uid)
+    const userSnapshot = await getDoc(userRef);
+    let user = userSnapshot.data();
+    this.userService.setUser(user);
   }
 
   /**

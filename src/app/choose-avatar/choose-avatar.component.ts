@@ -78,7 +78,6 @@ export class ChooseAvatarComponent {
         this.chosenImage = e.target?.result as string;  // Setze das Bild auf die hochgeladene Datei
       };
       reader.readAsDataURL(file);  // Liest die Datei als Daten-URL
-
       // Reset das Input-Feld
       target.value = '';  // Setzt das Input-Feld zurück
     }

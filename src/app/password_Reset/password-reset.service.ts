@@ -1,19 +1,15 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
-import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PasswordResetService {
 
-  constructor(private firebase: FirebaseLoginService) {
-
-  }
+  constructor(private router: Router) { }
 
   private auth = getAuth();
-
 
   /**
    * This function sends a resetPassword mail from the firebase-database to the user
@@ -29,5 +25,14 @@ export class PasswordResetService {
         console.error('Fehler beim Senden der Passwort-Reset-E-Mail:', error);
         throw error;
       });
+  }
+
+  /**
+  This function sends the user back to the login-page after a timeout of 2 Sec.
+  */
+  redirectToLogin() {
+    setTimeout(() => {
+      this.router.navigate(['/']);
+    }, 2000);
   }
 }

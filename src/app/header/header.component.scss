@@ -109,15 +109,15 @@
         align-items: center;
         justify-content: center;
         position: relative;
+        animation: textcolor 2s ease-in-out 3s forwards;
 
         .text{
             position:absolute;
             left:-50px;
-
             white-space: nowrap; /* Verhindert Zeilenumbruch */
             position: relative;
             left: -100%; /* Startpunkt: außerhalb des Containers */
-            animation: slide-in 2s ease-in-out 0.3s forwards,textcolor 2s ease-in-out 3s forwards;
+            animation: slide-in 2s ease-in-out 0.3s forwards;
         }
     }
 }
@@ -141,7 +141,7 @@
     }
 }
 
-@keyframes logoMovement{ // Animation Schritt 1
+@keyframes logoMovement{ // Animation Schritt 2
     0%{
         transform:scale(2);
     }
@@ -162,7 +162,6 @@
     flex-direction: column;
     gap: 20px;
     max-width: 1920px;
-
 }
 
 .loginHeaderRegister {
@@ -194,19 +193,44 @@
     @keyframes logomovement-small {
         0% {
             top: 50%;
-            left: 50%;
+            left:0%;
         }
 
         100% {
             top: 75px;
-            left: 25%;
+            left: 0%;
         }
+    }
+
+    .name{
+        overflow:unset;
+    }
+
+    .text{
+        font-size:20px;
+        margin-left:-20px;
     }
 
     .loginLogo {
         animation-name: logomovement-small;
-        width: 50%;
+        width:100%;
+        left:0%;
         justify-content: center;
+        transform:none;
+
+        .name{
+            transform:scale(1.2);
+            font-size:20px;
+            margin-left:-25px;
+
+            .text{
+                margin-left:5px;
+            }
+        }
+
+        img{
+            transform:scale(0.8);
+        }
     }
 
     .loginHeaderRegister {

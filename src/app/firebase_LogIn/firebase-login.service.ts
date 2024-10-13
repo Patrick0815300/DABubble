@@ -10,7 +10,7 @@ import { Firestore } from '@angular/fire/firestore';
   providedIn: 'root',
 })
 export class FirebaseLoginService {
-  constructor(private firestore: Firestore, private auth: Auth) {
+  constructor(private firestore: Firestore, public auth: Auth) {
     // this.firestore = fireService;
   }
 
@@ -79,7 +79,7 @@ export class FirebaseLoginService {
     setDoc(userRef, {
       name: name,
       email: email,
-      // password: password,
+      password: password,
       online: false,
       avatar: '',
     })
@@ -101,6 +101,18 @@ export class FirebaseLoginService {
     let user = doc(this.firestore, 'users', id);
     await updateDoc(user, {
       avatar: chosenAvatar,
+    });
+  }
+
+  /**
+  * This functionupdates the avatar of the user
+  * @param password the password
+  * @param id the user-id (DocRef of firebase)
+  */
+  async updatePassword(password: string, id: any) {
+    let user = doc(this.firestore, "users", id)
+    await updateDoc(user, {
+      password: password,
     });
   }
 

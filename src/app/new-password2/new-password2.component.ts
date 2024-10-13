@@ -7,6 +7,10 @@ import { Router, RouterModule } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { PasswordResetService } from '../password_Reset/password-reset.service';
+import { confirmPasswordReset, getAuth } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Component({
   selector: 'app-new-password2',
@@ -33,39 +37,71 @@ export class NewPassword2Component {
   emptyInputs: boolean = true;
   displayError: boolean = false;
   passwordChanged: boolean = false;
+  passwordNotLongEnough: boolean = false;
 
-constructor(private router: Router){
+  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
 
-}
+  }
+
+  private auth = getAuth();
+  urlParams = new URLSearchParams(window.location.search);
+  oobCode = this.urlParams.get('oobCode');
+
+
 
   /**
    * This function clears the inputs and changes the Passwords
    */
   changePassword() {
-    if(this.passwordAccordance){
-      this.displayError = false;
-      this.clearInputs();
-      this.displayPWChangedMessage();
-    } else{
+    if (this.checkForSamePasswords()) {
+      this.resetPassword();
+    } else {
       this.displayError = true;
+      setTimeout(() => {
+        this.displayError = false;
+      }, 2000);
+    }
+  }
+
+  resetPassword() {
+    if (this.oobCode) {
+      confirmPasswordReset(this.auth, this.oobCode, this.Password1)
+        .then(() => {
+          console.log("Passwort erfolgreich zurückgesetzt.");
+          this.service.redirectToLogin();
+          this.passwordChanged = true;
+          this.resetPasswordInDatabase();
+          setTimeout(() => {
+            this.passwordChanged = false;
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error("Fehler beim Zurücksetzen des Passworts: ", error);
+        });
+    }
+  }
+
+  resetPasswordInDatabase() {
+    if (this.auth.currentUser) {
+      this.firebase.updatePassword(this.Password1, this.auth.currentUser.uid);
     }
   }
 
   /**
    * This function displays a message, that the Password was successfully changed 
    */
-  displayPWChangedMessage(){
+  displayPWChangedMessage() {
     this.passwordChanged = true;
-    setTimeout(()=>{
+    setTimeout(() => {
       this.passwordChanged = false;
       this.router.navigate(['/']);
-    },2000);
+    }, 2000);
   }
 
   /**
    * This function clears the inputs
    */
-  clearInputs(){
+  clearInputs() {
     this.Password1 = '';
     this.Password2 = '';
   }
@@ -74,24 +110,35 @@ constructor(private router: Router){
    * This function calls different Password-control functions
    */
   checkPasswords() {
+    this.checkPasswordLength();
     this.checkForEmptyInputs();
     let changePossible = this.checkForSamePasswords();
-    if (changePossible){
+    if (changePossible) {
       this.Password1
-    }else{
+    } else {
+    }
+  }
 
+  /**
+   * This function checks, if the passwords are long enough
+   */
+  checkPasswordLength() {
+    if (this.Password1.length < 6 || this.Password2.length < 6) {
+      this.passwordNotLongEnough = true;
+    } else {
+      this.passwordNotLongEnough = false;
     }
   }
 
   /**
    * This function checks if the PW1 and PW2 are the same or not
    */
-  checkForSamePasswords(){
+  checkForSamePasswords() {
     this.displayError = false;
-    if(this.Password1 === this.Password2){
+    if (this.Password1 === this.Password2) {
       this.passwordAccordance = true;
       return true;
-    }else{
+    } else {
       return false;
     }
   }
@@ -99,14 +146,13 @@ constructor(private router: Router){
   /**
    * This function checks, if the Inputs for Password 1 and 2 are empty or not
    */
-  checkForEmptyInputs(){
-    if(!this.Password1 || !this.Password2){
+  checkForEmptyInputs() {
+    if (!this.Password1 || !this.Password2) {
       this.emptyInputs = true;
-    }else{
+    } else {
       this.emptyInputs = false;
     }
   }
-
 }
 
 

@@ -43,6 +43,8 @@ export class SignInComponent {
   displayNameError: boolean = false;
   displayPasswordError: boolean = false;
   displayPrivatPolicyError: boolean = false;
+  passwordNotLongEnough: boolean = false;
+  displayPasswordNotLongEnough: boolean = false;
 
   emptyInputs: boolean = true;
 
@@ -53,7 +55,7 @@ export class SignInComponent {
   /**
    * This function activates the button if all inputs are filled and calls several control functions
    */
-  checkPasswords() {
+  checkInputs() {
     if (this.name && this.mail && this.password && this.privacyPolicy) {
       this.emptyInputs = false;
     }
@@ -89,12 +91,35 @@ export class SignInComponent {
   * This function checks if the password Input was already filled, if yes it displays an error-message
   */
   checkPasswordInput() {
-    if (!this.password) {
+    if (!this.password || this.password.length < 6) {
       this.displayPasswordError = true;
     } else {
       this.displayPasswordError = false;
     }
   }
+
+  // /**
+  //  * This function checks the length of the Password
+  //  */
+  // checkPasswordLength() {
+  //   if (this.password.length < 6) {
+  //     this.passwordNotLongEnough = true;
+  //     this.displayPasswordLengthError
+  //   } else {
+  //     this.passwordNotLongEnough = false;
+  //   }
+  // }
+
+  // /**
+  //  * If the Password is not long enough, an Error will be displayed
+  //  */
+  // displayPasswordLengthError() {
+  //   if (this.passwordNotLongEnough) {
+  //     this.displayPasswordNotLongEnough = true;
+  //   } else {
+  //     this.displayPasswordNotLongEnough = false;
+  //   }
+  // }
 
   /**
   * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
@@ -132,13 +157,13 @@ export class SignInComponent {
    * This function creates a user-obj in the firebase authenticator and sends the user to the chosseAvatar site
    */
   async onSubmit() {
-    if(await this.firebase.findUserWithRef('email', this.mail) == false){
+    if (await this.firebase.findUserWithRef('email', this.mail) == false) {
       this.setData();
       let user = this.firebase.setUserObject(this.data);
-      let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name); 
+      let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name);
       this.router.navigate(['/chooseAvatar', id]);
       this.emptyAllInputs();
-    }else{
+    } else {
       this.displayMailErrorFor3Sec();
     }
   }
@@ -146,11 +171,11 @@ export class SignInComponent {
   /**
    * This function displays an Error under the E-Mail-Input for 3 sec.
    */
-  displayMailErrorFor3Sec(){
+  displayMailErrorFor3Sec() {
     this.displayMailError = true;
-    setTimeout(()=>{
+    setTimeout(() => {
       this.displayMailError = false;
-    },3000);
+    }, 3000);
   }
 
 }

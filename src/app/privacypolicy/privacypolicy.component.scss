@@ -1,0 +1,62 @@
+.header-container {
+    position: absolute;
+    top: 90px;
+    left: 90px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    transform: scale(1.2);
+
+
+    .name {
+        transform: scale(1.2);
+        margin-left: 20px;
+        font-family:nunito, sans-serif;
+    }
+
+    &:hover {
+        cursor: default;
+    }
+
+    img {
+        width: auto;
+        height: 70px;
+    }
+}
+
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+    mat-card {
+        background-color: white;
+        height: auto;
+        width: auto;
+        border-radius: 30px;
+        padding: 48px 56px;
+
+        mat-card-content {
+            width: 100%;
+        }
+    }
+}
+
+.arrowBack {
+    &:hover {
+        cursor: pointer;
+        filter: drop-shadow(2px 2px 1px gray);
+    }
+}
+
+.info{
+    position:absolute;
+    bottom:100px;
+    left:80px;
+    font-family:nunito, sans-serif;
+    font-weight:700;
+    font-size:32px;
+}
