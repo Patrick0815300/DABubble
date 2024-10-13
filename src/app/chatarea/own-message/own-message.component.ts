@@ -8,6 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { reactionList } from '../../models/reactions/reaction-list.model';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { MainServiceService } from '../../firestore-service/main-service.service';
+import { FileUploadService } from '../../firestore-service/file-upload.service';
+import { SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-own-message',
@@ -38,9 +40,13 @@ export class OwnMessageComponent implements OnInit {
   answerCount: number = 0;
   lastAnswerTime: string | null = null;
   reactionNames: string[] = [];
+  fileType: string | null = null;
+  fileURL: SafeResourceUrl | null = null;
+  fileName: string | null = null;
 
   private fireService = inject(ChatareaServiceService);
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService) {
+
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService) {
     this.fireService.loadReactions();
   }
 
@@ -49,6 +55,14 @@ export class OwnMessageComponent implements OnInit {
     this.renderReact();
     this.loadActiveChannelId();
     this.loadReactionNames();
+    this.loadFileUpload()
+  }
+
+  loadFileUpload() {
+    if (this.message.fileName) {
+      this.fileName = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
+      this.fileURL = this.message.fileUrl
+    }
   }
 
   async loadReactionNames() {
@@ -167,6 +181,8 @@ export class OwnMessageComponent implements OnInit {
         .filter(message => message.isOwnMessage)
         .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       this.cdr.detectChanges();
+      console.log(this.messages);
+
     });
   }
 

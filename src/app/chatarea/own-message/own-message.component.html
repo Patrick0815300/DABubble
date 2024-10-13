@@ -28,6 +28,18 @@
             </div>
             
             <span class="text" *ngIf="!isEditingMessage(message.id)">{{ message.content }}</span>
+            <ng-container *ngIf="fileURL">
+                <img *ngIf="fileType === 'image'" [src]="fileURL" alt="Image" class="uploaded-image" width="200px">
+                <iframe *ngIf="fileType === 'pdf'" [src]="fileURL" class="pdf-viewer" width="200px" height="250px"></iframe>
+                <video *ngIf="fileType === 'video'" controls>
+                  <source [src]="fileURL" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+                <div *ngIf="fileType === 'unknown'">
+                  <a [href]="fileURL" target="_blank">Datei herunterladen: {{ fileName }}</a>
+                </div>
+              </ng-container>
+          
             <div *ngIf="isEditingMessage(message.id)" class="edit-menu">
                 <input [(ngModel)]="message.content" type="text">
                 <div class="edit-bottom">

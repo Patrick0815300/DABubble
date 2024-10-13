@@ -44,25 +44,6 @@ export class MessageBoxComponent {
     }
   }
 
-  getFileTypeFromFileName(fileName: string): string | null {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return 'image';
-      case 'pdf':
-        return 'pdf';
-      case 'mp4':
-      case 'webm':
-      case 'ogg':
-        return 'video';
-      default:
-        return 'unknown';
-    }
-  }
-
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -74,7 +55,7 @@ export class MessageBoxComponent {
   uploadFile() {
     if (this.selectedFile) {
       this.isUploading = true;
-      this.fileType = this.getFileTypeFromFileName(this.selectedFile.name);
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
       this.fileUploadService.uploadFile(this.selectedFile, this.uid, (progress) => {
         this.uploadProgress = progress;
       }).then((result: { url: string, fileName: string }) => {
@@ -90,7 +71,6 @@ export class MessageBoxComponent {
       this.selectedFile = null;
     }
   }
-
 
   sendMessage() {
     if (this.messageContent.trim() === '' && !this.fileURL) {
