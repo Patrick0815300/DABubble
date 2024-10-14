@@ -1,5 +1,6 @@
 <div class="container">
     <textarea 
+      #messageTextArea
       placeholder="Nachricht an #{{ channelName }}" 
       [(ngModel)]="messageContent"
       name="" id="" cols="30" rows="3">
@@ -19,13 +20,19 @@
     <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="uploadProgress"></mat-progress-bar>
   <div class="bottom">
     <div>
-      <input type="file" id="fileUpload" (change)="onFileSelected($event)" hidden>
+      <input type="file" #fileUpload hidden>
       <label for="fileUpload">
-        <mat-icon>add</mat-icon>
+        <mat-icon (click)="openFileDialog()">add</mat-icon>
       </label>
       <span></span>
       <mat-icon>sentiment_satisfied</mat-icon>
-      <mat-icon>alternate_email</mat-icon>
+      <div class="link-someone" *ngIf="linkDialog">
+        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)">
+          <img [src]="user.avatar" alt="{{ user.name }}">
+          <span>{{ user.name }}</span>
+        </div>
+      </div>
+      <mat-icon (click)="toggleLinkDialog()">alternate_email</mat-icon>
     </div>
     <mat-icon (click)="sendMessage()">send</mat-icon>
   </div>

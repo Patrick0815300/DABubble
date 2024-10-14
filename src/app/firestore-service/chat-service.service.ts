@@ -4,12 +4,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { Message } from '../models/messages/channel-message.model';
 import { Channel } from '../models/channels/entwickler-team.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatServiceService {
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
+  uid = this.authService.getUID();
   senderId: string = '';
   private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
   private pickedThreadSubject = new BehaviorSubject<any>(null);
@@ -17,7 +18,7 @@ export class ChatServiceService {
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
 
   /**
    * Sets the thread data including channelId, messageId, and senderId.
@@ -71,9 +72,9 @@ export class ChatServiceService {
     const snapshot = await getDoc(messageDocRef);
     const messageData = snapshot.data();
     const reactions = messageData?.['reactions'] || [];
-    const hasReacted = await this.hasUserReacted(reactions, reactionType, this.uid);
+    const hasReacted = await this.hasUserReacted(reactions, reactionType, this.uid!);
     if (!hasReacted) {
-      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, this.uid, reactionPath);
+      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, this.uid!, reactionPath);
       await updateDoc(messageDocRef, { reactions: updatedReactions });
     }
   }
@@ -170,7 +171,9 @@ export class ChatServiceService {
         senderId: messageData?.['senderId'],
         time: messageData?.['time'],
         name: messageData?.['name'],
-        reactions: messageData?.['reactions']
+        reactions: messageData?.['reactions'],
+        fileUrl: messageData?.['fileUrl'],
+        fileName: messageData?.['fileName'],
       };
     } else {
       throw new Error('Message not found');
@@ -249,6 +252,8 @@ export class ChatServiceService {
       name: messageData.name,
       reactions: messageData.reactions,
       createdAt: new Date(),
+      fileName: messageData.fileName,
+      fileUrl: messageData.fileUrl,
     });
 
     await updateDoc(threadDocRef, { threadId: threadDocRef.id });

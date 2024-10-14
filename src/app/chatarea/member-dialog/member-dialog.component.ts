@@ -31,7 +31,6 @@ export class MemberDialogComponent {
 
   users: User[] = [];
   memberIds: string[] = [];
-  channelName = 'Entwickler Team';
 
   constructor(
     public dialogRef: MatDialogRef<MemberDialogComponent>,
@@ -44,7 +43,7 @@ export class MemberDialogComponent {
   loadChannelMembers() {
     this.chatareaService.getActiveChannel().subscribe((channel: any) => {
       this.memberIds = channel.member || [];
-      this.loadUsers(); // Lade die zugehörigen Benutzerdaten
+      this.loadUsers();
     });
   }
 

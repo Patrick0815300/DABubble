@@ -1,24 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, updateDoc, getDocs } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
+import { getAuth, User } from 'firebase/auth';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MainServiceService {
-  uid: string = '';
+  uid = this.authService.getUID();
 
-  constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router) { }
-
-  /**
-   * This function extracts the last segment of the current URL (e.g., the UID) and stores it.
-   */
-  extractLastUrlSegment(): void {
-    const currentUrl = this.router.url;
-    const urlSegments = currentUrl.split('/');
-    this.uid = urlSegments[urlSegments.length - 1];
-    console.log('Last Part of URL: ', this.uid);
-  }
+  constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router, private authService: AuthService) { }
 
   /**
  * Returns a reference to a Firestore collection based on the provided collection ID.

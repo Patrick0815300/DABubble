@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { ChatServiceService } from '../../../firestore-service/chat-service.service';
 import { FormsModule } from '@angular/forms';
 import { MainServiceService } from '../../../firestore-service/main-service.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FileUploadThreadService } from '../../../firestore-service/file-upload-thread.service';
+import { AuthService } from '../../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-own-message-thread',
@@ -23,9 +26,15 @@ export class OwnMessageThreadComponent {
   reactions: any[] = [];
   threadMessages: any[] = [];
   reactionNames: string[] = [];
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
+  uid: string | null = null;
+  fileType: string | null = null;
+  fileURL: SafeResourceUrl | null = null;
+  fileName: string | null = null;
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService) {
+  private sanitizer = inject(DomSanitizer);
+
+
+  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService, private authService: AuthService) {
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -35,7 +44,17 @@ export class OwnMessageThreadComponent {
   }
 
   ngOnInit() {
+    this.uid = this.authService.getUID();
     this.loadReactionNames();
+    this.loadFileUpload();
+  }
+
+  async loadFileUpload() {
+    if (this.thread.fileName) {
+      this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName)
+      this.fileName = this.thread.fileName
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl)
+    }
   }
 
   async loadReactionNames() {

@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
 import { OwnMessageThreadComponent } from "../../chatarea/thread/own-message-thread/own-message-thread.component";
 import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thread/message-box-thread.component';
-import { ActivatedRoute } from '@angular/router';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { Channel } from '../../models/channels/entwickler-team.model';
 
@@ -39,11 +38,21 @@ export class RightWrapperComponent {
   answers: string = '';
   channelName: string = '';
 
-  private route = inject(ActivatedRoute);
   private chatService = inject(ChatServiceService);
   private currentChannel: Channel | null = null;
 
   ngOnInit() {
+    this.chatService.loadActiveChannel();
+    this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
+      if (channel) {
+        this.currentChannel = channel;
+        this.channelName = channel.channel_name
+        this.isVisible = channel.thread_open;
+      } else {
+        !this.isVisible
+      }
+    });
+
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -52,15 +61,6 @@ export class RightWrapperComponent {
         this.threadId = data.id;
         this.ownMessage = this.threadData.senderId === this.uid;
         this.loadThreadMessages(this.channelId, this.messageId, this.threadId);
-      }
-    });
-
-    this.chatService.loadActiveChannel();
-    this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
-      if (channel) {
-        this.currentChannel = channel;
-        this.channelName = channel.channel_name
-        this.isVisible = channel.thread_open;
       }
     });
   }

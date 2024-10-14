@@ -15,7 +15,22 @@
           <span class="name">{{ thread.name }}</span>
         </div>
   
-        <span class="text" *ngIf="!editMode">{{ thread.content }}</span>
+        <div class="text" *ngIf="!editMode">{{ thread.content }}
+          <ng-container *ngIf="fileURL">
+            <a [href]="fileURL"><img *ngIf="fileType === 'image'" [src]="fileURL" alt="Image" class="uploaded-image" width="200px"></a>
+            <a [href]="fileURL"><iframe *ngIf="fileType === 'pdf'" [src]="fileURL" class="pdf-viewer" width="200px" height="250px"></iframe></a>
+            <a [href]="fileURL">
+              <video *ngIf="fileType === 'video'" controls>
+                <source [src]="fileURL" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </a>
+            <div *ngIf="fileType === 'unknown'">
+              <a [href]="fileURL" target="_blank">Datei herunterladen: {{ fileName }}</a>
+            </div>
+          </ng-container>
+        </div>
+
         <div class="edit-menu" *ngIf="editMode">
           <input type="text">
           <div class="edit-bottom">

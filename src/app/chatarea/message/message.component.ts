@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { OwnMessageComponent } from '../own-message/own-message.component';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { MainServiceService } from '../../firestore-service/main-service.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FileUploadService } from '../../firestore-service/file-upload.service';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-message',
@@ -17,18 +20,33 @@ export class MessageComponent {
   @Input() message: any;
   @Input() previousMessageDate: string | null = null;
 
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
+  uid: string | null = null;
   channelId: string = '';
   answerCount: number = 0;
   lastAnswerTime: string | null = null;
   allReactions: boolean = false;
   reactionNames: string[] = [];
+  fileType: string | null = null;
+  fileURL: SafeResourceUrl | null = null;
+  fileName: string | null = null;
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService) { }
+  private sanitizer = inject(DomSanitizer);
+
+  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) { }
 
   ngOnInit() {
+    this.uid = this.authService.getUID();
+    this.loadFileUpload();
     this.loadActiveChannelId();
     this.loadReactionNames()
+  }
+
+  async loadFileUpload() {
+    if (this.message.fileName) {
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
+      this.fileName = this.message.fileName
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl)
+    }
   }
 
   async loadReactionNames() {
@@ -94,7 +112,7 @@ export class MessageComponent {
       console.error('Keine Channel-ID vorhanden.');
       return;
     }
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
   }
 
   formatTime(timeString: string): string {

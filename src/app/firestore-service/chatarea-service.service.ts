@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { MainServiceService } from './main-service.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatareaServiceService {
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
+  uid = this.authService.getUID();
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
 
   /**
    * Loads a Firestore document and returns an observable with its data.

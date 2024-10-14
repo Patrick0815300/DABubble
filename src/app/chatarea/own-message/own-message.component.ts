@@ -9,7 +9,8 @@ import { reactionList } from '../../models/reactions/reaction-list.model';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { MainServiceService } from '../../firestore-service/main-service.service';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
-import { SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-own-message',
@@ -34,7 +35,7 @@ export class OwnMessageComponent implements OnInit {
   allReactions: boolean = false;
   selectedReactionPath: string = '';
   previousMessageDate: string | null = null;
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2'
+  uid: string | null = null;
   editMode: { [messageId: string]: boolean } = {};
   channelId: string = '';
   answerCount: number = 0;
@@ -45,23 +46,27 @@ export class OwnMessageComponent implements OnInit {
   fileName: string | null = null;
 
   private fireService = inject(ChatareaServiceService);
+  private sanitizer = inject(DomSanitizer);
 
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService) {
+
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
     this.fireService.loadReactions();
   }
 
   ngOnInit() {
+    this.uid = this.authService.getUID();
+    this.loadFileUpload();
     this.loadActiveChannelMessages();
     this.renderReact();
     this.loadActiveChannelId();
     this.loadReactionNames();
-    this.loadFileUpload()
   }
 
-  loadFileUpload() {
+  async loadFileUpload() {
     if (this.message.fileName) {
-      this.fileName = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
-      this.fileURL = this.message.fileUrl
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
+      this.fileName = this.message.fileName
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl)
     }
   }
 
@@ -139,7 +144,7 @@ export class OwnMessageComponent implements OnInit {
   }
 
   reactToMessage(messageId: string, reactionType: string, path: string) {
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid, path)
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
   }
 
   editMessage(messageId: string) {
@@ -181,8 +186,6 @@ export class OwnMessageComponent implements OnInit {
         .filter(message => message.isOwnMessage)
         .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       this.cdr.detectChanges();
-      console.log(this.messages);
-
     });
   }
 

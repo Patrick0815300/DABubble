@@ -14,6 +14,8 @@ import { User } from '../models/user/user.model';
 import { ChatareaServiceService } from '../firestore-service/chatarea-service.service';
 import { MainServiceService } from '../firestore-service/main-service.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { AuthService } from '../firestore-service/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chatarea',
@@ -34,19 +36,31 @@ import { ChangeDetectorRef } from '@angular/core';
 export class ChatareaComponent {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
 
+  private uidSubscription: Subscription | null = null;
+
   channelName: string = '';
   memberIds: string[] = [];
   members: User[] = [];
   messages: any[] = [];
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
+  uid: string | null = null;
   previousMessageDate: string | null = null;
   allChannelsAreFalse: boolean = false;
 
-  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService, private cdRef: ChangeDetectorRef) { }
+  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService, private cdRef: ChangeDetectorRef, private authService: AuthService) { }
 
   ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+      console.log('Loaded UID:', this.uid);
+    });
     this.loadActiveChannelData();
     this.checkChannelsStatus();
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 
   checkChannelsStatus() {

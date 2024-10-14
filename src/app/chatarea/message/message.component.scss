@@ -117,6 +117,9 @@
     }
 
     .text {
+        display: flex;
+        flex-direction: column;
+        grid-area: 18px;
         font-size: 18px;
         color: black;
         padding: 15px;

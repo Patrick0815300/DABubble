@@ -3,6 +3,8 @@ import { ShowProfilService } from '../../modules/show-profil.service';
 import { UserService } from '../../modules/user.service';
 import { DatabaseServiceService } from '../../database-service.service';
 import { User } from '../../modules/database.model';
+import { AuthService } from '../../firestore-service/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-logout',
@@ -16,7 +18,7 @@ export class LogoutComponent implements OnInit {
   authenticatedUser: User | undefined;
   selectedUser: User | undefined;
 
-  constructor(private userService: UserService, private showProfileService: ShowProfilService, private databaseService: DatabaseServiceService) {
+  constructor(private userService: UserService, private showProfileService: ShowProfilService, private databaseService: DatabaseServiceService, private authService: AuthService, private router: Router) {
     this.showProfileService.open_show_profile_nav$.subscribe(state => {
       this.open_show_profile_nav = state;
     });
@@ -41,5 +43,10 @@ export class LogoutComponent implements OnInit {
 
   sendSelectedUser(user: User) {
     this.userService.emitSelectedUser(user);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

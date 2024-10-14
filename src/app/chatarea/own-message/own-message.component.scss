@@ -94,6 +94,9 @@ mat-icon {
         }
 
         .text {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
             font-size: 18px;
             color: white;
             padding: 15px;
