@@ -5,6 +5,7 @@ import localeDe from '@angular/common/locales/de';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { provideAuth, getAuth } from '@angular/fire/auth';
 
 registerLocaleData(localeDe);
 
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideFirestore(() => getFirestore()),
+    provideAuth(() => getAuth()),
     { provide: LOCALE_ID, useValue: 'de-DE' },
   ],
 };

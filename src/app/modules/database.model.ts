@@ -35,17 +35,21 @@ export class Message {
   message_id!: string;
   message_content!: string;
   response_content!: string;
+  from_user_origin!: string;
   send_date!: number;
   from_user!: string;
   to_user!: string;
+  is_updated!: boolean;
 
   constructor(obj?: any) {
     this.message_id = obj ? obj.message_id || nanoid() : '';
     this.message_content = obj ? obj.message_content : '';
     this.response_content = obj ? obj.response_content || '' : '';
+    this.from_user_origin = obj ? obj.from_user_origin || '' : '';
     this.send_date = obj ? obj.send_date || Date.now() : '';
     this.from_user = obj ? obj.from_user || '' : '';
     this.to_user = obj ? obj.to_user || '' : '';
+    this.is_updated = obj ? obj.is_updated || false : '';
   }
 
   public toObject(): object {
@@ -53,9 +57,11 @@ export class Message {
       message_id: this.message_id,
       message_content: this.message_content,
       response_content: this.response_content,
+      from_user_origin: this.from_user_origin,
       send_date: this.send_date,
       from_user: this.from_user,
       to_user: this.to_user,
+      is_updated: this.is_updated,
     };
   }
 }

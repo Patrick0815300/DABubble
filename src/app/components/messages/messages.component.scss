@@ -120,21 +120,11 @@ button {
     > .name-date-line p {
       background-color: white;
     }
+    > .name-date-line .response_msg p {
+      background-color: white;
+    }
     > .emoji-container div {
       display: flex;
-    }
-  }
-}
-.align-right {
-  justify-content: end;
-  flex-direction: row-reverse;
-  > .name-date-line {
-    > p {
-      border-top-left-radius: 30px;
-      border-top-right-radius: unset;
-    }
-    > div {
-      flex-direction: row-reverse;
     }
   }
 }
@@ -231,6 +221,7 @@ button {
     background-color: white;
     color: #444df2;
     border: 1px solid #adb0d9;
+    font-weight: 700;
   }
   > .btn-info {
     background-color: #444df2;
@@ -284,7 +275,30 @@ button {
     border-top-right-radius: 30px;
     border-bottom-right-radius: 30px;
     border-bottom-left-radius: 30px;
+    cursor: default;
+    align-self: flex-start;
   }
+}
+
+.align-right {
+  justify-content: end;
+  flex-direction: row-reverse;
+  > .name-date-line {
+    > p {
+      border-top-left-radius: 30px;
+      border-top-right-radius: unset;
+      background-color: #797ef3 !important;
+      color: white;
+      cursor: default;
+      align-self: end;
+    }
+    > div {
+      flex-direction: row-reverse;
+    }
+  }
+}
+.updated_msg {
+  font-size: 14px;
 }
 
 .group-date {
@@ -368,4 +382,44 @@ button {
   > span {
     font-weight: 700;
   }
+}
+
+.response_msg {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem !important;
+  margin-bottom: 0.5rem;
+  > p {
+    background-color: #eceefe;
+    padding: 0.75rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.1rem;
+    border: 1px solid #adb0d9;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-right-radius: 30px;
+  }
+}
+
+.origin_msg {
+  font-weight: 700;
+}
+
+.sender-origin {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.offset {
+  height: 26.4px;
+  margin-bottom: 0.5rem;
+}
+
+.emoji-picker {
+  position: absolute;
+  bottom: 132px;
+  left: 50%;
+  transform: translateX(-50%);
 }
