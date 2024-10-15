@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { Channel } from '../../models/channels/entwickler-team.model';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
+import { MemberDialogComponent } from "../member-dialog/member-dialog.component";
 
 @Component({
   selector: 'app-channel-dialog',
@@ -23,29 +24,24 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
     MatDialogActions,
     MatButtonModule,
     FormsModule,
+    MemberDialogComponent
   ],
   templateUrl: './channel-dialog.component.html',
   styleUrls: ['./channel-dialog.component.scss']
 })
 export class ChannelDialogComponent {
+  @Output() toggleChannelInfoDialog = new EventEmitter<void>();
   admin: string = '';
   description: string = '';
-  name: string = ''; // Name des Channels
+  name: string = '';
   selectedChannelId: string = '';
   channels: Channel[] = [];
   channelNameEdit: boolean = false;
   channelDescEdit: boolean = false;
   channel: Channel = new Channel();
 
-  constructor(
-    public dialogRef: MatDialogRef<ChannelDialogComponent>,
-    private fireService: ChatareaServiceService,
-  ) {
+  constructor(private fireService: ChatareaServiceService) {
     this.loadActiveChannel();
-  }
-
-  ngOnDestroy() {
-    this.dialogRef.close();
   }
 
   loadActiveChannel() {
@@ -86,6 +82,6 @@ export class ChannelDialogComponent {
   }
 
   closeDialog() {
-    this.dialogRef.close();
+    this.toggleChannelInfoDialog.emit();
   }
 }

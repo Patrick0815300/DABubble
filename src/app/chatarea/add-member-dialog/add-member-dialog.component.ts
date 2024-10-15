@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,16 +31,13 @@ import { MainServiceService } from '../../firestore-service/main-service.service
   styleUrl: './add-member-dialog.component.scss'
 })
 export class AddMemberDialogComponent {
+  @Output() toggleAddMemberDialog = new EventEmitter<void>();
   users: User[] = [];
   filteredUsers: User[] = [];
   selectedUser: string[] = [];
   memberIds: string[] = [];
 
-  constructor(
-    public dialogRef: MatDialogRef<AddMemberDialogComponent>,
-    private fireService: ChatareaServiceService,
-    private mainService: MainServiceService
-  ) {
+  constructor(private fireService: ChatareaServiceService) {
     this.loadChannelMembers();
     this.loadUsers();
   }
@@ -82,7 +79,7 @@ export class AddMemberDialogComponent {
     this.fireService.addMembersToActiveChannel(this.selectedUser).subscribe({
       next: () => {
         console.log('Benutzer erfolgreich hinzugefügt.');
-        this.dialogRef.close();
+        this.closeDialog();
       },
       error: (err) => {
         console.error('Fehler beim Hinzufügen der Benutzer:', err);
@@ -91,6 +88,6 @@ export class AddMemberDialogComponent {
   }
 
   closeDialog() {
-    this.dialogRef.close();
+    this.toggleAddMemberDialog.emit()
   }
 }

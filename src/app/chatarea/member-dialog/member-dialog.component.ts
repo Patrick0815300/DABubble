@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,15 +28,12 @@ import { ChatareaServiceService } from '../../firestore-service/chatarea-service
   styleUrl: './member-dialog.component.scss'
 })
 export class MemberDialogComponent {
-
+  @Output() toggleMemberDialog = new EventEmitter<void>();
+  @Output() toggleAddMemberDialog = new EventEmitter<void>();
   users: User[] = [];
   memberIds: string[] = [];
 
-  constructor(
-    public dialogRef: MatDialogRef<MemberDialogComponent>,
-    public dialog: MatDialog,
-    private chatareaService: ChatareaServiceService
-  ) {
+  constructor(public dialog: MatDialog, private chatareaService: ChatareaServiceService) {
     this.loadChannelMembers();
   }
 
@@ -58,16 +55,11 @@ export class MemberDialogComponent {
   }
 
   closeDialog() {
-    this.dialogRef.close();
-  }
-
-  openProfilDialog() {
-    this.dialog.closeAll();
-    this.dialog.open(ProfilMemberDialogComponent);
+    this.toggleMemberDialog.emit();
   }
 
   openAddMemberDialog() {
-    this.dialog.closeAll();
-    this.dialog.open(AddMemberDialogComponent);
+    this.closeDialog();
+    this.toggleAddMemberDialog.emit()
   }
 }

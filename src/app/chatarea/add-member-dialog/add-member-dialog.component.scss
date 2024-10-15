@@ -2,11 +2,6 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 40px;
-    padding-left: 40px;
-    padding-right: 40px;
-    margin-bottom: 0;
-    font-family: 'Nunito' !important;
     font-weight: 700 !important;
     font-size: 24px !important;
     line-height: 32.74px !important;
@@ -38,12 +33,9 @@ h2 {
     }
 }
 
-mat-dialog-content {
+.container {
     display: flex;
     flex-direction: column;
-    padding-left: 40px !important;
-    padding-right: 40px !important;
-    padding-bottom: 0 !important;
 
     div {
         margin-bottom: 20px;
@@ -63,11 +55,9 @@ mat-dialog-content {
     }
 }
 
-mat-dialog-actions {
-    padding: 40px;
-    padding-top: 0;
-    padding-top: 0;
-    align-self: flex-end;
+.btn-container {
+    display: flex;
+    justify-content: flex-end;
 
     button {
         all: unset;
@@ -158,3 +148,15 @@ mat-dialog-actions {
         }
     }
 }
+
+// ----------------------------- MEDIA -----------------------------
+
+@media(max-width: 620px) {
+    .container {
+        mat-form-field {
+            width: 320px;
+        }
+    }
+}
+
+@media(max-width: 610px) {}

@@ -19,6 +19,9 @@
                 <button class="btn" mat-menu-item (click)="editMessage(message.id)">
                     Nachricht bearbeiten   
                 </button>
+                <button class="btn" mat-menu-item (click)="deleteMessage(message.id)">
+                    Nachricht löschen   
+                </button>
             </mat-menu>
         </div>
         <div class="message">
@@ -39,6 +42,7 @@
                       <a [href]="fileURL" target="_blank">Datei herunterladen: {{ message.fileName }}</a>
                     </div>
                   </ng-container>
+                  <span *ngIf="message.messageEdit">(Bearbeitet)</span>
             </div>
             
           
@@ -71,7 +75,7 @@
         </div>
 
         <div class="img-container">
-            <img src="../../../assets/img/00_general-buttons/characters/Frederik_Beck.png">
+            <img [src]="avatar">
         </div>
     </div>
 </div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, Inject, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
@@ -7,6 +7,8 @@ import { OwnMessageThreadComponent } from "../../chatarea/thread/own-message-thr
 import { MessageBoxThreadComponent } from '../../chatarea/thread/message-box-thread/message-box-thread.component';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { Channel } from '../../models/channels/entwickler-team.model';
+import { AuthService } from '../../firestore-service/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-right-wrapper',
@@ -27,7 +29,7 @@ export class RightWrapperComponent {
   isVisible: boolean = false;
   selectedThread: any;
   threads: any[] = [];
-  uid: string = 'cYNWHsbhyTZwZHCZnGD3ujgD2Db2';
+  uid: string | null = null;
   messages: any[] = [];
   threadData: any;
   threadMessages: any[] = [];
@@ -39,9 +41,14 @@ export class RightWrapperComponent {
   channelName: string = '';
 
   private chatService = inject(ChatServiceService);
+  private authService = inject(AuthService)
   private currentChannel: Channel | null = null;
+  private uidSubscription: Subscription | null = null;
 
   ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
     this.chatService.loadActiveChannel();
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
@@ -63,6 +70,12 @@ export class RightWrapperComponent {
         this.loadThreadMessages(this.channelId, this.messageId, this.threadId);
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 
   loadThreadMessages(channelId: string, messageId: string, threadId: string) {

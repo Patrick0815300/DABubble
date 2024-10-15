@@ -28,7 +28,9 @@ import { Subscription } from 'rxjs';
     ChannelDialogComponent,
     MessageComponent,
     OwnMessageComponent,
-    MessageBoxComponent
+    MessageBoxComponent,
+    MemberDialogComponent,
+    AddMemberDialogComponent
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss'
@@ -37,7 +39,9 @@ export class ChatareaComponent {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
 
   private uidSubscription: Subscription | null = null;
-
+  channelInfoDialog: boolean = false;
+  channelMemberDialog: boolean = false;
+  addMemberDialog: boolean = false;
   channelName: string = '';
   memberIds: string[] = [];
   members: User[] = [];
@@ -51,7 +55,6 @@ export class ChatareaComponent {
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
-      console.log('Loaded UID:', this.uid);
     });
     this.loadActiveChannelData();
     this.checkChannelsStatus();
@@ -93,7 +96,6 @@ export class ChatareaComponent {
       this.messages = [];
       return;
     }
-
     this.fireService.loadMessages(channelId).subscribe((messages) => {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
@@ -150,14 +152,26 @@ export class ChatareaComponent {
   }
 
   openChannelDialog() {
-    this.dialog.open(ChannelDialogComponent);
+    this.channelInfoDialog = !this.channelInfoDialog;
+  }
+
+  closeDialogOnClick(event: MouseEvent) {
+    if (this.channelInfoDialog) {
+      this.channelInfoDialog = false;
+    }
+    if (this.channelMemberDialog) {
+      this.channelMemberDialog = false;
+    }
+    if (this.addMemberDialog) {
+      this.addMemberDialog = false;
+    }
   }
 
   openMemberDialog() {
-    this.dialog.open(MemberDialogComponent);
+    this.channelMemberDialog = !this.channelMemberDialog;
   }
 
   openAddMemberDialog() {
-    this.dialog.open(AddMemberDialogComponent);
+    this.addMemberDialog = !this.addMemberDialog;
   }
 }

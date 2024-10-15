@@ -9,6 +9,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { User } from '../../models/user/user.model';
 import { MainServiceService } from '../../firestore-service/main-service.service';
 import { AuthService } from '../../firestore-service/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-message-box',
@@ -36,15 +37,25 @@ export class MessageBoxComponent implements AfterViewInit {
   private fileUploadService = inject(FileUploadService);
   private sanitizer = inject(DomSanitizer);
 
+  private uidSubscription: Subscription | null = null;
+
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('messageTextArea') messageTextArea!: ElementRef;
 
   constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService) { }
 
   ngOnInit() {
-    this.uid = this.authService.getUID();
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
     this.loadActiveChannelName();
     this.loadChannelMembers();
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 
   toggleLinkDialog() {
@@ -92,7 +103,7 @@ export class MessageBoxComponent implements AfterViewInit {
   }
 
   openFileDialog() {
-    this.fileInputElement.nativeElement.click();  // Öffnet das Dateiauswahlfenster
+    this.fileInputElement.nativeElement.click();
   }
 
   ngAfterViewInit() {
@@ -101,7 +112,7 @@ export class MessageBoxComponent implements AfterViewInit {
       if (input.files && input.files.length > 0) {
         const selectedFile = input.files[0];
         this.selectedFile = selectedFile
-        this.uploadFile();  // Datei zum Hochladen weitergeben
+        this.uploadFile();
       }
     });
   }
@@ -144,7 +155,8 @@ export class MessageBoxComponent implements AfterViewInit {
               reactions: [],
               senderId: this.uid,
               fileUrl: this.cleanUrl,
-              fileName: this.fileName || null
+              fileName: this.fileName || null,
+              messageEdit: false,
             };
             this.fireService.addMessage(channel.id, messageData).then(() => {
               this.messageContent = '';

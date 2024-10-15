@@ -11,6 +11,7 @@ import { MainServiceService } from '../../firestore-service/main-service.service
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../firestore-service/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-own-message',
@@ -44,6 +45,10 @@ export class OwnMessageComponent implements OnInit {
   fileType: string | null = null;
   fileURL: SafeResourceUrl | null = null;
   fileName: string | null = null;
+  avatar: string | null = null;
+  messageEdited: boolean = false;
+
+  private uidSubscription: Subscription | null = null;
 
   private fireService = inject(ChatareaServiceService);
   private sanitizer = inject(DomSanitizer);
@@ -54,12 +59,36 @@ export class OwnMessageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.uid = this.authService.getUID();
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
     this.loadFileUpload();
     this.loadActiveChannelMessages();
     this.renderReact();
     this.loadActiveChannelId();
     this.loadReactionNames();
+    this.loadAvatar();
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
+
+  deleteMessage(messageId: string) {
+    this.fireService.getActiveChannel().subscribe((channelData) => {
+      const channelId = channelData.id;
+      this.fireService.deleteMessage(channelId, messageId)
+    });
+  }
+
+
+  loadAvatar() {
+    const docId = this.message.senderId;
+    this.fireService.getUserAvatar(docId).subscribe((avatar) => {
+      this.avatar = avatar;
+    });
   }
 
   async loadFileUpload() {
@@ -160,15 +189,20 @@ export class OwnMessageComponent implements OnInit {
   }
 
   saveEditMessage(message: any) {
-    this.fireService.updateMessage(message.id, { content: message.content })
+    this.fireService.updateMessage(message.id, {
+      content: message.content,
+      messageEdit: true
+    })
       .subscribe({
         next: () => {
           this.editMode[message.id] = false;
+          this.messageEdited = true;
           this.cdr.detectChanges();
         },
         error: (error) => console.error('Fehler beim Aktualisieren der Nachricht:', error)
       });
   }
+
 
   loadActiveChannelMessages() {
     this.fireService.getActiveChannel().subscribe({

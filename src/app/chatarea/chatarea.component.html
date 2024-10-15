@@ -1,6 +1,11 @@
 <mat-card class="card">
     <mat-card-header>
-        <mat-card-title (click)="openChannelDialog()" ><mat-icon>tag</mat-icon> {{ channelName }} <mat-icon>keyboard_arrow_down</mat-icon></mat-card-title>
+        <mat-card-title (click)="openChannelDialog()">
+          <mat-icon>tag</mat-icon> 
+          {{ channelName }} 
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </mat-card-title>
+        <app-channel-dialog class="channel-dialog" *ngIf="channelInfoDialog" (click)="$event.stopPropagation()" (toggleChannelInfoDialog)="openChannelDialog()"></app-channel-dialog>
         <div class="member-container">
              <div class="member" (click)="openMemberDialog()">
                  <div>
@@ -10,6 +15,8 @@
              </div>
              <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
         </div>
+        <app-member-dialog class="member-dialog" *ngIf="channelMemberDialog" (click)="$event.stopPropagation()" (toggleMemberDialog)="openMemberDialog()" (toggleAddMemberDialog)="openAddMemberDialog()"></app-member-dialog>
+        <app-add-member-dialog class=" member-dialog add-member-dialog" *ngIf="addMemberDialog" (click)="$event.stopPropagation()" (toggleAddMemberDialog)="openAddMemberDialog()"></app-add-member-dialog>
      </mat-card-header>
      <mat-card-content #messageContainer>
       <ng-container *ngFor="let message of messages; let i = index">
@@ -26,3 +33,4 @@
       </mat-card-content>
     <app-message-box class="message-box"></app-message-box>
 </mat-card>
+<div class="background" *ngIf="channelInfoDialog || channelMemberDialog || addMemberDialog" (click)="closeDialogOnClick($event)"></div>

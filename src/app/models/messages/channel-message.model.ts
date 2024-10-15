@@ -6,7 +6,8 @@ export class Message {
     time: string;
     senderId: string;
     fileUrl: string;
-    fileName: string
+    fileName: string;
+    edit: boolean;
 
     constructor(obj?: any) {
         this.id = obj && obj.id ? obj.id : '';
@@ -17,6 +18,7 @@ export class Message {
         this.senderId = obj && obj.senderId ? obj.senderId : '';
         this.fileUrl = obj && obj.fileUrl ? obj.fileUrl : '';
         this.fileName = obj && obj.fileName ? obj.fileName : '';
+        this.edit = obj && obj.edit ? obj.edit : false;
     }
 
     toJSON() {
@@ -28,7 +30,8 @@ export class Message {
             time: this.time,
             senderId: this.senderId,
             fileUrl: this.fileUrl,
-            fileName: this.fileName
+            fileName: this.fileName,
+            edit: this.edit
         };
     }
 }

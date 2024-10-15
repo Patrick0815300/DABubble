@@ -1,44 +1,48 @@
 <h2>
-    <div>
-      <mat-icon>tag</mat-icon> {{ name }}
-    </div>
-    <mat-icon (click)="closeDialog()" class="close">close</mat-icon>
-  </h2>
-  
-  <mat-dialog-content>
-    <div *ngIf="selectedChannelId">
-      <div class="channel" [ngClass]="{ 'none-border': channelNameEdit }">
-        <div class="channel-headline">
-          <span>Channel-Name</span>
-          <span class="edit" (click)="editChannelName()">
-            {{ channelNameEdit ? 'Speichern' : 'Bearbeiten' }}
-          </span>
-        </div>
-        <div [ngClass]="{ 'editing-border': channelNameEdit }">
-          <mat-icon>tag</mat-icon>
-          <span *ngIf="!channelNameEdit">{{ name }}</span>
-          <input *ngIf="channelNameEdit" type="text" [(ngModel)]="name">
-        </div>
+  <div>
+    <mat-icon>tag</mat-icon> {{ name }}
+  </div>
+  <mat-icon (click)="closeDialog()" class="close">close</mat-icon>
+</h2>
+
+<div>
+  <div *ngIf="selectedChannelId">
+    <div class="channel" [ngClass]="{ 'none-border': channelNameEdit }">
+      <div class="channel-headline">
+        <span>Channel-Name</span>
+        <span class="edit" (click)="editChannelName()">
+          {{ channelNameEdit ? 'Speichern' : 'Bearbeiten' }}
+        </span>
+        <mat-icon class="edit-icon" *ngIf="!channelNameEdit" (click)="editChannelName()">edit</mat-icon>
+        <mat-icon class="edit-icon" *ngIf="channelNameEdit" (click)="editChannelName()">check_circle</mat-icon>
       </div>
-  
-      <div class="description channel" [ngClass]="{ 'none-border': channelDescEdit }">
-        <div class="channel-headline">
-          <span>Beschreibung</span>
-          <span class="edit" (click)="editChannelDescription()">
-            {{ channelDescEdit ? 'Speichern' : 'Bearbeiten' }}
-          </span>
-        </div>
-        <span *ngIf="!channelDescEdit">{{ description }}</span>
-        <input class="editing-border" *ngIf="channelDescEdit" type="text" [(ngModel)]="description">
-        <div class="admin">
-          <span>Erstellt von</span>
-          <span class="name">{{ admin }}</span>
-        </div>
+      <div [ngClass]="{ 'editing-border': channelNameEdit }">
+        <mat-icon>tag</mat-icon>
+        <span *ngIf="!channelNameEdit">{{ name }}</span>
+        <input *ngIf="channelNameEdit" type="text" [(ngModel)]="name">
       </div>
     </div>
-  </mat-dialog-content>
-  
-  <mat-dialog-actions>
-    <button (click)="leaveChannel()">Channel verlassen</button>
-  </mat-dialog-actions>
-  
+
+    <div class="description channel" [ngClass]="{ 'none-border': channelDescEdit }">
+      <div class="channel-headline">
+        <span>Beschreibung</span>
+        <span class="edit" (click)="editChannelDescription()">
+          {{ channelDescEdit ? 'Speichern' : 'Bearbeiten' }}
+        </span>
+        <mat-icon class="edit-icon" *ngIf="!channelDescEdit" (click)="editChannelDescription()">edit</mat-icon>
+        <mat-icon class="edit-icon" *ngIf="channelDescEdit" (click)="editChannelDescription()">check_circle</mat-icon>
+      </div>
+      <span *ngIf="!channelDescEdit">{{ description }}</span>
+      <input class="editing-border" *ngIf="channelDescEdit" type="text" [(ngModel)]="description">
+      <div class="admin">
+        <span>Erstellt von</span>
+        <span class="name">{{ admin }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<app-member-dialog></app-member-dialog>
+
+<div class="leave-channel">
+  <button (click)="leaveChannel()">Channel verlassen</button>
+</div>

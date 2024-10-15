@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
+import { deleteDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,12 @@ export class ChatareaServiceService {
         }
       }, (error) => observer.error(error));
     });
+  }
+
+  getUserAvatar(docId: string): Observable<string | null> {
+    return this.loadDocument('users', docId).pipe(
+      map((user) => user.avatar ? user.avatar : null)
+    );
   }
 
   /**
@@ -155,6 +162,11 @@ export class ChatareaServiceService {
   addMessage(channelId: string, messageData: any): Promise<DocumentReference<any>> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
     return addDoc(messagesCollectionRef, messageData);
+  }
+
+  deleteMessage(channelId: string, messageId: string): Promise<void> {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
+    return deleteDoc(messageDocRef);
   }
 
   /**
