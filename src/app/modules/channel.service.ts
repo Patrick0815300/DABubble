@@ -73,9 +73,9 @@ export class ChannelService {
       const userDocRef = doc(this.firestore, `${collectionName}/${docId}`);
       try {
         await updateDoc(userDocRef, editedData);
-        console.log('Channel successfully updated!');
+        console.log(`${collectionName} successfully updated!`);
       } catch (error) {
-        console.error('Error updating channel field chosen: ', error);
+        console.error(`Error updating ${collectionName} field ${parameter}: `, error);
       }
     } else {
       console.log(`No ${collectionName} found with ID:', ${parameter}`);

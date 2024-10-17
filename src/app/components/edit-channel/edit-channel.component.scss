@@ -15,7 +15,13 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
   > input {
+    font-family: 'Nunito';
+
     padding-left: 1rem;
+    height: 30px;
+    border-radius: 30px;
+    border: 1px solid #adb0d9;
+    outline: none;
   }
   > .ch-creation {
     display: flex;
@@ -27,6 +33,12 @@ form {
       text-transform: capitalize;
     }
   }
+}
+
+li {
+  list-style-type: none;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .capitalize {
@@ -82,10 +94,11 @@ form {
 
 .btn-container {
   align-self: end;
+  display: flex;
+  gap: 1rem;
   > .btn {
     font-family: 'Nunito';
     padding: 0.75rem 1rem;
-    background-color: #444df2;
     color: white;
     border-radius: 25px;
     border: transparent;
@@ -93,6 +106,12 @@ form {
     &:hover {
       opacity: 0.8;
     }
+  }
+  > .btn-danger {
+    background-color: #dc3545;
+  }
+  > .btn-info {
+    background-color: #444df2;
   }
 }
 

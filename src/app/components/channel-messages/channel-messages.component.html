@@ -13,6 +13,17 @@
           <p>Ouff! Only <span>members</span> of this channel are allowed to send messages. Please contact the <span>channel administrator</span> for adding you as member!</p>
           <img src="assets/img/icons/subscribe.svg" alt="" />
         </section>
+        <section *ngIf="channel_is_deleted">
+          @if(authenticatedUser?.user_id === channel.admin){
+          <h1>Du hast diesen Channel gelöscht. Kein Mitglied kann Nachricht in diesem Channel schreiben. Das ist das Ende des Channels.</h1>
+          }@else{
+          <h1>
+            Dieser Channel wurde vom Administrator gelöscht. Kein Mitglied kann im Channel schreiben. Bitte kontaktieren Sie der Admin, um mehr dazu zu erfahren. Das ist das Ende
+            des Channels.
+          </h1>
+
+          }
+        </section>
         @if(channelChat.length !==0){
         <div *ngFor="let chatGroup of groupedChat">
           <div class="group-date">

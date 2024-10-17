@@ -10,6 +10,7 @@ import { User } from '../../models/user/user.model';
 import { MainServiceService } from '../../firestore-service/main-service.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
+import { EmojiService } from '../../modules/emoji.service';
 
 @Component({
   selector: 'app-message-box',
@@ -32,11 +33,13 @@ export class MessageBoxComponent implements AfterViewInit {
   fileType: string | null = null;
   users: User[] = [];
   memberIds: string[] = [];
-  linkDialog: boolean = false
+  linkDialog: boolean = false;
   linkedUsers: string[] = [];
+  toggleEmojiPicker: boolean = false;
 
   private fireService = inject(ChatareaServiceService);
   private fileUploadService = inject(FileUploadService);
+  private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
 
   private uidSubscription: Subscription | null = null;
@@ -52,12 +55,19 @@ export class MessageBoxComponent implements AfterViewInit {
     });
     this.loadActiveChannelName();
     this.loadChannelMembers();
+    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
+
+    })
   }
 
   ngOnDestroy() {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  showEmojiPicker() {
+    this.emojiService.handleShowPicker();
   }
 
   checkForAtSymbol(event: KeyboardEvent) {

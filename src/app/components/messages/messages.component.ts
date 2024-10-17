@@ -1,7 +1,7 @@
 import { Message, User } from './../../modules/database.model';
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
-import { addDoc, collection, Firestore, FirestoreModule, onSnapshot } from '@angular/fire/firestore';
+import { FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
 import { DatabaseServiceService } from '../../database-service.service';
 import { CommonModule, formatDate } from '@angular/common';
@@ -9,10 +9,15 @@ import { FormsModule } from '@angular/forms';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 import { UserService } from '../../modules/user.service';
 import { ShowProfilService } from '../../modules/show-profil.service';
+import { ChannelService } from '../../modules/channel.service';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
+import { EmojiService } from '../../modules/emoji.service';
+
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent],
+  imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent, EmojiPickerComponent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
@@ -29,8 +34,21 @@ export class MessagesComponent implements OnInit {
   today!: string;
   open_show_profile!: boolean;
   selectedUser: User = new User();
-
-  constructor(private showProfileService: ShowProfilService, private userService: UserService, private databaseService: DatabaseServiceService) {
+  show_delete_msg!: number;
+  update_message: string = '';
+  is_update_msg: boolean = false;
+  update_group!: number;
+  update_chat!: number;
+  update_title = formatDate(new Date(), 'EEEE, dd MMMM y HH:MM', 'de-DE');
+  is_response: boolean = false;
+  toggleEmojiPicker: boolean = false;
+  constructor(
+    private channelService: ChannelService,
+    private showProfileService: ShowProfilService,
+    private userService: UserService,
+    private databaseService: DatabaseServiceService,
+    private emojiService: EmojiService
+  ) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
     });
@@ -67,7 +85,23 @@ export class MessagesComponent implements OnInit {
      */
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
+      this.onCancelUpdateMsg();
       console.log('selected User is:', this.selectedUser);
+    });
+
+    /**
+     * this method add the selected emoji to the current tipped message
+     */
+    this.emojiService.emoji$.subscribe((emoji: string) => {
+      this.message_content = this.message_content ? this.message_content + emoji : emoji;
+    });
+
+    /**
+     * this method manage the state of emoji picker. If the  user picks an emoji it handles the
+     * closing of the picker
+     */
+    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
+      this.toggleEmojiPicker = statePicker;
     });
   }
 
@@ -113,23 +147,6 @@ export class MessagesComponent implements OnInit {
     return this.databaseService.messages;
   }
 
-  // onAddUser() {
-  //   let user = {
-  //     first_name: 'Validate',
-  //     last_name: 'validate_last_name',
-  //      name:'',
-  //     email: 'validate@gmail.com',
-  //     image_file: 'avatar.svg',
-  //     password: '33333',
-  //     user_id: 'cc8e',
-  //     online: false,
-  //   };
-
-  //   let newUser = new User(user);
-  //   let userOject = newUser.toObject();
-  //   this.databaseService.addUser(userOject);
-  // }
-
   onAddMessage(currentUser_id: string | undefined, to_user_id: string) {
     let msg = {
       message_content: this.message_content,
@@ -174,5 +191,69 @@ export class MessagesComponent implements OnInit {
 
   sendSelectedUser(user: User) {
     this.userService.emitSelectedUser(user);
+  }
+
+  onShowDeleteDialog(index: number) {
+    if (this.show_delete_msg === index) {
+      this.show_delete_msg = -1;
+    } else {
+      this.show_delete_msg = index;
+    }
+  }
+
+  onDeleteMessage(msgId: string) {
+    this.databaseService.deleteDocument('messages', 'message_id', msgId);
+    this.show_delete_msg = -1;
+  }
+
+  onUpdateMessage(msgContent: string, index_chat: number, index_group: number) {
+    this.update_chat = index_chat;
+    this.update_group = index_group;
+    this.update_message = msgContent;
+    this.show_delete_msg = -1;
+    console.log('Chat:', this.update_chat, 'Group', this.update_group);
+  }
+
+  handleUpdateMsg(currentMsgId: string) {
+    this.channelService
+      .updateChannelData('messages', 'message_id', currentMsgId, { message_content: this.update_message })
+      .then(() => this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { is_updated: true }));
+    this.update_message = '';
+    this.onCancelUpdateMsg();
+  }
+
+  onCancelUpdateMsg() {
+    this.update_group = -1;
+    this.update_chat = -1;
+    this.is_response = false;
+  }
+
+  onRespond(index_chat: number, index_group: number) {
+    this.is_response = true;
+    this.update_chat = index_chat;
+    this.update_group = index_group;
+    this.show_delete_msg = -1;
+  }
+
+  handleResponse(currentMsg: Message) {
+    let msg = {
+      message_content: this.update_message,
+      response_content: currentMsg?.message_content,
+      from_user_origin: currentMsg?.from_user,
+      from_user: this.authenticatedUser?.user_id,
+      to_user: currentMsg?.to_user === this.authenticatedUser?.user_id ? currentMsg?.from_user : currentMsg?.to_user,
+    };
+
+    let newMessage = new Message(msg);
+
+    let msgObject = newMessage.toObject();
+
+    this.databaseService.addMessage(msgObject);
+    this.update_message = '';
+    this.onCancelUpdateMsg();
+  }
+
+  onShowEmojiPicker() {
+    this.emojiService.handleShowPicker();
   }
 }

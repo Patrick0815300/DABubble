@@ -34,25 +34,34 @@ export class User {
 export class Message {
   message_id!: string;
   message_content!: string;
+  response_content!: string;
+  from_user_origin!: string;
   send_date!: number;
   from_user!: string;
   to_user!: string;
+  is_updated!: boolean;
 
   constructor(obj?: any) {
     this.message_id = obj ? obj.message_id || nanoid() : '';
     this.message_content = obj ? obj.message_content : '';
+    this.response_content = obj ? obj.response_content || '' : '';
+    this.from_user_origin = obj ? obj.from_user_origin || '' : '';
     this.send_date = obj ? obj.send_date || Date.now() : '';
     this.from_user = obj ? obj.from_user || '' : '';
     this.to_user = obj ? obj.to_user || '' : '';
+    this.is_updated = obj ? obj.is_updated || false : '';
   }
 
   public toObject(): object {
     return {
       message_id: this.message_id,
       message_content: this.message_content,
+      response_content: this.response_content,
+      from_user_origin: this.from_user_origin,
       send_date: this.send_date,
       from_user: this.from_user,
       to_user: this.to_user,
+      is_updated: this.is_updated,
     };
   }
 }
@@ -67,6 +76,7 @@ export class Channel {
   admin!: string;
   thread_open!: boolean;
   chosen!: boolean;
+  is_deleted!: boolean;
 
   constructor(obj?: any) {
     this.channel_id = obj ? obj.channel_id || nanoid() : '';
@@ -76,6 +86,7 @@ export class Channel {
     this.admin = obj ? obj.admin : '';
     this.thread_open = obj ? obj.thread_open || false : '';
     this.chosen = obj ? obj.chosen || false : '';
+    this.is_deleted = obj ? obj.is_deleted || false : '';
   }
 
   public toObject() {
@@ -87,6 +98,7 @@ export class Channel {
       admin: this.admin,
       thread_open: this.thread_open,
       chosen: this.chosen,
+      is_deleted: this.is_deleted,
     };
   }
 }

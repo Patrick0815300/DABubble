@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ChannelService } from '../../modules/channel.service';
 import { UserService } from '../../modules/user.service';
-import { Channel, User } from '../../modules/database.model';
+import { Channel, ChannelMember, Message, User } from '../../modules/database.model';
 import { DatabaseServiceService } from '../../database-service.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-channel',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './edit-channel.component.html',
   styleUrl: './edit-channel.component.scss',
 })
@@ -16,6 +18,10 @@ export class EditChannelComponent implements OnInit {
   channel: Channel = new Channel();
   admin_name: string = '';
   authenticatedUser: User | undefined;
+  is_delete_channel: boolean = false;
+  ChannelMembers: ChannelMember[] = [];
+  admin_password: string = '';
+  deletion_message: string = '';
 
   constructor(private channelService: ChannelService, private userService: UserService, private databaseService: DatabaseServiceService) {}
 
@@ -26,6 +32,10 @@ export class EditChannelComponent implements OnInit {
 
     this.userService.channel$.subscribe(channel => {
       this.channel = channel;
+    });
+
+    this.channelService.channelMembers$.subscribe(members => {
+      this.ChannelMembers = members;
     });
 
     this.databaseService.getChannelAdmin(this.channel.admin).subscribe(admin => {
@@ -43,11 +53,63 @@ export class EditChannelComponent implements OnInit {
 
   onLeaveChannel() {
     if (this.authenticatedUser?.user_id !== this.channel.admin) {
-      this.databaseService.leaveChannel(this.authenticatedUser?.user_id);
+      this.databaseService.deleteDocument('channel_members', 'member_id', this.authenticatedUser?.user_id);
     } else {
       console.log('Admin cannot leave the channel');
     }
 
     this.onOpenEditChannel();
+  }
+
+  onTryToDeleteChannel() {
+    this.is_delete_channel = true;
+  }
+
+  onDeleteChannel() {
+    if (this.admin_password === this.authenticatedUser?.password) {
+      let all_channel_members = this.ChannelMembers.map(member => member.member_id);
+      this.ChannelMembers.forEach(member => this.databaseService.deleteDocument('channel_members', 'member_id', member.member_id));
+      all_channel_members.forEach(member => this.sendDeletionMessage(member));
+
+      this.handleIsDeleted(this.channel.channel_id);
+      console.log('Channel deleted');
+      this.onCancelDeletion();
+    } else {
+      console.log('Eingegebenes Passwort ist falsch, bitte versuchen Sie nochmal!');
+    }
+  }
+
+  /**
+   * this method handle the is_deleted field of the Channel. Set it to true if
+   * the current channel is deleted or let the default value (False) if not.
+   * @param {string} currentChannelId - Id of the current channel to be deleted
+   */
+  handleIsDeleted(currentChannelId: string) {
+    this.channelService.updateChannelData('channels', 'channel_id', currentChannelId, { is_deleted: true });
+  }
+
+  /**
+   * this method send messages to all users of the channel to be deleted to inform them that the admin
+   * has deleted the channel.
+   * @param {string} toUser - Id of the user who the message is sent to,
+   */
+  sendDeletionMessage(toUser: string) {
+    let msg = {
+      message_content: `Deine Mitgliedschaf zum folgenden Channel #${this.channel.channel_name} wurde vom mir beendet.
+                        Ich habe den Channel endgültig gelöscht. Du kannst alten Nachrichten sehen aber keine Neuen schreiben.
+                        Grund: ${this.deletion_message ? this.deletion_message : 'Kein Grund wurde gegeben.'}`,
+      from_user: this.channel.admin,
+      to_user: toUser,
+    };
+    let newMessage = new Message(msg);
+    let msgObject = newMessage.toObject();
+    this.databaseService.addMessage(msgObject);
+  }
+
+  /**
+   * this method allow to cancel the deletion process
+   */
+  onCancelDeletion() {
+    this.is_delete_channel = false;
   }
 }

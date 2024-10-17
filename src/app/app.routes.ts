@@ -11,13 +11,13 @@ import { MainComponentComponent } from './main-component/main-component.componen
 
 
 export const routes: Routes = [
-    { path: "", component: LoginComponent },
-    { path: "signIn", component: SignInComponent },
-    { path: "chooseAvatar/:id", component: ChooseAvatarComponent },
-    { path: "newPassword", component: NewPasswordComponent },
-    { path: "newPassword2", component: NewPassword2Component },
-    { path: "desktop/:id", component: MainComponentComponent },
-    { path: "imprint", component: ImprintComponent },
-    { path: "privacyPolicy", component: PrivacypolicyComponent },
-    { path: '**', redirectTo: '', pathMatch: 'full' }
+  { path: "", component: LoginComponent },
+  { path: "signIn", component: SignInComponent },
+  { path: "chooseAvatar/:id", component: ChooseAvatarComponent },
+  { path: "newPassword", component: NewPasswordComponent },
+  { path: "newPassword2", component: NewPassword2Component },
+  { path: "desktop/:id", component: MainComponentComponent },
+  { path: "imprint", component: ImprintComponent },
+  { path: "privacyPolicy", component: PrivacypolicyComponent },
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

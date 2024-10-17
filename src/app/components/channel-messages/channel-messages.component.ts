@@ -20,6 +20,7 @@ export class ChannelMessagesComponent implements OnInit {
   authenticatedUser: User | undefined;
   today!: string;
   show_error_message: boolean = false;
+  channel_is_deleted: boolean = false;
   groupedChat: any;
   channelChat: Message[] = [];
   ChannelMembers: ChannelMember[] = [];
@@ -35,7 +36,8 @@ export class ChannelMessagesComponent implements OnInit {
     this.userService.channel$.subscribe(channel => {
       this.channel = channel;
       this.show_error_message = false;
-      //console.log('current channel', this.channel);
+      this.channel_is_deleted = false;
+      console.log('current channel', this.channel);
     });
 
     this.channelService.channelMembers$.subscribe(members => {
@@ -70,8 +72,10 @@ export class ChannelMessagesComponent implements OnInit {
 
     if (all_subscribers.includes(currentUser_id!)) {
       this.databaseService.addMessage(msgObject);
-    } else {
+    } else if (!this.channel.is_deleted) {
       this.show_error_message = true;
+    } else {
+      this.channel_is_deleted = true;
     }
 
     this.message_content = '';

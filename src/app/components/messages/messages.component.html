@@ -6,21 +6,68 @@
     </div>
     @if(chat.length !==0){
     <div class="chat-container">
-      <div *ngFor="let chatGroup of groupedChat">
+      <div *ngFor="let chatGroup of groupedChat; let index_chat = index">
         <div class="group-date">
           <span>{{ chatGroup.date }} </span>
           <div class="line"></div>
         </div>
-        <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.user_id">
+        <div *ngFor="let message of chatGroup.messages; let index_group = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.user_id">
           <div class="image-message">
+            <div class="offset" *ngIf="message?.response_content"></div>
             <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
           </div>
-          <div class="name-date-line">
-            <div>
+          <div class="name-date-line" [class.update_msg]="update_group === index_group && update_chat === index_chat">
+            <div class="response_msg" *ngIf="message?.response_content">
+              <img class="sender-origin" src="assets/img/profiles/{{ getCachedUser(message?.from_user_origin)?.image_file }}" alt="" />
+              <span class="origin_msg">&#64;{{ getCachedUser(message?.from_user_origin)?.name }}</span>
+              <p class="response">{{ message?.response_content.substring(0, 100) }}</p>
+            </div>
+            <div *ngIf="update_group !== index_group || update_chat !== index_chat">
               <span>{{ getCachedUser(message?.from_user)?.name }}</span>
               <span>{{ setTimeFormat(message.send_date) }} Uhr</span>
             </div>
-            <p>{{ message.message_content }}</p>
+
+            <p *ngIf="update_group !== index_group || update_chat !== index_chat">
+              {{ message.message_content }}
+              <span title="{{ update_title }}" *ngIf="message?.is_updated" class="updated_msg">(Bearbeitet)</span>
+            </p>
+
+            <input
+              class="update_message"
+              *ngIf="update_group === index_group && update_chat === index_chat"
+              autocomplete="off"
+              [(ngModel)]="update_message"
+              type="text"
+              name="update_message"
+            />
+            <div class="btn-line" *ngIf="update_group === index_group && update_chat === index_chat">
+              <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+              <div class="btn-container">
+                <button class="btn btn-white" (click)="onCancelUpdateMsg()" type="button">Abbrechen</button>
+                @if(is_response){
+                <button class="btn btn-info" (click)="handleResponse(message)" type="button">Speichern</button>
+                }@else {
+                <button class="btn btn-info" (click)="handleUpdateMsg(message?.message_id)" type="button">Speichern</button>
+                }
+              </div>
+            </div>
+          </div>
+          <div
+            class="emoji-container"
+            [class.align-box-right]="message?.from_user !== authenticatedUser?.user_id"
+            *ngIf="update_group !== index_group || update_chat !== index_chat"
+          >
+            <div class="img-group">
+              <img src="assets/img/icons/emoji_white_heavy_check_mark_.svg" alt="" />
+              <img src="assets/img/icons/emoji_person_hand_celebrate_.svg" alt="" />
+              <img (click)="onShowEmojiPicker()" src="assets/img/icons/add_reaction.svg" alt="" />
+              <img (click)="onRespond(index_chat, index_group)" src="assets/img/icons/comment.svg" alt="" />
+              <img (click)="onShowDeleteDialog(index_group)" *ngIf="message?.from_user === authenticatedUser?.user_id" src="assets/img/icons/more_vert.svg" alt="" />
+              <div *ngIf="show_delete_msg === index_group" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser?.user_id">
+                <button class="btn" (click)="onUpdateMessage(message?.message_content, index_chat, index_group)">Nachricht bearbeiten</button>
+                <button class="btn" (click)="onDeleteMessage(message?.message_id)">Nachricht löschen</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -47,15 +94,15 @@
       </div>
     </div>
     }
-
+    <app-emoji-picker class="emoji-picker" *ngIf="toggleEmojiPicker" />
     <div class="input-wrapper">
       <div class="input-form">
-        <input class="message-input" [(ngModel)]="message_content" type="text" name="meassage" placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}" />
+        <input class="message-input" [(ngModel)]="message_content" type="text" name="message" placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}" />
         <div class="send-line">
           <div class="alternate-line">
             <img class="icons" src="assets/img/icons/input_add.svg" alt="" />
             <div class="sep-line"></div>
-            <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+            <img (click)="onShowEmojiPicker()" class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
             <img class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
           </div>
           <button (click)="onAddMessage(authenticatedUser?.user_id, toUserId)">

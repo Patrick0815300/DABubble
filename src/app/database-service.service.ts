@@ -168,33 +168,7 @@ export class DatabaseServiceService {
     }
   }
 
-  async getDocumentIdByMemberId(member_id: string | undefined) {
-    const collectionRef = collection(this.firestore, 'channel_members');
-    const q = query(collectionRef, where('member_id', '==', member_id));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const docSnapshot = querySnapshot.docs[0];
-      return docSnapshot.id;
-    } else {
-      console.log(`No Member found with ID:', ${member_id}`);
-      return null;
-    }
-  }
-
-  async leaveChannel(member_id: string | undefined) {
-    const docId = await this.getDocumentIdByMemberId(member_id);
-    if (docId) {
-      const userDocRef = doc(this.firestore, 'channel_members', `${docId}`);
-      try {
-        await deleteDoc(userDocRef);
-        console.log('Document deleted');
-      } catch (e) {
-        console.error('Error adding document: ', e);
-      }
-    }
-  }
-  //////////////// MANIPULATE DATA IN THE DATABASE ////////////*css*/`
+  //////////////// MANIPULATE DATA IN THE DATABASE ////////////////////
 
   /**
    *get the current authenticated user
@@ -265,6 +239,33 @@ export class DatabaseServiceService {
 
   officeTeam(): Observable<Channel> {
     return this.snapChannels().pipe(map(channels => channels.filter(channel => channel.channel_name.toLowerCase() === 'office-team')[0]));
+  }
+
+  async getDocumentIdByMemberId(collectionName: string, field: string, parameter: any) {
+    const collectionRef = collection(this.firestore, collectionName);
+    const q = query(collectionRef, where(field, '==', parameter));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const docSnapshot = querySnapshot.docs[0];
+      return docSnapshot.id;
+    } else {
+      console.log(`No Member found with ID:', ${parameter}`);
+      return null;
+    }
+  }
+
+  async deleteDocument(collectionName: string, field: string, parameter: any) {
+    const docId = await this.getDocumentIdByMemberId(collectionName, field, parameter);
+    if (docId) {
+      const userDocRef = doc(this.firestore, collectionName, `${docId}`);
+      try {
+        await deleteDoc(userDocRef);
+        console.log(parameter, 'Document deleted');
+      } catch (e) {
+        console.error('Error adding document: ', e);
+      }
+    }
   }
 
   getChannelAdmin(admin_id: string): Observable<User> {

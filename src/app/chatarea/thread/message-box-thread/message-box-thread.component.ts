@@ -12,6 +12,7 @@ import { User } from '../../../models/user/user.model';
 import { ChatareaServiceService } from '../../../firestore-service/chatarea-service.service';
 import { MainServiceService } from '../../../firestore-service/main-service.service';
 import { AuthService } from '../../../firestore-service/auth.service';
+import { EmojiService } from '../../../modules/emoji.service';
 
 @Component({
   selector: 'app-message-box-thread',
@@ -38,6 +39,7 @@ export class MessageBoxThreadComponent {
   linkDialog: boolean = false
 
   private fileUploadService = inject(FileUploadThreadService);
+  private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
   @ViewChild('fileUploadThread') fileInputThreadElement!: ElementRef;
   @ViewChild('inputBox') inputBox!: ElementRef;
@@ -47,6 +49,13 @@ export class MessageBoxThreadComponent {
   ngOnInit() {
     this.uid = this.authService.getUID();
     this.loadChannelMembers();
+    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
+      //this.toggleEmojiPc
+    })
+  }
+
+  toggleEmojiPicker() {
+    this.emojiService.handleShowPicker();
   }
 
   toggleLinkDialog() {

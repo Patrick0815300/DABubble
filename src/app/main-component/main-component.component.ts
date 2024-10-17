@@ -15,7 +15,6 @@ import { LogOutService } from '../modules/log-out.service';
 import { ShowProfilService } from '../modules/show-profil.service';
 import { UpdateProfilService } from '../modules/update-profil.service';
 import { ChatareaComponent } from "../chatarea/chatarea.component";
-import { nanoid } from 'nanoid';
 import { MessagesComponent } from '../components/messages/messages.component';
 import { Channel, ChannelMember, Message, User } from '../modules/database.model';
 import { DatabaseServiceService } from '../database-service.service';
@@ -210,16 +209,22 @@ export class MainComponentComponent implements OnInit {
   }
 
   onAddPeopleToChannel(array: any[], office: any) {
-    this.databaseService.addChannel(office);
-    if (!array.includes(this.authenticatedUser?.user_id)) {
-      array.push(this.authenticatedUser?.user_id);
+    if (this.alreadyExist(office.channel_name)) {
+      console.log('This channel name is already used, please enter a different name.');
+      this.open_dialog_add_user = false;
+      this.navService.createChannel();
+    } else {
+      this.databaseService.addChannel(office);
+      if (!array.includes(this.authenticatedUser?.user_id)) {
+        array.push(this.authenticatedUser?.user_id);
+      }
+      array.forEach(member => {
+        const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
+        this.databaseService.addMemberToChannel(newMember);
+      });
+      this.onCancelAddUser();
+      this.channel_name = '';
     }
-    array.forEach(member => {
-      const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
-      this.databaseService.addMemberToChannel(newMember);
-    });
-    this.onCancelAddUser();
-    this.channel_name = '';
   }
 
   iconPath() {
