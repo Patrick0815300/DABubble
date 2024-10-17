@@ -20,6 +20,14 @@ export class ChatServiceService {
 
   constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
 
+  async updateMessageFileUrl(channelId: string, messageId: string, threadId: string, docId: string, fileUrl: string, fileName: string): Promise<void> {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${docId}`);
+    await updateDoc(messageDocRef, {
+      fileUrl: fileUrl,
+      fileName: fileName
+    });
+  }
+
   /**
    * Sets the thread data including channelId, messageId, and senderId.
    * @param {{channelId: string, messageId: string, senderId: string}} threadInfo - Information about the thread.
@@ -203,6 +211,7 @@ export class ChatServiceService {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
     const docRef = await addDoc(messagesCollectionRef, message.toJSON());
     await updateDoc(docRef, { id: docRef.id });
+    message.id = docRef.id;
   }
 
   /**

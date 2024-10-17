@@ -25,6 +25,7 @@ export class MessageBoxComponent implements AfterViewInit {
   selectedFile: File | null = null;
   fileURL: SafeResourceUrl | null = null;
   cleanUrl: string | null = null;
+  tempFilePath: string | null = null;
   fileName: string | null = null;
   uploadProgress: number = 0;
   isUploading: boolean = false;
@@ -32,6 +33,7 @@ export class MessageBoxComponent implements AfterViewInit {
   users: User[] = [];
   memberIds: string[] = [];
   linkDialog: boolean = false
+  linkedUsers: string[] = [];
 
   private fireService = inject(ChatareaServiceService);
   private fileUploadService = inject(FileUploadService);
@@ -58,12 +60,23 @@ export class MessageBoxComponent implements AfterViewInit {
     }
   }
 
+  checkForAtSymbol(event: KeyboardEvent) {
+    const textareaValue = (event.target as HTMLTextAreaElement).value;
+    const lastChar = textareaValue.slice(-1);
+    if (lastChar != '@') {
+      this.linkDialog = false;
+    } else {
+      this.linkDialog = true;
+    }
+  }
+
   toggleLinkDialog() {
     this.linkDialog = !this.linkDialog;
   }
 
-  addMemberToMessage(name: string) {
-    this.messageContent = `@${name} `;
+  addMemberToMessage(name: string, userId: string) {
+    this.messageContent += `@${name} `;
+    this.linkedUsers.push(userId);
     this.toggleLinkDialog();
     this.cdr.detectChanges();
     setTimeout(() => {
@@ -90,16 +103,11 @@ export class MessageBoxComponent implements AfterViewInit {
     });
   }
 
-  deleteUploadedFile() {
-    if (this.fileURL) {
-      const filePath = `uploads/${this.uid}/${this.fileName}`;
-      this.fileUploadService.deleteFile(filePath).then(() => {
-        this.fileURL = null;
-        this.fileName = null;
-      }).catch((error) => {
-        console.error('Fehler beim Löschen der Datei:', error);
-      });
-    }
+  clearFileUpload() {
+    this.fileURL = null;
+    this.fileName = null;
+    this.fileType = null;
+    this.selectedFile = null;
   }
 
   openFileDialog() {
@@ -110,26 +118,41 @@ export class MessageBoxComponent implements AfterViewInit {
     this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
-        const selectedFile = input.files[0];
-        this.selectedFile = selectedFile
-        this.uploadFile();
+        this.selectedFile = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+          this.fileName = this.selectedFile!.name;
+          this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
+        };
+        reader.readAsDataURL(this.selectedFile);
       }
+    });
+
+    this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+      this.checkForAtSymbol(event);
     });
   }
 
-  uploadFile() {
+
+
+  uploadFile(messageId: string, channelId: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFile(this.selectedFile, this.uid!, (progress) => {
+      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
         this.uploadProgress = progress;
       }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url
+        this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
         this.fileName = result.fileName;
-        setTimeout(() => {
+        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
+          this.messageContent = '';
+          this.fileURL = null;
+          this.fileName = null;
           this.isUploading = false;
-        }, 1000);
+        });
       }).catch((error) => {
         console.error('Fehler beim Hochladen der Datei:', error);
         this.isUploading = false;
@@ -138,37 +161,36 @@ export class MessageBoxComponent implements AfterViewInit {
     }
   }
 
+
   sendMessage() {
-    if (this.messageContent.trim() === '' && !this.fileURL) {
-      return;
-    }
+    if (this.messageContent.trim() === '' && !this.selectedFile) return;
     this.fireService.loadDocument('users', this.uid!).subscribe({
       next: (user: any) => {
         const userName = `${user.name}`;
         this.fireService.getActiveChannel().subscribe({
           next: (channel: any) => {
-            let content = this.messageContent;
             const messageData = {
-              content: content,
+              content: this.messageContent,
               name: userName,
               time: new Date().toISOString(),
               reactions: [],
               senderId: this.uid,
-              fileUrl: this.cleanUrl,
-              fileName: this.fileName || null,
+              fileUrl: null,
+              fileName: null,
               messageEdit: false,
             };
-            this.fireService.addMessage(channel.id, messageData).then(() => {
+            this.fireService.addMessage(channel.id, messageData).then((docRef) => {
+              const messageId = docRef.id;
               this.messageContent = '';
-              this.fileURL = null;
-              this.fileName = null;
+              if (this.selectedFile) {
+                this.uploadFile(messageId, channel.id);
+              }
             });
           }
         });
       }
     });
   }
-
 
   async loadActiveChannelName() {
     this.fireService.getActiveChannel().subscribe((channel: any) => {

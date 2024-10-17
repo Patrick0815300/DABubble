@@ -15,7 +15,7 @@
       <div *ngIf="fileType === 'unknown'">
         <a [href]="fileURL" target="_blank">Datei herunterladen: {{ fileName }}</a>
       </div>
-      <mat-icon (click)="deleteUploadedFile()" class="delete-btn">delete</mat-icon>
+      <mat-icon (click)="clearFileUpload()" class="delete-btn">delete</mat-icon>
     </ng-container>
     <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="uploadProgress"></mat-progress-bar>
   <div class="bottom">
@@ -27,7 +27,7 @@
       <span></span>
       <mat-icon>sentiment_satisfied</mat-icon>
       <div class="link-someone" *ngIf="linkDialog">
-        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)">
+        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name, user.id!)">
           <img [src]="user.avatar" alt="{{ user.name }}">
           <span>{{ user.name }}</span>
         </div>

@@ -38,7 +38,6 @@ export class OwnMessageThreadComponent {
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
-        this.loadThreadMessages();
       }
     });
   }
@@ -47,10 +46,11 @@ export class OwnMessageThreadComponent {
     this.uid = this.authService.getUID();
     this.loadReactionNames();
     this.loadFileUpload();
+    this.loadThreadMessages();
   }
 
   async loadFileUpload() {
-    if (this.thread.fileName) {
+    if (this.thread.fileUrl) {
       this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName)
       this.fileName = this.thread.fileName
       this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl)
@@ -71,8 +71,6 @@ export class OwnMessageThreadComponent {
             names.push(name);
           }
         }
-
-        // Wenn der aktuelle Nutzer ("Du") in den Reaktionen ist
         if (currentUserIncluded) {
           if (names.length === 0) {
             this.reactionNames.push('Du');
@@ -82,14 +80,13 @@ export class OwnMessageThreadComponent {
             this.reactionNames.push(`Du und ${names.length} weitere`);
           }
         } else {
-          // Wenn der aktuelle Nutzer nicht in den Reaktionen ist, normale Auflistung der Namen
           this.reactionNames.push(names.join(' und '));
         }
       }
     }
   }
 
-  loadThreadMessages(): void {
+  async loadThreadMessages() {
     const { channelId, messageId, id: threadId } = this.threadData;
     this.chatService.loadThreadMessages(channelId, messageId, threadId).then((messages) => {
       this.threadMessages = messages;

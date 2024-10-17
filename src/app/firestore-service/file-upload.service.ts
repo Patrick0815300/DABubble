@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Firestore } from '@angular/fire/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
+import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject } from 'firebase/storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileUploadService {
+  private firestore = inject(Firestore);
 
   private maxFileSizeMB: number = 5;
 
@@ -14,11 +17,18 @@ export class FileUploadService {
     return fileSizeMB <= this.maxFileSizeMB;
   }
 
+  updateMessageFileUrl(channelId: string, messageId: string, fileUrl: string, fileName: string): Promise<void> {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
+    return updateDoc(messageDocRef, {
+      fileUrl: fileUrl,
+      fileName: fileName
+    });
+  }
+
   deleteFile(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const storage = getStorage();
       const fileRef = ref(storage, filePath);
-
       deleteObject(fileRef).then(() => {
         resolve();
       }).catch((error) => {
@@ -28,41 +38,27 @@ export class FileUploadService {
     });
   }
 
-  uploadFile(file: File, userId: string, onProgress: (progress: number) => void): Promise<{ url: string, fileName: string }> {
+  uploadFile(file: File, messageId: string, onProgress: (progress: number) => void): Promise<{ url: string, fileName: string }> {
     if (!this.isFileSizeValid(file.size)) {
-      return Promise.reject(new Error('The file exceeds the maximum allowed size of  ' + this.maxFileSizeMB + ' MB.'));
+      return Promise.reject(new Error(`The file exceeds the maximum allowed size of ${this.maxFileSizeMB} MB.`));
     }
-    return this.startUpload(file, userId, onProgress);
-  }
-
-
-  private startUpload(file: File, userId: string, onProgress: (progress: number) => void): Promise<{ url: string, fileName: string }> {
     const storage = getStorage();
-    const storageRef = ref(storage, `uploads/${userId}/${file.name}`);
+    const storageRef = ref(storage, `uploads/${messageId}/${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
-
     return new Promise((resolve, reject) => {
-      this.handleUploadEvents(uploadTask, onProgress, resolve, reject);
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress(progress);
+        },
+        (error) => reject(error),
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve({ url: downloadURL, fileName: file.name });
+        }
+      );
     });
   }
-
-  private handleUploadEvents(uploadTask: any, onProgress: (progress: number) => void, resolve: any, reject: any) {
-    uploadTask.on('state_changed',
-      (snapshot: any) => this.trackProgress(snapshot, onProgress),
-      (error: any) => reject(error),
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        resolve({ url: downloadURL, fileName: uploadTask.snapshot.ref.name });
-      }
-    );
-  }
-
-  private trackProgress(snapshot: any, onProgress: (progress: number) => void) {
-    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    console.log('Upload is ' + progress + '% done');
-    onProgress(progress);
-  }
-
 
   getFileTypeFromFileName(fileName: string): string | null {
     const extension = fileName.split('.').pop()?.toLowerCase();
@@ -82,5 +78,4 @@ export class FileUploadService {
         return 'unknown';
     }
   }
-
 }

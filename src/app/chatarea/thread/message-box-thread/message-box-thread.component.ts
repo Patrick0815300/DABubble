@@ -82,15 +82,10 @@ export class MessageBoxThreadComponent {
   }
 
   deleteUploadedFile() {
-    if (this.fileURL) {
-      const filePath = `thread/${this.uid}/${this.fileName}`;
-      this.fileUploadService.deleteFile(filePath).then(() => {
-        this.fileURL = null;
-        this.fileName = null;
-      }).catch((error) => {
-        console.error('Fehler beim Löschen der Datei:', error);
-      });
-    }
+    this.fileURL = null;
+    this.fileName = null;
+    this.fileType = null;
+    this.selectedFile = null;
   }
 
   openFileDialog() {
@@ -101,26 +96,37 @@ export class MessageBoxThreadComponent {
     this.fileInputThreadElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
-        const selectedFile = input.files[0];
-        this.selectedFile = selectedFile
-        this.uploadFile();
+        this.selectedFile = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+          this.fileName = this.selectedFile!.name;
+          this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
+        };
+        reader.readAsDataURL(this.selectedFile);
       }
     });
   }
 
-  uploadFile() {
+  uploadFile(channelId: string, messageId: string, threadId: string, threadMessageId: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFileThread(this.selectedFile, this.uid!, (progress) => {
+      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
         this.uploadProgress = progress;
+        console.log(this.uploadProgress);
+
       }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url
+        this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
         this.fileName = result.fileName;
-        setTimeout(() => {
+        this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName).then(() => {
+          this.content = '';
+          this.fileURL = null;
+          this.fileName = null;
           this.isUploading = false;
-        }, 1000);
+        });
       }).catch((error) => {
         console.error('Fehler beim Hochladen der Datei:', error);
         this.isUploading = false;
@@ -130,26 +136,24 @@ export class MessageBoxThreadComponent {
   }
 
   async sendMessage() {
-    if (this.content.trim() === '') return;
-    try {
-      const userName = await this.chatService.getUserNameByUid(this.uid!);
-      const newMessage = new Message({
-        content: this.content,
-        name: userName,
-        senderId: this.uid,
-        time: new Date().toISOString(),
-        reactions: [],
-        fileUrl: this.cleanUrl,
-        fileName: this.fileName || null
-      });
-
-      await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
-      this.content = '';
-      this.fileURL = null;
-      this.cleanUrl = null;
-      this.fileName = null
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen der Nachricht:', error);
+    if (this.content.trim() === '' && !this.selectedFile) return;
+    const userName = await this.chatService.getUserNameByUid(this.uid!);
+    const newMessage = new Message({
+      content: this.content,
+      name: userName,
+      senderId: this.uid,
+      time: new Date().toISOString(),
+      reactions: [],
+      fileUrl: null,
+      fileName: null,
+      messageEdit: false
+    });
+    await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
+    const latestMessageId = newMessage.id;
+    if (this.selectedFile) {
+      this.uploadFile(this.channelId, this.messageId, this.threadId, latestMessageId,);
     }
+    this.content = '';
+    this.deleteUploadedFile();
   }
 }
