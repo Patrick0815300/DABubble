@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { Channel, Message, User } from './database.model';
 @Injectable({
   providedIn: 'root',
@@ -10,15 +10,24 @@ export class UserService {
   private channelSource = new ReplaySubject<Channel>(1);
   private channelMsgSource = new Subject<Message[]>();
   private userIdsSource = new ReplaySubject<string>(1);
+  private messageIdSource = new ReplaySubject<string>(1);
   private userSource = new ReplaySubject<User>(1);
+  private pickedUserSource = new ReplaySubject<User>(1);
   private officeSource = new Subject<string[]>();
+  private logShowSearchSubject = new BehaviorSubject<boolean>(false);
+  private clickedInsideButton = new BehaviorSubject<boolean>(false);
+
+  clickedInsideButton$ = this.clickedInsideButton.asObservable();
   userIds$ = this.userIdsSource.asObservable();
-  // channelIds$ = this.channelIdsSource.asObservable();
   channel$ = this.channelSource.asObservable();
   selectedUser$ = this.userSource.asObservable();
+  selectedMessageId$ = this.messageIdSource.asObservable();
+  pickedUser$ = this.pickedUserSource.asObservable();
   chatMessages$ = this.chatSource.asObservable();
   officeMembers$ = this.officeSource.asObservable();
   channelMessages$ = this.channelMsgSource.asObservable();
+  toggle_show_search_user$ = this.logShowSearchSubject.asObservable();
+
   constructor() {}
 
   emitUserId(userId: string) {
@@ -29,9 +38,17 @@ export class UserService {
     this.userSource.next(user);
   }
 
-  // emitChannelId(channelId: string) {
-  //   this.channelIdsSource.next(channelId);
-  // }
+  emitSelectedMessageId(msg_id: string) {
+    this.messageIdSource.next(msg_id);
+  }
+
+  emitPickedUser(user: User) {
+    this.pickedUserSource.next(user);
+  }
+
+  emitShowSearchUser(show: boolean) {
+    this.logShowSearchSubject.next(show);
+  }
 
   emitChannel(channel: Channel) {
     this.channelSource.next(channel);
@@ -44,7 +61,12 @@ export class UserService {
   emitChannelMessage(msg: Message[]) {
     this.channelMsgSource.next(msg);
   }
+
   emitOfficeMembers(members: string[]) {
     this.officeSource.next(members);
+  }
+
+  setClickedInsideButton(isClicked: boolean) {
+    this.clickedInsideButton.next(isClicked);
   }
 }

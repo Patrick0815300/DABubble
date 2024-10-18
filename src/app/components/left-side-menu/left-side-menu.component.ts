@@ -8,11 +8,12 @@ import { User, Channel, Message } from '../../modules/database.model';
 import { combineLatest, Observable, of, switchMap, map } from 'rxjs';
 import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
+import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
 
 @Component({
   selector: 'app-left-side-menu',
   standalone: true,
-  imports: [WrapperComponent, ProfileComponent, CommonModule],
+  imports: [WrapperComponent, ProfileComponent, CommonModule, ScrollToTopComponent],
   templateUrl: './left-side-menu.component.html',
   styleUrl: './left-side-menu.component.scss',
 })
@@ -59,6 +60,7 @@ export class LeftSideMenuComponent implements OnInit {
     });
 
     this.showChannelMessages(false);
+
     // if (this.all_channel.length === 0) {
     //   this.sendSelectedUser(this.authenticatedUser!);
     //   this.sendUserId(this.authenticatedUser?.user_id!);
@@ -89,6 +91,9 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.databaseService.authenticatedUser().subscribe(user => {
       this.authenticatedUser = user;
+      this.sendSelectedUser(this.authenticatedUser!);
+      this.sendUserId(this.authenticatedUser?.user_id!);
+      this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
     });
 
     /**
@@ -145,6 +150,7 @@ export class LeftSideMenuComponent implements OnInit {
      */
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
+      this.channelService.emitPickedUser([]);
     });
 
     this.channelService.showChannelMsg$.subscribe(is_channel => {

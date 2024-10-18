@@ -22,6 +22,8 @@ export class EmojiPickerComponent implements OnInit {
 
   onAddEmoji(event: any) {
     const emoji = event.emoji.native;
+    console.log('emoji', emoji);
+
     this.emojiService.selectEmoji(emoji);
     this.onTogglePicker();
   }

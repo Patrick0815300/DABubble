@@ -273,22 +273,22 @@ a {
   align-items: flex-end;
   justify-content: center;
   position: relative;
-  > input {
+
+  >input {
     width: 100%;
   }
-  > .app-search-user {
+
+  >.app-search-user {
     position: absolute;
     transform: translateY(145px);
   }
 }
+
 .bold-ex {
   font-weight: 700;
 }
 
 @media (width<500px) {
-
-  .app-middle-wrapper,
-  .app-right-wrapper,
   .toggle-side-menu {
     display: none !important;
   }

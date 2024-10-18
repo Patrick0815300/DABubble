@@ -1,5 +1,5 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, OnInit } from '@angular/core';
+import { Component, DoCheck, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
 import { FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
@@ -13,11 +13,12 @@ import { ChannelService } from '../../modules/channel.service';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { EmojiService } from '../../modules/emoji.service';
+import { SearchUserComponent } from '../search-user/search-user.component';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent, EmojiPickerComponent],
+  imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent, PickerModule, EmojiPickerComponent, SearchUserComponent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
@@ -42,8 +43,16 @@ export class MessagesComponent implements OnInit {
   update_title = formatDate(new Date(), 'EEEE, dd MMMM y HH:MM', 'de-DE');
   is_response: boolean = false;
   toggleEmojiPicker: boolean = false;
+  showSearchUserName: boolean = false;
+  excludeClick = false;
+  chosenEmoji: string = '';
+  pickedUserArray: string[] = [];
+  chosenReaction: string = '';
+  isMainEmoji: boolean = true;
+  messageId: string = '';
   constructor(
     private channelService: ChannelService,
+    private elementRef: ElementRef,
     private showProfileService: ShowProfilService,
     private userService: UserService,
     private databaseService: DatabaseServiceService,
@@ -73,7 +82,7 @@ export class MessagesComponent implements OnInit {
       this.chat = msg.sort((a, b) => b.send_date - a.send_date);
       this.groupedChat = this.groupMessagesByDate(this.chat);
       this.loadChatData(this.groupedChat, this.toUserId);
-      console.log('Group', this.groupMessagesByDate(this.chat));
+      this.message_content = '';
     });
 
     this.databaseService.filteredMessages$.subscribe(messages => {
@@ -89,11 +98,24 @@ export class MessagesComponent implements OnInit {
       console.log('selected User is:', this.selectedUser);
     });
 
+    this.userService.selectedMessageId$.subscribe(id => {
+      this.messageId = id;
+    });
+
     /**
      * this method add the selected emoji to the current tipped message
      */
     this.emojiService.emoji$.subscribe((emoji: string) => {
-      this.message_content = this.message_content ? this.message_content + emoji : emoji;
+      console.log('chat_up', this.update_chat, 'group_up', this.update_group);
+      this.chosenReaction = emoji;
+
+      if (this.update_chat != undefined && this.update_chat !== -1) {
+        this.update_message = this.update_message ? this.update_message + emoji : emoji;
+      } else if (this.isMainEmoji) {
+        this.message_content = this.message_content ? this.message_content + emoji : emoji;
+      } else if (!this.isMainEmoji) {
+        this.onAddReaction(this.messageId);
+      }
     });
 
     /**
@@ -102,6 +124,26 @@ export class MessagesComponent implements OnInit {
      */
     this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
       this.toggleEmojiPicker = statePicker;
+    });
+
+    this.userService.toggle_show_search_user$.subscribe(state => {
+      this.showSearchUserName = state;
+    });
+
+    this.userService.clickedInsideButton$.subscribe(isClicked => {
+      this.excludeClick = isClicked;
+    });
+
+    this.userService.pickedUser$.subscribe(user => {
+      if (this.message_content[this.message_content.length - 1] === '@') {
+        this.message_content = this.message_content ? this.message_content + `${user.name} ` : `${user.name} `;
+      } else {
+        this.message_content = this.message_content ? this.message_content + ` @${user.name} ` : ` @${user.name} `;
+      }
+    });
+
+    this.channelService.userPicked$.subscribe(users => {
+      this.pickedUserArray = users;
     });
   }
 
@@ -147,18 +189,29 @@ export class MessagesComponent implements OnInit {
     return this.databaseService.messages;
   }
 
-  onAddMessage(currentUser_id: string | undefined, to_user_id: string) {
+  onAddMessage(to_user_id: string) {
+    if (this.pickedUserArray.length != 0) {
+      this.pickedUserArray.push(to_user_id);
+      this.pickedUserArray.forEach(userId => {
+        let msgVal = this.messageSender(userId);
+        this.databaseService.addMessage(msgVal);
+      });
+    } else {
+      let msgObject = this.messageSender(to_user_id);
+      this.databaseService.addMessage(msgObject);
+    }
+    this.message_content = '';
+  }
+
+  messageSender(receiverId: string): object {
     let msg = {
       message_content: this.message_content,
-      from_user: currentUser_id,
-      to_user: to_user_id,
+      from_user: this.authenticatedUser?.user_id,
+      to_user: receiverId,
     };
     let newMessage = new Message(msg);
 
-    let msgObject = newMessage.toObject();
-
-    this.databaseService.addMessage(msgObject);
-    this.message_content = '';
+    return newMessage.toObject();
   }
 
   groupMessagesByDate(messages: any[]) {
@@ -191,6 +244,11 @@ export class MessagesComponent implements OnInit {
 
   sendSelectedUser(user: User) {
     this.userService.emitSelectedUser(user);
+  }
+
+  sendSelectedMsgId(id: string) {
+    this.userService.emitSelectedMessageId(id);
+    this.isMainEmoji = false;
   }
 
   onShowDeleteDialog(index: number) {
@@ -255,5 +313,34 @@ export class MessagesComponent implements OnInit {
 
   onShowEmojiPicker() {
     this.emojiService.handleShowPicker();
+    this.showSearchUserName ? this.userService.emitShowSearchUser(!this.showSearchUserName) : '';
+  }
+
+  sendShowSearchUser() {
+    this.userService.emitShowSearchUser(!this.showSearchUserName);
+    this.toggleEmojiPicker ? this.emojiService.handleShowPicker() : '';
+  }
+
+  onButtonClick() {
+    this.isMainEmoji = true;
+    this.userService.setClickedInsideButton(true);
+  }
+
+  onAddReaction(message_id: string) {
+    this.channelService.updateChannelData('messages', 'message_id', message_id, { reaction: this.chosenReaction });
+  }
+
+  onAddThreadMsg(event: Event) {
+    if (!this.message_content && this.showSearchUserName) {
+      this.userService.emitShowSearchUser(false);
+    }
+    const inputElement = event.target as HTMLInputElement;
+    const enteredText = inputElement.selectionStart;
+    if (enteredText !== null) {
+      const currentChar = this.message_content[enteredText - 1];
+      if (currentChar === '@') {
+        this.sendShowSearchUser();
+      }
+    }
   }
 }
