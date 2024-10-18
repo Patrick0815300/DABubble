@@ -36,7 +36,7 @@ main {
 mat-card {
     background-color: white;
     border-radius: 20px;
-    height: 70vh;
+    height: 720px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -69,6 +69,7 @@ form {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom:20px;
 }
 
 .seperator {
@@ -220,5 +221,17 @@ form {
         .card {
             width: 300px;
         }
+    }
+}
+
+@media(max-height:1000px){
+    mat-card{
+        transform:scale(0.9);
+    }
+}
+
+@media(max-height:950px){
+    mat-card{
+        transform:scale(0.8);
     }
 }

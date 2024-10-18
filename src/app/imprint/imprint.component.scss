@@ -29,12 +29,13 @@
 section {
     display: flex;
     justify-content: center;
-    align-items: center;
+    // align-items: center;
+    margin-top:250px;
     height: 100%;
 
     mat-card {
         background-color: white;
-        height: 50%;
+        height: 590px;
         width: auto;
         border-radius: 30px;
         padding: 48px 56px;

@@ -51,7 +51,7 @@ export class LoginComponent {
       await this.setVarOnlineToTrue(userCredential);
     } catch (error) {
       this.displayWrongMailOrPasswordErrorMessage();
-      this.resetInputs();
+      this.resetInputs();            
     }
   }
 
