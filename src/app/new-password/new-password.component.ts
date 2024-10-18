@@ -6,10 +6,11 @@ import { Router, RouterModule } from '@angular/router';
 import { SignInComponent } from '../sign-in/sign-in.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+
 
 @Component({
   selector: 'app-new-password',

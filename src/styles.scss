@@ -66,8 +66,25 @@ html {
   box-sizing: border-box;
 }
 
+.turnDeviceContainer {
+  background: linear-gradient(to top, rgb(50, 60, 230), rgb(121, 126, 243));
+  color:white;
+  z-index:999;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content: center;
+  align-items:center
+}
 
-
+@media(min-height:850px){
+  .turnDeviceContainer{
+    display:none !important;
+  }
+}
 
 
 /* ---------------------------------------- fonts ---------------------------------------- */
