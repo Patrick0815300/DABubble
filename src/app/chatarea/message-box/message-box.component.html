@@ -24,8 +24,8 @@
       <label for="fileUpload">
         <mat-icon (click)="openFileDialog()">add</mat-icon>
       </label>
-      <span></span>
-      <mat-icon>sentiment_satisfied</mat-icon>
+            <span></span>
+      <mat-icon (click)="showEmojiPicker()">sentiment_satisfied</mat-icon>
       <div class="link-someone" *ngIf="linkDialog">
         <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name, user.id!)">
           <img [src]="user.avatar" alt="{{ user.name }}">
@@ -36,4 +36,5 @@
     </div>
     <mat-icon (click)="sendMessage()">send</mat-icon>
   </div>
+  <app-emoji-picker/>
 </div>

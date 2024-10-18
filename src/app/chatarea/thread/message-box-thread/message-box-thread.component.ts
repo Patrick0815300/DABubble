@@ -106,7 +106,6 @@ export class MessageBoxThreadComponent {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
         this.selectedFile = input.files[0];
-
         const reader = new FileReader();
         reader.onload = () => {
           this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
@@ -120,12 +119,12 @@ export class MessageBoxThreadComponent {
 
   uploadFile(channelId: string, messageId: string, threadId: string, threadMessageId: string) {
     if (this.selectedFile) {
+      console.log('file: ', this.selectedFile.type);
+
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
       this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
         this.uploadProgress = progress;
-        console.log(this.uploadProgress);
-
       }).then((result: { url: string, fileName: string }) => {
         this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
@@ -145,24 +144,25 @@ export class MessageBoxThreadComponent {
   }
 
   async sendMessage() {
-    if (this.content.trim() === '' && !this.selectedFile) return;
-    const userName = await this.chatService.getUserNameByUid(this.uid!);
-    const newMessage = new Message({
-      content: this.content,
-      name: userName,
-      senderId: this.uid,
-      time: new Date().toISOString(),
-      reactions: [],
-      fileUrl: null,
-      fileName: null,
-      messageEdit: false
-    });
-    await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
-    const latestMessageId = newMessage.id;
-    if (this.selectedFile) {
-      this.uploadFile(this.channelId, this.messageId, this.threadId, latestMessageId,);
-    }
+    if (this.content.trim() != '' || this.selectedFile) {
+      const userName = await this.chatService.getUserNameByUid(this.uid!);
+      const newMessage = new Message({
+        content: this.content,
+        name: userName,
+        senderId: this.uid,
+        time: new Date().toISOString(),
+        reactions: [],
+        fileUrl: null,
+        fileName: null,
+        messageEdit: false
+      });
+      await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
+      const latestMessageId = newMessage.id;
+      if (this.selectedFile) {
+        this.uploadFile(this.channelId, this.messageId, this.threadId, latestMessageId);
+      }
+    };
     this.content = '';
-    this.deleteUploadedFile();
+    //this.deleteUploadedFile();
   }
 }

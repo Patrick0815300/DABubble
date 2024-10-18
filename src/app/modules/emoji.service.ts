@@ -10,7 +10,7 @@ export class EmojiService {
   emoji$ = this.emojiSubject.asObservable();
   toggle_emoji_picker$ = this.logShowPickerSubject.asObservable();
   isPickerOpen = false;
-  constructor() {}
+  constructor() { }
 
   selectEmoji(emoji: string) {
     this.emojiSubject.next(emoji);

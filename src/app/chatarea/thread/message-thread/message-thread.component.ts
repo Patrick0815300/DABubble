@@ -6,6 +6,9 @@ import { MatMenu } from '@angular/material/menu';
 import { MainServiceService } from '../../../firestore-service/main-service.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileUploadThreadService } from '../../../firestore-service/file-upload-thread.service';
+import { ChatareaServiceService } from '../../../firestore-service/chatarea-service.service';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-message-thread',
@@ -16,6 +19,7 @@ import { FileUploadThreadService } from '../../../firestore-service/file-upload-
 })
 export class MessageThreadComponent {
   private sanitizer = inject(DomSanitizer);
+  private uidSubscription: Subscription | null = null;
 
   @Input() thread: any;
   @Input() id: string = '';
@@ -25,8 +29,10 @@ export class MessageThreadComponent {
   fileType: string | null = null;
   fileURL: SafeResourceUrl | null = null;
   fileName: string | null = null;
+  avatar: string | null = null;
+  uid: string | null = null;
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService) {
+  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService, private chatareaService: ChatareaServiceService, private authService: AuthService) {
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -36,7 +42,16 @@ export class MessageThreadComponent {
   }
 
   ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
     this.loadFileUpload();
+  }
+
+  loadUserAvatar() {
+    this.chatareaService.getUserAvatar(this.thread.senderId).subscribe(avatar => {
+      this.avatar = avatar;
+    });
   }
 
   async loadFileUpload() {
@@ -58,7 +73,7 @@ export class MessageThreadComponent {
     const { channelId, messageId, id: threadId } = this.threadData;
 
     if (channelId && messageId && threadId && id) {
-      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id)
+      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id, this.uid!)
         .then(() => {
           console.log('Reaktion erfolgreich hinzugefügt');
         })

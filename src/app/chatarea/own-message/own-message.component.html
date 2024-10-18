@@ -30,7 +30,8 @@
                 <span class="name">{{ message.name }}</span>
             </div>
             
-            <div class="text" *ngIf="!isEditingMessage(message.id)">{{ message.content }}
+            <div class="text" *ngIf="!isEditingMessage(message.id)">
+                {{ message.content }}
                 <ng-container *ngIf="fileURL">
                     <a target="_blank" [href]="fileURL"><img *ngIf="fileType === 'image'" [src]="fileURL" alt="Image" class="uploaded-image" width="200px"></a>
                     <a target="_blank" [href]="fileURL"><iframe *ngIf="fileType === 'pdf'" [src]="fileURL" class="pdf-viewer" width="200px" height="250px"></iframe></a>

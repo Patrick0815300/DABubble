@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, where } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { Message } from '../models/messages/channel-message.model';
 import { Channel } from '../models/channels/entwickler-team.model';
@@ -10,7 +10,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ChatServiceService {
-  uid = this.authService.getUID();
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
   senderId: string = '';
   private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
   private pickedThreadSubject = new BehaviorSubject<any>(null);
@@ -19,6 +20,20 @@ export class ChatServiceService {
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
   constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
+
+  ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+      console.log('uid', this.uid);
+
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
 
   async updateMessageFileUrl(channelId: string, messageId: string, threadId: string, docId: string, fileUrl: string, fileName: string): Promise<void> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${docId}`);
@@ -75,14 +90,14 @@ export class ChatServiceService {
    * @param {string} messageIdThread - The ID of the message in the thread.
    * @returns {Promise<void>} A promise that resolves when the reaction is added.
    */
-  async addReactionToThreadMessage(channelId: string, messageId: string, threadId: string, reactionType: string, reactionPath: string, messageIdThread: string): Promise<void> {
+  async addReactionToThreadMessage(channelId: string, messageId: string, threadId: string, reactionType: string, reactionPath: string, messageIdThread: string, uid: string): Promise<void> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${messageIdThread}`);
     const snapshot = await getDoc(messageDocRef);
     const messageData = snapshot.data();
     const reactions = messageData?.['reactions'] || [];
-    const hasReacted = await this.hasUserReacted(reactions, reactionType, this.uid!);
+    const hasReacted = await this.hasUserReacted(reactions, reactionType, uid);
     if (!hasReacted) {
-      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, this.uid!, reactionPath);
+      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, uid, reactionPath);
       await updateDoc(messageDocRef, { reactions: updatedReactions });
     }
   }

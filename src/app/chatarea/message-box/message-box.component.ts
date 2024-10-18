@@ -11,11 +11,14 @@ import { MainServiceService } from '../../firestore-service/main-service.service
 import { AuthService } from '../../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
 import { EmojiService } from '../../modules/emoji.service';
+import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @Component({
   selector: 'app-message-box',
   standalone: true,
-  imports: [MatIconModule, CommonModule, FormsModule, MatProgressBarModule],
+  imports: [MatIconModule, CommonModule, FormsModule, MatProgressBarModule, EmojiPickerComponent, PickerComponent, EmojiComponent],
   templateUrl: './message-box.component.html',
   styleUrl: './message-box.component.scss'
 })
@@ -55,9 +58,13 @@ export class MessageBoxComponent implements AfterViewInit {
     });
     this.loadActiveChannelName();
     this.loadChannelMembers();
-    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
 
-    })
+    this.emojiService.emoji$.subscribe((emoji: string) => {
+      this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
+    });
+    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
+      this.toggleEmojiPicker = statePicker;
+    });
   }
 
   ngOnDestroy() {
