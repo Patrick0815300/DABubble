@@ -1,11 +1,11 @@
 <section class="main-section">
   <app-nav-bar />
   <main>
-    <button class="toggle-side-menu">
+    <button class="toggle-side-menu" (click)="handleToggle()">
       <span>
         Workspace-Menü <span class="left-pad">{{ this.state_text }}</span>
       </span>
-      <img (click)="handleToggle()" class="cursor-effect" src="{{ state_icon }}" alt="" />
+      <img class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
     <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
     <app-messages *ngIf="isChannelView === false" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
@@ -54,7 +54,7 @@
     </div>
     <div class="search-section">
       <input [(ngModel)]="new_person_name" (input)="onSearchUser()" class="add-person" *ngIf="isChecked === 'singleUser'" type="text" placeholder="Name eingeben" />
-      <app-search-user *ngIf="showSearchUserName === true" class="app-search-user" />
+      <app-search-user *ngIf="showSearchUserName === true" class="app-search-user" [componentType]="'user-list'" />
     </div>
 
     <div class="btn-container-user">

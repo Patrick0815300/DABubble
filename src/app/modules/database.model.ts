@@ -40,6 +40,7 @@ export class Message {
   from_user!: string;
   to_user!: string;
   is_updated!: boolean;
+  reaction!: string;
 
   constructor(obj?: any) {
     this.message_id = obj ? obj.message_id || nanoid() : '';
@@ -50,6 +51,7 @@ export class Message {
     this.from_user = obj ? obj.from_user || '' : '';
     this.to_user = obj ? obj.to_user || '' : '';
     this.is_updated = obj ? obj.is_updated || false : '';
+    this.reaction = obj ? obj.reaction || '' : '';
   }
 
   public toObject(): object {
@@ -62,6 +64,7 @@ export class Message {
       from_user: this.from_user,
       to_user: this.to_user,
       is_updated: this.is_updated,
+      reaction: this.reaction,
     };
   }
 }
@@ -103,7 +106,7 @@ export class Channel {
   }
 }
 
-////////////// MODEL FOR CHANNEL MESSAGES /////////////////////////////
+////////////// MODEL FOR CHANNEL MEMBERS /////////////////////////////
 
 export class ChannelMember {
   member_id!: string;
@@ -124,6 +127,34 @@ export class ChannelMember {
       channel_id: this.channel_id,
       joined_date: this.joined_date,
       left_date: this.left_date,
+    };
+  }
+}
+
+/////// MODEL FOR EMOJIS ////////////////////
+
+export class Emoji {
+  id!: string;
+  message_id!: string;
+  user_id!: string;
+  description!: string;
+  occurrence!: number;
+
+  constructor(obj?: any) {
+    this.id = obj ? obj.id || nanoid() : '';
+    this.message_id = obj ? obj.message_id : '';
+    this.user_id = obj ? obj.user_id : '';
+    this.description = obj ? obj.description : '';
+    this.occurrence = obj ? obj.occurrence || 0 : 0;
+  }
+
+  public toObject(): object {
+    return {
+      id: this.id,
+      message_id: this.message_id,
+      user_id: this.user_id,
+      description: this.description,
+      occurrence: this.occurrence,
     };
   }
 }

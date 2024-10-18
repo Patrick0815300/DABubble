@@ -1,7 +1,7 @@
 <app-middle-wrapper [hasDefaultPadding]="false" class="app-middle-wrapper">
   <div class="chat-content">
     <div class="current-nav-user">
-      <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+      <img *ngIf="getCachedUser(toUserId)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
       <span>{{ getCachedUser(toUserId)?.name }}</span>
     </div>
     @if(chat.length !==0){
@@ -14,13 +14,18 @@
         <div *ngFor="let message of chatGroup.messages; let index_group = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.user_id">
           <div class="image-message">
             <div class="offset" *ngIf="message?.response_content"></div>
-            <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
+            <img *ngIf="getCachedUser(message?.from_user)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
           </div>
           <div class="name-date-line" [class.update_msg]="update_group === index_group && update_chat === index_chat">
             <div class="response_msg" *ngIf="message?.response_content">
-              <img class="sender-origin" src="assets/img/profiles/{{ getCachedUser(message?.from_user_origin)?.image_file }}" alt="" />
+              <img
+                *ngIf="getCachedUser(message?.from_user_origin)?.image_file"
+                class="sender-origin"
+                src="assets/img/profiles/{{ getCachedUser(message?.from_user_origin)?.image_file }}"
+                alt=""
+              />
               <span class="origin_msg">&#64;{{ getCachedUser(message?.from_user_origin)?.name }}</span>
-              <p class="response">{{ message?.response_content.substring(0, 100) }}</p>
+              <p class="response" [class.response-p]="message?.from_user === authenticatedUser?.user_id">{{ message?.response_content.substring(0, 100) }}</p>
             </div>
             <div *ngIf="update_group !== index_group || update_chat !== index_chat">
               <span>{{ getCachedUser(message?.from_user)?.name }}</span>
@@ -30,6 +35,7 @@
             <p *ngIf="update_group !== index_group || update_chat !== index_chat">
               {{ message.message_content }}
               <span title="{{ update_title }}" *ngIf="message?.is_updated" class="updated_msg">(Bearbeitet)</span>
+              <span class="single-reaction" *ngIf="message?.reaction">{{ message?.reaction }}</span>
             </p>
 
             <input
@@ -41,7 +47,7 @@
               name="update_message"
             />
             <div class="btn-line" *ngIf="update_group === index_group && update_chat === index_chat">
-              <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+              <img (click)="onShowEmojiPicker(); onButtonClick()" class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
               <div class="btn-container">
                 <button class="btn btn-white" (click)="onCancelUpdateMsg()" type="button">Abbrechen</button>
                 @if(is_response){
@@ -60,7 +66,7 @@
             <div class="img-group">
               <img src="assets/img/icons/emoji_white_heavy_check_mark_.svg" alt="" />
               <img src="assets/img/icons/emoji_person_hand_celebrate_.svg" alt="" />
-              <img (click)="onShowEmojiPicker()" src="assets/img/icons/add_reaction.svg" alt="" />
+              <img (click)="onShowEmojiPicker(); sendSelectedMsgId(message?.message_id)" src="assets/img/icons/add_reaction.svg" alt="" />
               <img (click)="onRespond(index_chat, index_group)" src="assets/img/icons/comment.svg" alt="" />
               <img (click)="onShowDeleteDialog(index_group)" *ngIf="message?.from_user === authenticatedUser?.user_id" src="assets/img/icons/more_vert.svg" alt="" />
               <div *ngIf="show_delete_msg === index_group" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser?.user_id">
@@ -76,7 +82,7 @@
     <div id="message" class="message">
       <div>
         <div class="user-ref">
-          <img class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+          <img *ngIf="getCachedUser(toUserId)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
           <span class="username text-capitalize">{{ getCachedUser(toUserId)?.name }} </span>
         </div>
         @if(getCachedUser(toUserId)?.user_id===authenticatedUser?.user_id){
@@ -85,7 +91,7 @@
           mit dir selbst besprechen.
         </div>
         } @else {
-        <div>
+        <div class="conversation-start">
           Diese Unterhaltung findet nur zwischen
           <button class="tag text-capitalize" (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">&#64;{{ getCachedUser(toUserId)?.name }}</button>
           und dir statt.
@@ -95,17 +101,28 @@
     </div>
     }
     <app-emoji-picker class="emoji-picker" *ngIf="toggleEmojiPicker" />
+    <app-search-user [componentType]="'search-input'" />
     <div class="input-wrapper">
       <div class="input-form">
-        <input class="message-input" [(ngModel)]="message_content" type="text" name="message" placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}" />
+        <input
+          class="message-input"
+          [(ngModel)]="message_content"
+          (input)="onAddThreadMsg($event)"
+          type="text"
+          name="message"
+          placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}"
+          autocomplete="off"
+        />
         <div class="send-line">
           <div class="alternate-line">
             <img class="icons" src="assets/img/icons/input_add.svg" alt="" />
             <div class="sep-line"></div>
-            <img (click)="onShowEmojiPicker()" class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
-            <img class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
+            <button #buttonDialog>
+              <img (click)="onShowEmojiPicker(); onButtonClick()" class="icons exclude-button" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
+            </button>
+            <img (click)="sendShowSearchUser()" class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
           </div>
-          <button (click)="onAddMessage(authenticatedUser?.user_id, toUserId)">
+          <button (click)="onAddMessage(toUserId)">
             <img src="assets/img/icons/send.svg" alt="Send message" />
           </button>
         </div>

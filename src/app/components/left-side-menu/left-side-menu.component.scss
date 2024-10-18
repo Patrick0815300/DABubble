@@ -90,6 +90,9 @@
   margin-left: 1rem;
   padding-block: 4px;
 }
+.l-mg-7 {
+  padding-block: 7px;
+}
 .users {
   overflow-y: auto;
   height: 245px;
@@ -114,7 +117,6 @@
 
 .fold {
   max-height: 150px;
-
   overflow-y: auto;
   scrollbar-width: none;
   display: flex;
@@ -189,4 +191,34 @@ li {
 .edit-square {
   width: 32px;
   height: 32px;
+}
+
+.channel-name,
+.user-name {
+  font-size: 17px;
+}
+
+.sub-sec-1 {
+  height: 35%;
+}
+
+@media (width<610px) {
+  .users,
+  .list-channel {
+    gap: 13px;
+  }
+
+  .section-header {
+    display: none;
+  }
+  .section-content {
+    height: 100%;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+  .l-mg-2 {
+    padding-block: 7px;
+  }
 }
