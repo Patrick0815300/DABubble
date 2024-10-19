@@ -224,14 +224,29 @@ form {
     }
 }
 
-@media(max-height:1000px){
+@media(max-height:1050px){
     mat-card{
         transform:scale(0.9);
     }
 }
 
-@media(max-height:950px){
+@media(max-height:1010px){
     mat-card{
         transform:scale(0.8);
     }
+
+    main{
+       margin-top:-70px; 
+    }
 }
+
+@media(max-height:900px){
+    mat-card{
+        transform:scale(0.7);
+    }
+
+    main{
+       margin-top:-100px; 
+    }
+}
+

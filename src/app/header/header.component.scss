@@ -188,7 +188,7 @@
     }
 }
 
-@media(max-width:560px) {
+@media(max-width:610px) {
 
     @keyframes logomovement-small {
         0% {
@@ -197,7 +197,7 @@
         }
 
         100% {
-            top: 75px;
+            top:  10px;
             left: 0%;
         }
     }
@@ -215,6 +215,7 @@
         animation-name: logomovement-small;
         width:100%;
         left:0%;
+        gap:20px;
         justify-content: center;
         transform:none;
 
@@ -229,7 +230,7 @@
         }
 
         img{
-            transform:scale(0.8);
+            height:50px;
         }
     }
 
@@ -255,5 +256,40 @@
                 background-color: #999ce5;
             }
         }
+    }
+}
+
+@media(max-height:830px) and (max-width:610px){
+    .loginHeader {
+        padding-top: 5px;
+    }
+
+    .loginHeaderRegister {
+        position: absolute;
+        top:620px;
+    } 
+}
+
+@media(max-height:830px) and (min-width:610px){
+
+    @keyframes logomovement-middle {
+        0% {
+            top: 50%;
+        }
+
+        100% {
+            top:  10px;
+            left:20%;
+        }
+    }
+
+    .loginLogo{
+        animation-name: logomovement-middle;
+        gap:50px;
+        justify-content: center;
+    }
+
+    .loginHeader {
+        padding-top: 5px;
     }
 }

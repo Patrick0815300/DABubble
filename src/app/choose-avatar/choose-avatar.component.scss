@@ -303,3 +303,32 @@ input[type="file"] {
         font-size: 40px;
     }
 }
+
+@media(max-height:1020px){
+    mat-card{
+        transform:scale(0.9);
+    }
+}
+
+@media(max-height:960px){
+    mat-card{
+        transform:scale(0.8);
+    }
+}
+
+@media(max-height:880px){
+    mat-card{
+        position:absolute;
+        top:20px;
+    }
+
+    .header-container{
+        top:10px;
+    }
+}
+
+@media(max-height:695px){
+    mat-card{
+        transform:scale(0.8);
+    }
+}

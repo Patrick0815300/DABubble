@@ -3,7 +3,7 @@ footer {
     position: absolute;
     left: 0;
     right: 0;
-    top:90%;
+    top: 90%;
     bottom: 75px;
     display: flex;
     align-items: center;
@@ -27,7 +27,7 @@ footer {
     }
 }
 
-@media(max-width:560px) or (max-height: 950px){
+@media(max-width:610px) or (max-height: 950px) {
     footer {
         display: none;
     }
