@@ -9,7 +9,6 @@ import { NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
 import { confirmPasswordReset, getAuth } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
 @Component({
@@ -40,7 +39,7 @@ export class NewPassword2Component {
   passwordNotLongEnough: boolean = false;
 
   constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
-
+    
   }
 
   private auth = getAuth();
