@@ -24,8 +24,6 @@ export class ChatServiceService {
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
-      console.log('uid', this.uid);
-
     });
   }
 

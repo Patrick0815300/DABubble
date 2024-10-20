@@ -3,7 +3,7 @@ import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getD
 import { Observable, map } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
-import { deleteDoc } from 'firebase/firestore';
+import { CollectionReference, arrayRemove, deleteDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -37,38 +37,48 @@ export class ChatareaServiceService {
     );
   }
 
-  /**
-   * Gets the active channel (the channel with 'chosen' set to true).
-   * @returns {Observable<any>} An observable that emits the active channel data.
-   */
   getActiveChannel(): Observable<any> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channels');
-    const q = query(channelsCollectionRef, where('chosen', '==', true));
     return new Observable((observer) => {
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          const channelData = { id: doc.id, ...doc.data() };
-          observer.next(channelData);
-        });
+      const uid = this.authService.getUID();
+      if (!uid) { observer.error('Benutzer nicht authentifiziert'); return; }
+      let unsubChannel: () => void;
+      const unsubUser = onSnapshot(doc(this.firestore, `users/${uid}`), (userSnap) => {
+        const channelId = userSnap.data()?.['activeChannelId'];
+        if (unsubChannel) unsubChannel();
+        if (channelId) {
+          unsubChannel = this.subscribeToChannel(channelId, observer);
+        } else {
+          observer.next(null);
+        }
       }, (error) => observer.error(error));
+      return () => { unsubUser(); if (unsubChannel) unsubChannel(); };
     });
   }
 
-  /**
-   * Marks the active channel as inactive by setting 'chosen' to false.
-   * @returns {Observable<void>} An observable that completes when the channel is updated.
-   */
+  private subscribeToChannel(channelId: string, observer: any): () => void {
+    return onSnapshot(doc(this.firestore, `channels/${channelId}`), (channelSnap) => {
+      if (channelSnap.exists()) {
+        observer.next({ id: channelSnap.id, ...channelSnap.data() });
+      } else {
+        observer.error('Kanal nicht gefunden');
+      }
+    }, (error) => observer.error(error));
+  }
+
   leaveActiveChannel(): Observable<void> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channels');
-    const q = query(channelsCollectionRef, where('chosen', '==', true));
     return new Observable((observer) => {
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          const channelDocRef = doc.ref;
-          updateDoc(channelDocRef, { chosen: false })
-            .then(() => observer.next())
-        });
-      }, (error) => observer.error(error));
+      (async () => {
+        const uid = this.authService.getUID();
+        if (!uid) { observer.error('Benutzer nicht authentifiziert'); return; }
+        try {
+          const userRef = doc(this.firestore, `users/${uid}`);
+          const userSnap = await getDoc(userRef);
+          const channelId = userSnap.data()?.['activeChannelId'];
+          await updateDoc(userRef, { activeChannelId: '' });
+          if (channelId) await updateDoc(doc(this.firestore, `channels/${channelId}`), { members: arrayRemove(uid) });
+          observer.next();
+        } catch (error) { observer.error(error); }
+      })();
     });
   }
 
@@ -164,9 +174,18 @@ export class ChatareaServiceService {
     return addDoc(messagesCollectionRef, messageData);
   }
 
-  deleteMessage(channelId: string, messageId: string): Promise<void> {
+  async deleteMessageWithSubcollections(channelId: string, messageId: string): Promise<void> {
+    // Hauptdokument löschen
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
-    return deleteDoc(messageDocRef);
+    await deleteDoc(messageDocRef);
+
+    // Unterkollektion 'replies' löschen
+    const repliesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    const repliesSnapshot = await getDocs(repliesCollectionRef);
+    const deletePromises = repliesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+
+    // Weitere bekannte Unterkollektionen können hier hinzugefügt werden
   }
 
   /**

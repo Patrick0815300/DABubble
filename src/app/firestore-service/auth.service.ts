@@ -1,47 +1,51 @@
 import { Injectable } from '@angular/core';
+import { Firestore } from '@angular/fire/firestore';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private uidSubject = new BehaviorSubject<string | null>(null);  // BehaviorSubject für die UID
+  private uidSubject = new BehaviorSubject<string | null>(null);
 
-  constructor() {
-    this.watchAuthState();  // Starte die Echtzeitüberwachung
+  constructor(private firestore: Firestore) {
+    this.watchAuthState();
   }
 
-  // Überwache den Auth-Status und aktualisiere das BehaviorSubject
   private watchAuthState() {
     const auth = getAuth();
-    onAuthStateChanged(auth, (user: User | null) => {
+    onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
-        this.uidSubject.next(user.uid);  // Setze die UID im BehaviorSubject
+        this.uidSubject.next(user.uid);
         console.log('User is signed in:', user.uid);
+        const userDocRef = doc(this.firestore, 'users', user.uid);
+        await updateDoc(userDocRef, { online: true });
       } else {
-        this.uidSubject.next(null);  // Kein Benutzer eingeloggt
+        this.uidSubject.next(null);
         console.log('No user is signed in.');
       }
     });
   }
 
-  // Funktion, um das BehaviorSubject als Observable zurückzugeben
   getUIDObservable() {
-    return this.uidSubject.asObservable();  // UID als Observable für andere Komponenten
+    return this.uidSubject.asObservable();
   }
 
-  // Funktion, um die aktuelle UID synchron zu erhalten
   getUID(): string | null {
-    return this.uidSubject.getValue();  // UID direkt aus dem BehaviorSubject abrufen
+    return this.uidSubject.getValue();
   }
 
-  // Benutzer abmelden
-  logout() {
+  async logout() {
     const auth = getAuth();
-    auth.signOut().then(() => {
-      this.uidSubject.next(null);  // UID auf null setzen, wenn Benutzer abgemeldet ist
-      console.log('User signed out');
-    });
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(this.firestore, 'users', user.uid);
+      await updateDoc(userDocRef, { online: false });
+    }
+    await auth.signOut();
+    this.uidSubject.next(null);
+    console.log('User signed out');
   }
 }

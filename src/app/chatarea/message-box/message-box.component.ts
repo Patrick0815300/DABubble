@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { CommonModule } from '@angular/common';
@@ -23,6 +23,8 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
   styleUrl: './message-box.component.scss'
 })
 export class MessageBoxComponent implements AfterViewInit {
+  @Output() toggleEmoji = new EventEmitter<void>();
+
   uid: string | null = null;
   messageContent: string = '';
   channelName: string = '';
@@ -50,7 +52,7 @@ export class MessageBoxComponent implements AfterViewInit {
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('messageTextArea') messageTextArea!: ElementRef;
 
-  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService) { }
+  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService, private emojiRef: ElementRef) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -73,7 +75,15 @@ export class MessageBoxComponent implements AfterViewInit {
     }
   }
 
-  showEmojiPicker() {
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    if (!this.emojiRef.nativeElement.contains(event.target)) {
+      this.toggleEmojiPicker = false;
+    }
+  }
+
+  showEmojiPicker(event: Event) {
+    event.stopPropagation();
     this.emojiService.handleShowPicker();
   }
 

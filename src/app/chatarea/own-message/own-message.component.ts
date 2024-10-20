@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, inject, Input, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,10 @@ import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
+import { EmojiService } from '../../modules/emoji.service';
+import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @Component({
   selector: 'app-own-message',
@@ -22,6 +26,9 @@ import { Subscription } from 'rxjs';
     MatMenuModule,
     CommonModule,
     FormsModule,
+    EmojiPickerComponent,
+    PickerComponent,
+    EmojiComponent
   ],
   templateUrl: './own-message.component.html',
   styleUrl: './own-message.component.scss'
@@ -47,14 +54,16 @@ export class OwnMessageComponent implements OnInit {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
+  toggleEmojiPicker: boolean = false;
 
   private uidSubscription: Subscription | null = null;
 
   private fireService = inject(ChatareaServiceService);
+  private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
 
 
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
+  constructor(private emojiRef: ElementRef, private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
     this.fireService.loadReactions();
   }
 
@@ -68,6 +77,9 @@ export class OwnMessageComponent implements OnInit {
     this.loadActiveChannelId();
     this.loadReactionNames();
     this.loadAvatar();
+    this.emojiService.emoji$.subscribe((emoji: string) => {
+      this.message.content = this.message.content ? this.message.content + emoji : emoji;
+    });
   }
 
   ngOnDestroy() {
@@ -76,13 +88,24 @@ export class OwnMessageComponent implements OnInit {
     }
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    if (!this.emojiRef.nativeElement.contains(event.target)) {
+      this.toggleEmojiPicker = false;
+    }
+  }
+
+  showEmojiPicker(event: Event) {
+    event.stopPropagation();
+    this.emojiService.handleShowPicker();
+  }
+
   deleteMessage(messageId: string) {
     this.fireService.getActiveChannel().subscribe((channelData) => {
       const channelId = channelData.id;
-      this.fireService.deleteMessage(channelId, messageId)
+      this.fireService.deleteMessageWithSubcollections(channelId, messageId)
     });
   }
-
 
   loadAvatar() {
     const docId = this.message.senderId;
