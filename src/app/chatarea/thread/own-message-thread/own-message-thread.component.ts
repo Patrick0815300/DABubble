@@ -21,6 +21,8 @@ import { Subscription } from 'rxjs';
 export class OwnMessageThreadComponent {
   @Input() thread: any;
   @Input() id: string = '';
+  @Input() showReactionIcon: boolean = false;
+  @Input() filURL: SafeResourceUrl | null = null;
 
   editMode: boolean = false;
   threadData: any;
@@ -74,10 +76,6 @@ export class OwnMessageThreadComponent {
       this.fileName = this.thread.fileName
       this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl)
     }
-    console.log('threadFileUrl: ', this.thread.fileUrl);
-    console.log('fileType: ', this.fileType);
-    console.log('fileName: ', this.fileName);
-    console.log('fileURL: ', this.fileURL);
   }
 
   async loadReactionNames() {

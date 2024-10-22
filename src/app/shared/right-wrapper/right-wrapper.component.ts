@@ -39,6 +39,7 @@ export class RightWrapperComponent {
   ownMessage: boolean = false;
   answers: string = '';
   channelName: string = '';
+  reactions: any[] = [];
 
   private chatService = inject(ChatServiceService);
   private authService = inject(AuthService)
@@ -48,15 +49,17 @@ export class RightWrapperComponent {
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
+      if (this.uid) {
+        this.chatService.loadActiveChannel();
+      }
     });
-    this.chatService.loadActiveChannel();
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
         this.currentChannel = channel;
         this.channelName = channel.channel_name
         this.isVisible = channel.thread_open;
       } else {
-        !this.isVisible
+        this.isVisible = false;
       }
     });
 
@@ -67,6 +70,7 @@ export class RightWrapperComponent {
         this.messageId = data.messageId;
         this.threadId = data.id;
         this.ownMessage = this.threadData.senderId === this.uid;
+        this.reactions = data.reactions
         this.loadThreadMessages(this.channelId, this.messageId, this.threadId);
       }
     });
@@ -91,6 +95,8 @@ export class RightWrapperComponent {
   }
 
   toggleThread() {
+    console.log('currentChannel: ', this.currentChannel);
+
     this.isVisible = !this.isVisible;
     if (this.currentChannel) {
       this.chatService.updateChannelThreadState(this.channelId, this.isVisible);

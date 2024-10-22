@@ -165,7 +165,7 @@ export class OwnMessageComponent implements OnInit {
   }
 
   loadActiveChannelId() {
-    this.chatService.getActiveChannel().subscribe({
+    this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
@@ -195,8 +195,15 @@ export class OwnMessageComponent implements OnInit {
     }
   }
 
-  reactToMessage(messageId: string, reactionType: string, path: string) {
+  async reactToMessage(messageId: string, reactionType: string, path: string) {
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+    if (await this.chatService.hasThreads(this.channelId, messageId)) {
+      const count = await this.chatService.getReactionCount(this.channelId, messageId);
+      this.chatService.updateReactionsInAllThreads(this.channelId, messageId, reactionType, this.uid!, path, count)
+      if (await this.chatService.isThreadOpen(this.channelId)) {
+        this.openThread(messageId);
+      }
+    }
   }
 
   editMessage(messageId: string) {
@@ -225,7 +232,6 @@ export class OwnMessageComponent implements OnInit {
         error: (error) => console.error('Fehler beim Aktualisieren der Nachricht:', error)
       });
   }
-
 
   loadActiveChannelMessages() {
     this.fireService.getActiveChannel().subscribe({

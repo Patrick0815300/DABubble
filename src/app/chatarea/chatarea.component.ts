@@ -42,7 +42,7 @@ export class ChatareaComponent {
   channelInfoDialog: boolean = false;
   channelMemberDialog: boolean = false;
   addMemberDialog: boolean = false;
-  channelName: string = '';
+  channelName: string | null = null;
   memberIds: string[] = [];
   members: User[] = [];
   messages: any[] = [];
@@ -78,7 +78,7 @@ export class ChatareaComponent {
   }
 
   clearChannelData() {
-    this.channelName = '';
+    this.channelName = null;
     this.memberIds = [];
     this.members = [];
     this.messages = [];
@@ -107,7 +107,7 @@ export class ChatareaComponent {
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelName = channel.channel_name;
+        this.channelName = channel.channel_name || null;
         this.memberIds = channel.member || [];
         this.loadMembers();
         this.loadActiveChannelMessages();
@@ -136,11 +136,7 @@ export class ChatareaComponent {
   }
 
   scrollToBottom(): void {
-    try {
-      this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
-    } catch (err) {
-      console.error('Fehler beim automatischen Scrollen:', err);
-    }
+    this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
   }
 
   formatTime(timeString: string): string {

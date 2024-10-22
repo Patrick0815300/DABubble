@@ -102,7 +102,7 @@ export class MessageComponent {
   }
 
   loadActiveChannelId() {
-    this.chatService.getActiveChannel().subscribe({
+    this.chatAreaService.getActiveChannel().subscribe({
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();

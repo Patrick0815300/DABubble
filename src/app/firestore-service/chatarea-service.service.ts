@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, Subscription, catchError, filter, map, of, switchMap } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
 import { CollectionReference, arrayRemove, deleteDoc } from 'firebase/firestore';
@@ -9,9 +9,21 @@ import { CollectionReference, arrayRemove, deleteDoc } from 'firebase/firestore'
   providedIn: 'root'
 })
 export class ChatareaServiceService {
-  uid = this.authService.getUID();
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
+
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
 
   /**
    * Loads a Firestore document and returns an observable with its data.
@@ -38,21 +50,26 @@ export class ChatareaServiceService {
   }
 
   getActiveChannel(): Observable<any> {
-    return new Observable((observer) => {
-      const uid = this.authService.getUID();
-      if (!uid) { observer.error('Benutzer nicht authentifiziert'); return; }
-      let unsubChannel: () => void;
-      const unsubUser = onSnapshot(doc(this.firestore, `users/${uid}`), (userSnap) => {
-        const channelId = userSnap.data()?.['activeChannelId'];
-        if (unsubChannel) unsubChannel();
-        if (channelId) {
-          unsubChannel = this.subscribeToChannel(channelId, observer);
-        } else {
-          observer.next(null);
-        }
-      }, (error) => observer.error(error));
-      return () => { unsubUser(); if (unsubChannel) unsubChannel(); };
-    });
+    return this.authService.getUIDObservable().pipe(
+      filter(uid => !!uid),
+      switchMap(uid => new Observable(observer => {
+        const userDoc = doc(this.firestore, `users/${uid}`);
+        const unsubUser = onSnapshot(userDoc, userSnap => {
+          const channelId = userSnap.data()?.['activeChannelId'];
+          if (channelId) {
+            const channelDoc = doc(this.firestore, `channels/${channelId}`);
+            const unsubChannel = onSnapshot(channelDoc, channelSnap => {
+              observer.next(channelSnap.exists() ? { id: channelSnap.id, ...channelSnap.data() } : null);
+            }, error => { console.error(error); observer.next(null); });
+            observer.add(unsubChannel);
+          } else {
+            observer.next(null);
+          }
+        }, error => { console.error(error); observer.next(null); });
+        return () => unsubUser();
+      })),
+      catchError(error => { console.error(error); return of(null); })
+    );
   }
 
   private subscribeToChannel(channelId: string, observer: any): () => void {
@@ -68,14 +85,12 @@ export class ChatareaServiceService {
   leaveActiveChannel(): Observable<void> {
     return new Observable((observer) => {
       (async () => {
-        const uid = this.authService.getUID();
-        if (!uid) { observer.error('Benutzer nicht authentifiziert'); return; }
         try {
-          const userRef = doc(this.firestore, `users/${uid}`);
+          const userRef = doc(this.firestore, `users/${this.uid}`);
           const userSnap = await getDoc(userRef);
           const channelId = userSnap.data()?.['activeChannelId'];
           await updateDoc(userRef, { activeChannelId: '' });
-          if (channelId) await updateDoc(doc(this.firestore, `channels/${channelId}`), { members: arrayRemove(uid) });
+          if (channelId) await updateDoc(doc(this.firestore, `channels/${channelId}`), { members: arrayRemove(this.uid) });
           observer.next();
         } catch (error) { observer.error(error); }
       })();
