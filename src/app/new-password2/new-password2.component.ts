@@ -6,10 +6,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router, RouterModule } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { NgClass } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
 import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
+import { Firestore } from 'firebase/firestore';
+import { config } from 'rxjs';
+import { initializeApp } from 'firebase/app';
 
 @Component({
   selector: 'app-new-password2',
@@ -38,11 +41,30 @@ export class NewPassword2Component {
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
+  config = {
+    projectId: 'dabubble-57387',
+    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
+    storageBucket: 'dabubble-57387.appspot.com',
+    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
+    authDomain: 'dabubble-57387.firebaseapp.com',
+    messagingSenderId: '1040544770849',
+  };
+
   constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
     
   }
 
-  private auth = getAuth();
+  private config2 = { // löschen
+    projectId: 'dabubble-57387',
+    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
+    storageBucket: 'dabubble-57387.appspot.com',
+    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
+    authDomain: 'dabubble-57387.firebaseapp.com',
+    messagingSenderId: '1040544770849',
+  };
+
+  private app = initializeApp(this.config2); // löschen
+  private auth = getAuth(this.app); // this.app löschen
   urlParams = new URLSearchParams(window.location.search);
   oobCode = this.urlParams.get('oobCode');
 
@@ -53,6 +75,7 @@ export class NewPassword2Component {
    */
   changePassword() {
     if (this.checkForSamePasswords()) {
+      //init.App
       this.resetPassword();
     } else {
       this.displayError = true;
@@ -62,6 +85,9 @@ export class NewPassword2Component {
     }
   }
 
+  /**
+   * This function resets the password in the firebase authenticator
+   */
   resetPassword() {
     if (this.oobCode) {
       confirmPasswordReset(this.auth, this.oobCode, this.Password1)
@@ -80,6 +106,10 @@ export class NewPassword2Component {
     }
   }
 
+
+  /**
+   * This function resets the Password in the firebase-database
+   */
   resetPasswordInDatabase() {
     if (this.auth.currentUser) {
       this.firebase.updatePassword(this.Password1, this.auth.currentUser.uid);

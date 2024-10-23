@@ -26,6 +26,11 @@
 section {
     display: flex;
     justify-content: center;
+
+    main {
+        height:650px;
+    }
+
 }
 
 main {
@@ -36,7 +41,7 @@ main {
 mat-card {
     background-color: white;
     border-radius: 20px;
-    height: 720px;
+    height: 745px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -69,7 +74,7 @@ form {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
 
 .seperator {
@@ -185,14 +190,20 @@ form {
     display: flex;
 }
 
-.error{
-    color:red;
-    height:20px;
- }
+.error {
+    color: red;
+    height: 20px;
+}
 
 @media(max-width:710px) {
     main {
         width: calc(100% - 20px);
+    }
+}
+
+@media(max-width:610px) {
+    section {
+        margin-top: -30px;
     }
 }
 
@@ -224,29 +235,28 @@ form {
     }
 }
 
-@media(max-height:1050px){
-    mat-card{
-        transform:scale(0.9);
+@media(max-height:1050px) {
+    mat-card {
+        transform: scale(0.9);
     }
 }
 
-@media(max-height:1010px){
-    mat-card{
-        transform:scale(0.8);
+@media(max-height:1010px) {
+    mat-card {
+        transform: scale(0.8);
     }
 
-    main{
-       margin-top:-70px; 
-    }
-}
-
-@media(max-height:900px){
-    mat-card{
-        transform:scale(0.7);
-    }
-
-    main{
-       margin-top:-100px; 
+    main {
+        margin-top: -70px;
     }
 }
 
+@media(max-height:900px) {
+    mat-card {
+        transform: scale(0.7);
+    }
+
+    main {
+        margin-top: -100px;
+    }
+}

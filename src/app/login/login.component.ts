@@ -126,13 +126,12 @@ export class LoginComponent {
     await setDoc(
       userRef,
       {
-        // uid: user.uid,
         name: user.displayName,
         email: user.email,
         avatar: user.photoURL,
         online: true,
       },
       { merge: true }
-    ); // merge: true aktualisiert die Daten, falls sie bereits existieren
+    );
   }
 }

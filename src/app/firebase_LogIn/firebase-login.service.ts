@@ -55,12 +55,12 @@ export class FirebaseLoginService {
    * @param name Jame of the user
    * @returns the user ID
    */
-  async addUserInAuth(email: string, password: string, name: string) {
+  async addUserInAuth(email: string, password: string, name: string) {    
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      console.log(userCredential);
       const user = userCredential.user;
       this.saveUserDataToDatabase(user.uid, user.email, name, password);
-      //console.log('Benutzer erfolgreich registriert und in Firestore gespeichert mit UID:', user.uid);
       return user.uid;
     } catch (error) {
       console.error('Fehler bei der Registrierung:', error);
@@ -74,18 +74,16 @@ export class FirebaseLoginService {
    * @param email E-Mail of the user
    */
   saveUserDataToDatabase(uid: string, email: any, name: string, password: string) {
-    // Referenziere das Dokument mit der UID als DocID
     const userRef = doc(this.firestore, 'users', uid);
     setDoc(userRef, {
       name: name,
       email: email,
-      password: password,
       online: false,
       avatar: '',
+      id: uid,
     })
       .then(() => {
         return uid;
-        //console.log("Benutzer erfolgreich in der Datenbank gespeichert.");
       })
       .catch(error => {
         console.error('Fehler beim Speichern des Benutzers:', error);
