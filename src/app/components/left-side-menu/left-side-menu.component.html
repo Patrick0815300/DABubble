@@ -38,7 +38,7 @@
               sendChannel(channel);
               showChannelMessages(true);
               loadChannelMessages(channel.channel_id);
-              handleChosen(channel.channel_id)
+              handleUpdateUserChannelId(channel.channel_id)
             "
             class="d-flex gp l-mg-7"
           >
@@ -72,32 +72,27 @@
             sendSelectedUser(authenticatedUser!);
             onToggleDevSearch(false);
             showChannelMessages(false);
-            sendUserId(authenticatedUser?.user_id!);
-            loadMessages(authenticatedUser?.user_id!, authenticatedUser?.user_id!)
+            sendUserId(authenticatedUser?.id!);
+            loadMessages(authenticatedUser?.id!, authenticatedUser?.id!)
           "
           class="d-flex capitilize gp l-mg-2"
         >
           <app-profile class="app-profile" [left_side_profile]="true" *ngIf="authenticatedUser?.image_file" [image_user]="authenticatedUser?.image_file" />
           <span class="user-name"> {{ authenticatedUser?.name }}</span>
-          <span *ngIf="authenticatedUser?.online === true">(Du)</span>
+          <span>(Du)</span>
         </li>
         <ng-container *ngFor="let user of users$ | async; let i = index">
           <li
-            *ngIf="user.user_id !== authenticatedUser?.user_id"
+            *ngIf="user.id !== authenticatedUser?.id"
             [class.active]="selectedIndex == i + 1"
             (click)="
-              selectUser(i + 1);
-              sendSelectedUser(user);
-              onToggleDevSearch(false);
-              showChannelMessages(false);
-              sendUserId(user.user_id);
-              loadMessages(onlineUsers[0]?.user_id, user.user_id)
+              selectUser(i + 1); sendSelectedUser(user); onToggleDevSearch(false); showChannelMessages(false); sendUserId(user.id); loadMessages(authenticatedUser?.id, user.id)
             "
             class="d-flex capitilize gp l-mg-2"
           >
             <app-profile class="app-profile" [left_side_profile]="true" *ngIf="user.image_file" [image_user]="user.image_file" />
             <span> {{ user.name }}</span>
-            <span *ngIf="user.online === true">(Du)</span>
+            <span *ngIf="user.id === this.auth_user_id">(Du)</span>
           </li>
         </ng-container>
       </ul>

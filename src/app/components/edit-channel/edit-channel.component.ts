@@ -5,6 +5,8 @@ import { Channel, ChannelMember, Message, User } from '../../modules/database.mo
 import { DatabaseServiceService } from '../../database-service.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { map, Subscription } from 'rxjs';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-edit-channel',
@@ -22,8 +24,8 @@ export class EditChannelComponent implements OnInit {
   ChannelMembers: ChannelMember[] = [];
   admin_password: string = '';
   deletion_message: string = '';
-
-  constructor(private channelService: ChannelService, private userService: UserService, private databaseService: DatabaseServiceService) {}
+  private uidSubscription: Subscription | null = null;
+  constructor(private channelService: ChannelService, private authService: AuthService, private userService: UserService, private databaseService: DatabaseServiceService) {}
 
   ngOnInit(): void {
     this.channelService.open_update_channel$.subscribe(state => {
@@ -42,8 +44,16 @@ export class EditChannelComponent implements OnInit {
       this.admin_name = admin.name;
     });
 
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    // });
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
   }
 
@@ -52,8 +62,8 @@ export class EditChannelComponent implements OnInit {
   }
 
   onLeaveChannel() {
-    if (this.authenticatedUser?.user_id !== this.channel.admin) {
-      this.databaseService.deleteDocument('channel_members', 'member_id', this.authenticatedUser?.user_id);
+    if (this.authenticatedUser?.id !== this.channel.admin) {
+      this.databaseService.deleteDocument('channel_members', 'member_id', this.authenticatedUser?.id);
     } else {
       console.log('Admin cannot leave the channel');
     }
@@ -76,6 +86,12 @@ export class EditChannelComponent implements OnInit {
       this.onCancelDeletion();
     } else {
       console.log('Eingegebenes Passwort ist falsch, bitte versuchen Sie nochmal!');
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
     }
   }
 

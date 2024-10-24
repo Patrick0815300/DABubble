@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { addDoc, collection, collectionData, deleteDoc, doc, docData, Firestore, FirestoreModule, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { FirebaseAppModule } from '@angular/fire/app';
+import { Injectable, OnInit } from '@angular/core';
+import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { User, Message, Channel, ChannelMember } from './modules/database.model';
-import { BehaviorSubject, map, Observable, Subject, Subscription, switchMap } from 'rxjs';
-import { formatDate } from '@angular/common';
+import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
+import { getAuth } from 'firebase/auth';
+import { CurrentUserService } from './modules/current-user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +15,7 @@ export class DatabaseServiceService {
   messageData$: any;
   users: User[] = [new User()];
   messages: Message[] = [new Message()];
-  CURRENT_USER: any;
+  currentUserRef!: any;
 
   private logSubject = new BehaviorSubject<User>(new User());
   private usersSubject = new BehaviorSubject<User[]>([new User()]);
@@ -184,7 +184,7 @@ export class DatabaseServiceService {
   }
 
   getUserById(userId: string, callback: (user: any | null) => void) {
-    const userQuery = query(this.getUsersRef(), where('user_id', '==', userId));
+    const userQuery = query(this.getUsersRef(), where('id', '==', userId));
 
     onSnapshot(userQuery, snapshot => {
       if (!snapshot.empty) {
@@ -269,7 +269,7 @@ export class DatabaseServiceService {
   }
 
   getChannelAdmin(admin_id: string): Observable<User> {
-    return this.snapUsers().pipe(map(users => users.filter(user => user.user_id === admin_id)[0]));
+    return this.snapUsers().pipe(map(users => users.filter(user => user.id === admin_id)[0]));
   }
 
   getOfficeTeamMembers(TeamChannelId: string, callback: (members: any[] | null) => void) {
@@ -285,8 +285,17 @@ export class DatabaseServiceService {
     });
   }
 
-  authenticatedUser(): Observable<User> {
-    return this.snapUsers().pipe(map(users => users.filter(user => user.online === true)[0]));
+  // authenticatedUser(): Observable<User> {
+  //   return this.snapUsers().pipe(map(users => users.filter(user => user.online === true)[0]));
+  // }
+
+  async authUser(userId: string | undefined) {
+    if (userId) {
+      const userRef = doc(this.getUsersRef(), userId);
+      let user = await getDoc(userRef);
+      return user.data() as User;
+    }
+    return;
   }
 
   /**
@@ -297,22 +306,22 @@ export class DatabaseServiceService {
 
   // userFromId(id: string | undefined): Observable<User> {
   //   return this.snapUsers().pipe(
-  //     map(users => users.filter(user => user.user_id === id)[0]) // Filter users by the given ID
+  //     map(users => users.filter(user => user.id === id)[0]) // Filter users by the given ID
   //   );
   // }
 
   // pictureFromId(id: string | undefined): Observable<string> {
   //   return this.snapUsers().pipe(
-  //     map(users => users.filter(user => user.user_id === id)[0].image_file) // Filter users by the given ID
+  //     map(users => users.filter(user => user.id === id)[0].avatar) // Filter users by the given ID
   //   );
   // }
 
   // pictureFromID(id: string): string {
-  //   let user = this.users.find(user => user.user_id === id)!;
-  //   return `${user?.image_file}`;
+  //   let user = this.users.find(user => user.id === id)!;
+  //   return `${user?.avatar}`;
   // }
   // nameFromId(id: string | undefined): string {
-  //   let user = this.users.find(user => user.user_id === id);
+  //   let user = this.users.find(user => user.id === id);
   //   return `${user?.first_name}`;
   // }
 
@@ -326,7 +335,7 @@ export class DatabaseServiceService {
 
   async getDocumentIdByUserId(collectionName: string, userId: string) {
     const collectionRef = collection(this.firestore, collectionName);
-    const q = query(collectionRef, where('user_id', '==', userId));
+    const q = query(collectionRef, where('id', '==', userId));
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {

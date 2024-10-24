@@ -14,7 +14,7 @@
           <img src="assets/img/icons/subscribe.svg" alt="" />
         </section>
         <section *ngIf="channel_is_deleted">
-          @if(authenticatedUser?.user_id === channel.admin){
+          @if(authenticatedUser?.id === channel.admin){
           <h1>Du hast diesen Channel gelöscht. Kein Mitglied kann Nachricht in diesem Channel schreiben. Das ist das Ende des Channels.</h1>
           }@else{
           <h1>
@@ -30,9 +30,9 @@
             <span>{{ chatGroup.date }} </span>
             <div class="line"></div>
           </div>
-          <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.user_id">
+          <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.id">
             <div class="image-message">
-              <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
+              <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.avatar }}" alt="" />
             </div>
             <div class="name-date-line">
               <div>
@@ -49,7 +49,7 @@
             <img class="sender" src="assets/img/icons/hash_tag.svg" alt="" />
             <span class="username text-capitalize">{{ channel.channel_name }}</span>
           </div>
-          @if(channel.admin ===authenticatedUser?.user_id){
+          @if(channel.admin ===authenticatedUser?.id){
           <div class="self-room">
             Du hast diesen Channel {{ setChannelCreateDate(channel.created_at) }} erstellt. Das ist der Anfang des Channels
             <button class="tag text-capitalize">&num;{{ channel.channel_name }}</button>
@@ -74,7 +74,7 @@
             <img class="icons" src="assets/img/icons/sentiment_satisfied.svg" alt="" />
             <img class="icons" src="assets/img/icons/alternate_email.svg" alt="" />
           </div>
-          <button (click)="onAddMessage(authenticatedUser?.user_id, channel.channel_id)">
+          <button (click)="onAddMessage(authenticatedUser?.id, channel.channel_id)">
             <img src="assets/img/icons/send.svg" alt="Send message" />
           </button>
         </div>

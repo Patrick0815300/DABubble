@@ -1,3 +1,4 @@
+<app-middle-wrapper>
 <mat-card class="card">
     <mat-card-header>
         <mat-card-title (click)="openChannelDialog()">
@@ -34,3 +35,4 @@
     <app-message-box class="message-box"></app-message-box>
 </mat-card>
 <div class="background" *ngIf="channelInfoDialog || channelMemberDialog || addMemberDialog" (click)="closeDialogOnClick($event)"></div>
+</app-middle-wrapper>

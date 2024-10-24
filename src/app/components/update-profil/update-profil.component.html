@@ -17,6 +17,6 @@
   <input [(ngModel)]="user_email" type="text" placeholder="max-mustermann@gmail.com" />
   <div class="btn-container">
     <button class="btn" (click)="onCloseUpdateProfile()">Abbrechen</button>
-    <button class="btn" (click)="save('users', authenticatedUser?.user_id!)">Speichern</button>
+    <button class="btn" (click)="save('users', authenticatedUser?.id!)">Speichern</button>
   </div>
 </section>

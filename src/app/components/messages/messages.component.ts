@@ -1,5 +1,5 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, DoCheck, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, DoCheck, AfterViewInit, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
 import { FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
@@ -14,15 +14,33 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { EmojiService } from '../../modules/emoji.service';
 import { SearchUserComponent } from '../search-user/search-user.component';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { map, Subscription } from 'rxjs';
+import { AuthService } from '../../firestore-service/auth.service';
+import { FileUploadService } from '../../firestore-service/file-upload.service';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [MiddleWrapperComponent, CommonModule, FormsModule, FirestoreModule, FirebaseAppModule, LeftSideMenuComponent, PickerModule, EmojiPickerComponent, SearchUserComponent],
+  imports: [
+    MatIconModule,
+    MiddleWrapperComponent,
+    CommonModule,
+    FormsModule,
+    FirestoreModule,
+    FirebaseAppModule,
+    LeftSideMenuComponent,
+    PickerModule,
+    EmojiPickerComponent,
+    SearchUserComponent,
+    MatProgressBarModule,
+  ],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, AfterViewInit {
   message_content = '';
   chatMessages: Message[] = [];
   toUserId: string = '';
@@ -31,7 +49,7 @@ export class MessagesComponent implements OnInit {
   channelChat: Message[] = [];
   groupedChat: any;
   userByIdMap: { [userId: string]: any } = {};
-  authenticatedUser: User | undefined;
+  // authenticatedUser: User | undefined;
   today!: string;
   open_show_profile!: boolean;
   selectedUser: User = new User();
@@ -50,13 +68,28 @@ export class MessagesComponent implements OnInit {
   chosenReaction: string = '';
   isMainEmoji: boolean = true;
   messageId: string = '';
+  fileURL: SafeResourceUrl | null = null;
+  fileType: string | null = null;
+  fileName: string | null = null;
+  selectedFile: File | null = null;
+  isUploading: boolean = false;
+  uploadProgress: number = 0;
+  authenticatedUser: User | undefined;
+  cleanUrl: string | null = null;
+
+  private uidSubscription: Subscription | null = null;
+  private fileUploadService = inject(FileUploadService);
+  private sanitizer = inject(DomSanitizer);
+  @ViewChild('fileUpload') fileInputElement!: ElementRef;
+
   constructor(
     private channelService: ChannelService,
     private elementRef: ElementRef,
     private showProfileService: ShowProfilService,
     private userService: UserService,
     private databaseService: DatabaseServiceService,
-    private emojiService: EmojiService
+    private emojiService: EmojiService,
+    private authService: AuthService
   ) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
@@ -67,10 +100,19 @@ export class MessagesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
-      console.log('Auth User ooo', this.authenticatedUser.user_id);
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
+
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    //   console.log('Auth User ooo', this.authenticatedUser.id);
+    // });
 
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
@@ -147,6 +189,12 @@ export class MessagesComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
+
   /**
    *Fetch user data for all unique user IDs and cache them for
    * performance improvement
@@ -206,7 +254,7 @@ export class MessagesComponent implements OnInit {
   messageSender(receiverId: string): object {
     let msg = {
       message_content: this.message_content,
-      from_user: this.authenticatedUser?.user_id,
+      from_user: this.authenticatedUser?.id,
       to_user: receiverId,
     };
     let newMessage = new Message(msg);
@@ -298,8 +346,8 @@ export class MessagesComponent implements OnInit {
       message_content: this.update_message,
       response_content: currentMsg?.message_content,
       from_user_origin: currentMsg?.from_user,
-      from_user: this.authenticatedUser?.user_id,
-      to_user: currentMsg?.to_user === this.authenticatedUser?.user_id ? currentMsg?.from_user : currentMsg?.to_user,
+      from_user: this.authenticatedUser?.id,
+      to_user: currentMsg?.to_user === this.authenticatedUser?.id ? currentMsg?.from_user : currentMsg?.to_user,
     };
 
     let newMessage = new Message(msg);
@@ -341,6 +389,65 @@ export class MessagesComponent implements OnInit {
       if (currentChar === '@') {
         this.sendShowSearchUser();
       }
+    }
+  }
+
+  clearFileUpload() {
+    this.fileURL = null;
+    this.fileName = null;
+    this.fileType = null;
+    this.selectedFile = null;
+  }
+
+  openFileDialog() {
+    this.fileInputElement.nativeElement.click();
+  }
+
+  ngAfterViewInit() {
+    this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        this.selectedFile = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+          this.fileName = this.selectedFile!.name;
+          this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
+        };
+        reader.readAsDataURL(this.selectedFile);
+      }
+    });
+
+    // this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+    //   this.checkForAtSymbol(event);
+    // });
+  }
+
+  uploadFile(messageId: string, channelId: string) {
+    if (this.selectedFile) {
+      this.isUploading = true;
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
+      this.fileUploadService
+        .uploadFile(this.selectedFile, messageId, progress => {
+          this.uploadProgress = progress;
+        })
+        .then((result: { url: string; fileName: string }) => {
+          this.cleanUrl = result.url;
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+          this.fileName = result.fileName;
+          this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
+            this.message_content = '';
+            this.fileURL = null;
+            this.fileName = null;
+            this.isUploading = false;
+          });
+        })
+        .catch(error => {
+          console.error('Fehler beim Hochladen der Datei:', error);
+          this.isUploading = false;
+        });
+      this.selectedFile = null;
     }
   }
 }

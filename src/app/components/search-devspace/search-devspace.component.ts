@@ -36,8 +36,8 @@ export class SearchDevspaceComponent implements OnInit {
     });
   }
   sendToOpenUser(user: User) {
-    if (!this.PickedArray.includes(user.user_id)) {
-      this.PickedArray.push(user.user_id);
+    if (!this.PickedArray.includes(user.id)) {
+      this.PickedArray.push(user.id);
       this.channelService.emitPickedUser(this.PickedArray);
       console.log('new User', this.PickedArray);
     } else {

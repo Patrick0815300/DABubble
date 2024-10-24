@@ -14,7 +14,7 @@ import { UpdateProfilComponent } from '../components/update-profil/update-profil
 import { LogOutService } from '../modules/log-out.service';
 import { ShowProfilService } from '../modules/show-profil.service';
 import { UpdateProfilService } from '../modules/update-profil.service';
-import { ChatareaComponent } from "../chatarea/chatarea.component";
+import { ChatareaComponent } from '../chatarea/chatarea.component';
 import { MessagesComponent } from '../components/messages/messages.component';
 import { Channel, ChannelMember, Message, User } from '../modules/database.model';
 import { DatabaseServiceService } from '../database-service.service';
@@ -26,6 +26,8 @@ import { FormsModule } from '@angular/forms';
 import { EditChannelComponent } from '../components/edit-channel/edit-channel.component';
 import { SearchUserComponent } from '../components/search-user/search-user.component';
 import { DevNewMessageComponent } from '../components/dev-new-message/dev-new-message.component';
+import { map, Subscription } from 'rxjs';
+import { AuthService } from '../firestore-service/auth.service';
 
 @Component({
   selector: 'app-main-component',
@@ -86,6 +88,7 @@ export class MainComponentComponent implements OnInit {
   showSearchUserName: boolean = false;
   dev_message_search: boolean = false;
 
+  private uidSubscription: Subscription | null = null;
   constructor(
     private navService: NavService,
     private channelService: ChannelService,
@@ -93,6 +96,7 @@ export class MainComponentComponent implements OnInit {
     private showProfileService: ShowProfilService,
     private updateProfilService: UpdateProfilService,
     private databaseService: DatabaseServiceService,
+    private authService: AuthService,
     private userService: UserService
   ) {
     this.navService.state$.subscribe(state => {
@@ -148,10 +152,18 @@ export class MainComponentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    this.open_logout = false;
+    this.open_show_profil = false;
+    this.open_show_profile_nav = false;
+    this.open_update_profil = false;
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
-
     this.databaseService.officeTeam().subscribe(team => {
       this.officeTeamChannel = team;
     });
@@ -169,7 +181,7 @@ export class MainComponentComponent implements OnInit {
   }
 
   toggelThread() {
-    this.isThreadVisible = !this.isThreadVisible
+    this.isThreadVisible = !this.isThreadVisible;
   }
 
   toggleNavigation() {
@@ -177,6 +189,11 @@ export class MainComponentComponent implements OnInit {
       this.state_text = 'schließen';
     } else {
       this.state_text = 'öffnen   ';
+    }
+  }
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
     }
   }
 
@@ -189,7 +206,7 @@ export class MainComponentComponent implements OnInit {
     let channelData = {
       channel_name: this.channel_name,
       description: this.channel_description,
-      admin: this.authenticatedUser?.user_id,
+      admin: this.authenticatedUser?.id,
     };
 
     let office = new Channel(channelData).toObject();
@@ -215,8 +232,8 @@ export class MainComponentComponent implements OnInit {
       this.navService.createChannel();
     } else {
       this.databaseService.addChannel(office);
-      if (!array.includes(this.authenticatedUser?.user_id)) {
-        array.push(this.authenticatedUser?.user_id);
+      if (!array.includes(this.authenticatedUser?.id)) {
+        array.push(this.authenticatedUser?.id);
       }
       array.forEach(member => {
         const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();

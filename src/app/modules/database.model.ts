@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 
 ////////////// MODEL FOR USER ///////////////////////////////
 export class User {
-  user_id!: string;
+  id!: string;
   name!: string;
   email!: string;
   image_file!: string;
@@ -10,7 +10,7 @@ export class User {
   online!: boolean;
 
   constructor(obj?: any) {
-    this.user_id = obj ? obj.user_id || nanoid() : '';
+    this.id = obj ? obj.id || nanoid() : '';
     this.name! = obj ? obj.name : '';
     this.email = obj ? obj.email : '';
     this.image_file = obj ? obj.image_file : '';
@@ -20,7 +20,7 @@ export class User {
 
   public toObject() {
     return {
-      user_id: this.user_id,
+      id: this.id,
       name: this.name,
       email: this.email,
       password: this.password,

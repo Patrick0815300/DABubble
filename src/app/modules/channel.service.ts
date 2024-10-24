@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { Channel, ChannelMember, User } from './database.model';
-import { collection, doc, Firestore, getDocs, query, updateDoc, where } from '@angular/fire/firestore';
+import { collection, doc, Firestore, getDoc, getDocs, query, updateDoc, where } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -81,4 +81,12 @@ export class ChannelService {
       console.log(`No ${collectionName} found with ID:', ${parameter}`);
     }
   }
+
+  // setActiveChannel(channelId: string): void {
+  //   getDoc(doc(this.firestore, channels/${channelId})).then((docSnap) => {
+  //     if (docSnap.exists() && docSnap.data().members?.includes(this.uid)) {
+  //       updateDoc(doc(this.firestore, users/${this.uid}), { activeChannelId: channelId });
+  //     }
+  //   });
+  // }
 }

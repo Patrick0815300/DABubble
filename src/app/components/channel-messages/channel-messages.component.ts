@@ -6,6 +6,8 @@ import { ChannelService } from '../../modules/channel.service';
 import { Channel, Message, User, ChannelMember } from '../../modules/database.model';
 import { DatabaseServiceService } from '../../database-service.service';
 import { FormsModule } from '@angular/forms';
+import { map, Subscription } from 'rxjs';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-channel-messages',
@@ -26,12 +28,23 @@ export class ChannelMessagesComponent implements OnInit {
   ChannelMembers: ChannelMember[] = [];
   userByIdMap: { [userId: string]: any } = {};
   open_edit_channel: boolean = false;
-  constructor(private userService: UserService, private channelService: ChannelService, private databaseService: DatabaseServiceService) { }
+
+  private uidSubscription: Subscription | null = null;
+  constructor(private userService: UserService, private authService: AuthService, private channelService: ChannelService, private databaseService: DatabaseServiceService) {}
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
+
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    // });
 
     this.userService.channel$.subscribe(channel => {
       this.channel = channel;
@@ -79,6 +92,12 @@ export class ChannelMessagesComponent implements OnInit {
     }
 
     this.message_content = '';
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 
   groupMessagesByDate(messages: any[]) {

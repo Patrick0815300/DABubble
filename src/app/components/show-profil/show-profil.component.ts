@@ -5,6 +5,8 @@ import { User } from '../../modules/database.model';
 import { DatabaseServiceService } from '../../database-service.service';
 import { UserService } from '../../modules/user.service';
 import { CommonModule } from '@angular/common';
+import { map, Subscription } from 'rxjs';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-show-profil',
@@ -20,11 +22,14 @@ export class ShowProfilComponent implements OnInit {
   authenticatedUser: User | undefined;
   selectedUser: User = new User();
   @Input() isNavBar: boolean = false;
+
+  private uidSubscription: Subscription | null = null;
   constructor(
     private userService: UserService,
     private showProfileService: ShowProfilService,
     private updateProfilService: UpdateProfilService,
-    private databaseService: DatabaseServiceService
+    private databaseService: DatabaseServiceService,
+    private authService: AuthService
   ) {
     this.showProfileService.open_show_profile$.subscribe(state => {
       this.open_show_profile = state;
@@ -44,9 +49,18 @@ export class ShowProfilComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    // });
+
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
     });

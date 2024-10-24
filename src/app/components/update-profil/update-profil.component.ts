@@ -5,6 +5,8 @@ import { DatabaseServiceService } from '../../database-service.service';
 import { User } from '../../modules/database.model';
 import { FormsModule } from '@angular/forms';
 import { doc, Firestore, updateDoc, collection } from '@angular/fire/firestore';
+import { AuthService } from '../../firestore-service/auth.service';
+import { map, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-update-profil',
@@ -19,11 +21,14 @@ export class UpdateProfilComponent implements OnInit {
   authenticatedUser: User | undefined;
   username: string = '';
   user_email: string | undefined = '';
+
+  private uidSubscription: Subscription | null = null;
   constructor(
     private firestore: Firestore,
     private showProfileService: ShowProfilService,
     private updateProfilService: UpdateProfilService,
-    private databaseService: DatabaseServiceService
+    private databaseService: DatabaseServiceService,
+    private authService: AuthService
   ) {
     this.showProfileService.open_show_profile_nav$.subscribe(state => {
       this.open_show_profile_nav = state;
@@ -34,11 +39,28 @@ export class UpdateProfilComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
-      this.username = this.authenticatedUser?.name;
-      this.user_email = this.authenticatedUser?.email;
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+          this.username = this.authenticatedUser?.name;
+          this.user_email = this.authenticatedUser?.email;
+        });
     });
+
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    //   this.username = this.authenticatedUser?.name;
+    //   this.user_email = this.authenticatedUser?.email;
+    // });
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 
   onCloseUpdateProfile() {

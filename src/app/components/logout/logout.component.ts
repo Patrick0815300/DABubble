@@ -5,6 +5,7 @@ import { DatabaseServiceService } from '../../database-service.service';
 import { User } from '../../modules/database.model';
 import { AuthService } from '../../firestore-service/auth.service';
 import { Router } from '@angular/router';
+import { map, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-logout',
@@ -17,16 +18,30 @@ export class LogoutComponent implements OnInit {
   open_show_profile_nav!: boolean;
   authenticatedUser: User | undefined;
   selectedUser: User | undefined;
-
-  constructor(private userService: UserService, private showProfileService: ShowProfilService, private databaseService: DatabaseServiceService, private authService: AuthService, private router: Router) {
+  private uidSubscription: Subscription | null = null;
+  constructor(
+    private userService: UserService,
+    private showProfileService: ShowProfilService,
+    private databaseService: DatabaseServiceService,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.showProfileService.open_show_profile_nav$.subscribe(state => {
       this.open_show_profile_nav = state;
     });
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    // });
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.authenticatedUser = user;
+        });
     });
 
     /**
@@ -48,5 +63,11 @@ export class LogoutComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
   }
 }

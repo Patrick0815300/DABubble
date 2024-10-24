@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { Channel, Message, User } from './database.model';
+
 @Injectable({
   providedIn: 'root',
 })
