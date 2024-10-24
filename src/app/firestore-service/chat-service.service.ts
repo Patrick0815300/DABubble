@@ -191,7 +191,7 @@ export class ChatServiceService {
     onSnapshot(messagesCollectionRef, (messagesSnapshot) => {
       const threadMessages = messagesSnapshot.docs
         .map(doc => doc.data())
-        .filter(message => message['content'] && message['time'])
+        .filter(message => (message['content'] || message['fileUrl']) && message['time'])
         .sort((a, b) => new Date(a['time']).getTime() - new Date(b['time']).getTime());
       const count = threadMessages.length;
       const lastMessageTime = count > 0 ? threadMessages[count - 1]['time'] : null;
@@ -228,8 +228,6 @@ export class ChatServiceService {
     this.chatAreaService.getActiveChannel().subscribe({
       next: (channel) => {
         this.setCurrentChannel(channel);
-        console.log('activeChannel', channel);
-
       }
     });
   }
@@ -296,7 +294,7 @@ export class ChatServiceService {
       onSnapshot(messagesCollectionRef, (snapshot) => {
         const messages = snapshot.docs
           .map(doc => doc.data())
-          .filter(message => message['content'])
+          .filter(message => message['content'] || message['fileUrl'])
           .sort((a, b) => a['time'].localeCompare(b['time']));
         observer.next(messages);
       }, (error) => observer.error(error));

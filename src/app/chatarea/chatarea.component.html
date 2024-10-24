@@ -9,7 +9,7 @@
         <div class="member-container">
              <div class="member" (click)="openMemberDialog()">
                  <div>
-                    <img *ngFor="let member of members" class="member-img" [src]="member.avatar" [alt]="member.name + ' ' + member.name">
+                    <img *ngFor="let member of members" class="member-img" [src]="member.avatar">
                  </div>
                  <span>{{ members.length }}</span>
              </div>
@@ -25,9 +25,7 @@
           <span>{{ formatDate(message.time) }}</span>
           <div class="devider"></div>
         </div>
-        <!-- Nachricht von anderen Benutzern -->
         <app-message *ngIf="message.senderId !== uid" [message]="message"></app-message>
-        <!-- Eigene Nachrichten -->
         <app-own-message *ngIf="message.senderId === uid" [message]="message"></app-own-message>
       </ng-container>
       </mat-card-content>

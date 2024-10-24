@@ -84,16 +84,9 @@ export class ChatareaComponent {
     this.messages = [];
   }
 
-  loadActiveChannelMessages() {
-    this.fireService.getActiveChannel().subscribe((channel: any) => {
-      const channelId = channel.id;
-      this.loadMessages(channelId);
-    });
-  }
-
   loadMessages(channelId: string) {
     if (!channelId) {
-      this.messages = [];
+      this.clearChannelData();
       return;
     }
     this.fireService.loadMessages(channelId).subscribe((messages) => {
@@ -110,7 +103,7 @@ export class ChatareaComponent {
         this.channelName = channel.channel_name || null;
         this.memberIds = channel.member || [];
         this.loadMembers();
-        this.loadActiveChannelMessages();
+        this.loadMessages(channel.id);
         this.cdRef.detectChanges();
       }
     });

@@ -24,11 +24,10 @@
       <label for="fileUpload">
         <mat-icon (click)="openFileDialog()">add</mat-icon>
       </label>
-      <mat-icon (click)="showEmojiPicker($event)">sentiment_satisfied
-        <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()"/>
-      </mat-icon>
+      <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()" #emojiPicker/>
+      <mat-icon (click)="showEmojiPicker(); $event.stopPropagation()">sentiment_satisfied</mat-icon>
       <div class="link-someone" *ngIf="linkDialog">
-        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name, user.id!)">
+        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name, user.id!)"  #addMember>
           <img [src]="user.avatar" alt="{{ user.name }}">
           <span>{{ user.name }}</span>
         </div>

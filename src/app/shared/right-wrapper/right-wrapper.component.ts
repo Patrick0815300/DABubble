@@ -84,19 +84,21 @@ export class RightWrapperComponent {
 
   loadThreadMessages(channelId: string, messageId: string, threadId: string) {
     const path = `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`;
+    console.log('RightWrapperComponent: loadThreadMessages aufgerufen mit Path:', path);
+
     this.chatService.loadMessagesFromPath(path).subscribe((messages) => {
+      console.log('RightWrapperComponent: threadMessages empfangen:', messages);
       this.threadMessages = messages.map(message => {
         return {
           ...message,
           id: message.id
         };
       });
+      console.log('RightWrapperComponent: threadMessages gesetzt:', this.threadMessages);
     });
   }
 
   toggleThread() {
-    console.log('currentChannel: ', this.currentChannel);
-
     this.isVisible = !this.isVisible;
     if (this.currentChannel) {
       this.chatService.updateChannelThreadState(this.channelId, this.isVisible);

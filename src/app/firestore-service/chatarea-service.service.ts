@@ -16,7 +16,6 @@ export class ChatareaServiceService {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
-
   }
 
   ngOnDestroy() {
@@ -63,7 +62,7 @@ export class ChatareaServiceService {
             }, error => { console.error(error); observer.next(null); });
             observer.add(unsubChannel);
           } else {
-            observer.next(null);
+            observer.next(null); // hier könnte eine Funktion hin für den Leeren Channel und die Anfrage am Admin
           }
         }, error => { console.error(error); observer.next(null); });
         return () => unsubUser();
