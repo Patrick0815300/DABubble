@@ -1,17 +1,28 @@
 import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, Subscription, catchError, filter, map, of, switchMap } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
-import { deleteDoc } from 'firebase/firestore';
+import { CollectionReference, arrayRemove, deleteDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatareaServiceService {
-  uid = this.authService.getUID();
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
 
   /**
    * Loads a Firestore document and returns an observable with its data.
@@ -37,38 +48,51 @@ export class ChatareaServiceService {
     );
   }
 
-  /**
-   * Gets the active channel (the channel with 'chosen' set to true).
-   * @returns {Observable<any>} An observable that emits the active channel data.
-   */
   getActiveChannel(): Observable<any> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channels');
-    const q = query(channelsCollectionRef, where('chosen', '==', true));
-    return new Observable((observer) => {
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          const channelData = { id: doc.id, ...doc.data() };
-          observer.next(channelData);
-        });
-      }, (error) => observer.error(error));
-    });
+    return this.authService.getUIDObservable().pipe(
+      filter(uid => !!uid),
+      switchMap(uid => new Observable(observer => {
+        const userDoc = doc(this.firestore, `users/${uid}`);
+        const unsubUser = onSnapshot(userDoc, userSnap => {
+          const channelId = userSnap.data()?.['activeChannelId'];
+          if (channelId) {
+            const channelDoc = doc(this.firestore, `channels/${channelId}`);
+            const unsubChannel = onSnapshot(channelDoc, channelSnap => {
+              observer.next(channelSnap.exists() ? { id: channelSnap.id, ...channelSnap.data() } : null);
+            }, error => { console.error(error); observer.next(null); });
+            observer.add(unsubChannel);
+          } else {
+            observer.next(null); // hier könnte eine Funktion hin für den Leeren Channel und die Anfrage am Admin
+          }
+        }, error => { console.error(error); observer.next(null); });
+        return () => unsubUser();
+      })),
+      catchError(error => { console.error(error); return of(null); })
+    );
   }
 
-  /**
-   * Marks the active channel as inactive by setting 'chosen' to false.
-   * @returns {Observable<void>} An observable that completes when the channel is updated.
-   */
+  private subscribeToChannel(channelId: string, observer: any): () => void {
+    return onSnapshot(doc(this.firestore, `channels/${channelId}`), (channelSnap) => {
+      if (channelSnap.exists()) {
+        observer.next({ id: channelSnap.id, ...channelSnap.data() });
+      } else {
+        observer.error('Kanal nicht gefunden');
+      }
+    }, (error) => observer.error(error));
+  }
+
   leaveActiveChannel(): Observable<void> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channels');
-    const q = query(channelsCollectionRef, where('chosen', '==', true));
     return new Observable((observer) => {
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          const channelDocRef = doc.ref;
-          updateDoc(channelDocRef, { chosen: false })
-            .then(() => observer.next())
-        });
-      }, (error) => observer.error(error));
+      (async () => {
+        try {
+          const userRef = doc(this.firestore, `users/${this.uid}`);
+          const userSnap = await getDoc(userRef);
+          const channelId = userSnap.data()?.['activeChannelId'];
+          await updateDoc(userRef, { activeChannelId: '' });
+          if (channelId) await updateDoc(doc(this.firestore, `channels/${channelId}`), { members: arrayRemove(this.uid) });
+          observer.next();
+        } catch (error) { observer.error(error); }
+      })();
     });
   }
 
@@ -164,9 +188,18 @@ export class ChatareaServiceService {
     return addDoc(messagesCollectionRef, messageData);
   }
 
-  deleteMessage(channelId: string, messageId: string): Promise<void> {
+  async deleteMessageWithSubcollections(channelId: string, messageId: string): Promise<void> {
+    // Hauptdokument löschen
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
-    return deleteDoc(messageDocRef);
+    await deleteDoc(messageDocRef);
+
+    // Unterkollektion 'replies' löschen
+    const repliesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    const repliesSnapshot = await getDocs(repliesCollectionRef);
+    const deletePromises = repliesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+
+    // Weitere bekannte Unterkollektionen können hier hinzugefügt werden
   }
 
   /**

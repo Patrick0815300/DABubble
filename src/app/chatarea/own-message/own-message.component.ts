@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +11,11 @@ import { MainServiceService } from '../../firestore-service/main-service.service
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../firestore-service/auth.service';
-import { Subscription } from 'rxjs';
+import { filter, Subject, Subscription } from 'rxjs';
+import { EmojiService } from '../../modules/emoji.service';
+import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @Component({
   selector: 'app-own-message',
@@ -22,11 +26,14 @@ import { Subscription } from 'rxjs';
     MatMenuModule,
     CommonModule,
     FormsModule,
+    EmojiPickerComponent,
+    PickerComponent,
+    EmojiComponent
   ],
   templateUrl: './own-message.component.html',
   styleUrl: './own-message.component.scss'
 })
-export class OwnMessageComponent implements OnInit {
+export class OwnMessageComponent implements OnInit, OnDestroy {
   @Input() message: any;
   isReactionBarVisible: { [messageId: string]: boolean } = {};
   private isMenuOpen: { [messageId: string]: boolean } = {};
@@ -47,14 +54,16 @@ export class OwnMessageComponent implements OnInit {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
+  toggleEmojiPicker: boolean = false;
 
   private uidSubscription: Subscription | null = null;
-
+  private emojiSubscription: Subscription | null = null;
   private fireService = inject(ChatareaServiceService);
+  private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
+  private destroy$ = new Subject<void>();
 
-
-  constructor(private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
+  constructor(private emojiRef: ElementRef, private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
     this.fireService.loadReactions();
   }
 
@@ -71,18 +80,41 @@ export class OwnMessageComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
+    }
+    if (this.emojiSubscription) {
+      this.emojiSubscription.unsubscribe();
+    }
+  }
+
+
+  showEmojiPicker() {
+    this.toggleEmojiPicker = !this.toggleEmojiPicker;
+    if (this.toggleEmojiPicker) {
+      this.emojiSubscription = this.emojiService.emoji$
+        .pipe(
+          filter((emoji: string) => emoji.trim() !== '')
+        )
+        .subscribe((emoji: string) => {
+          this.message.content = this.message.content ? this.message.content + emoji : emoji;
+        });
+    } else {
+      if (this.emojiSubscription) {
+        this.emojiSubscription.unsubscribe();
+        this.emojiSubscription = null;
+      }
     }
   }
 
   deleteMessage(messageId: string) {
     this.fireService.getActiveChannel().subscribe((channelData) => {
       const channelId = channelData.id;
-      this.fireService.deleteMessage(channelId, messageId)
+      this.fireService.deleteMessageWithSubcollections(channelId, messageId)
     });
   }
-
 
   loadAvatar() {
     const docId = this.message.senderId;
@@ -142,7 +174,7 @@ export class OwnMessageComponent implements OnInit {
   }
 
   loadActiveChannelId() {
-    this.chatService.getActiveChannel().subscribe({
+    this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
@@ -172,8 +204,15 @@ export class OwnMessageComponent implements OnInit {
     }
   }
 
-  reactToMessage(messageId: string, reactionType: string, path: string) {
+  async reactToMessage(messageId: string, reactionType: string, path: string) {
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+    if (await this.chatService.hasThreads(this.channelId, messageId)) {
+      const count = await this.chatService.getReactionCount(this.channelId, messageId);
+      this.chatService.updateReactionsInAllThreads(this.channelId, messageId, reactionType, this.uid!, path, count)
+      if (await this.chatService.isThreadOpen(this.channelId)) {
+        this.openThread(messageId);
+      }
+    }
   }
 
   editMessage(messageId: string) {
@@ -202,7 +241,6 @@ export class OwnMessageComponent implements OnInit {
         error: (error) => console.error('Fehler beim Aktualisieren der Nachricht:', error)
       });
   }
-
 
   loadActiveChannelMessages() {
     this.fireService.getActiveChannel().subscribe({

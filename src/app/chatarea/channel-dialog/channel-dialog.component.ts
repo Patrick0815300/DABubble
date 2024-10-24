@@ -10,6 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { Channel } from '../../models/channels/entwickler-team.model';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { MemberDialogComponent } from "../member-dialog/member-dialog.component";
+import { ChatServiceService } from '../../firestore-service/chat-service.service';
+import { AuthService } from '../../firestore-service/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-channel-dialog',
@@ -31,6 +34,8 @@ import { MemberDialogComponent } from "../member-dialog/member-dialog.component"
 })
 export class ChannelDialogComponent {
   @Output() toggleChannelInfoDialog = new EventEmitter<void>();
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
   admin: string = '';
   description: string = '';
   name: string = '';
@@ -39,18 +44,40 @@ export class ChannelDialogComponent {
   channelNameEdit: boolean = false;
   channelDescEdit: boolean = false;
   channel: Channel = new Channel();
+  isAdmin: boolean = false;
+  channelAdminId: string = '';
 
-  constructor(private fireService: ChatareaServiceService) {
+  constructor(private fireService: ChatareaServiceService, private chatService: ChatServiceService, private authService: AuthService) {
+
+  }
+
+  ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
     this.loadActiveChannel();
+  }
+
+  checkAdmin(adminId: string) {
+    if (this.uid && adminId) {
+      this.isAdmin = (this.uid === adminId);
+    } else {
+      this.isAdmin = false;
+    }
+    if (!this.isAdmin) {
+      this.channelNameEdit = false;
+      this.channelDescEdit = false;
+    }
   }
 
   loadActiveChannel() {
     this.fireService.getActiveChannel().subscribe({
-      next: (channel: any) => {
+      next: async (channel: any) => {
         this.selectedChannelId = channel.channel_id;
         this.name = channel.channel_name;
         this.description = channel.description;
-        this.admin = channel.admin;
+        this.admin = await this.chatService.getUserNameByUid(channel.admin);
+        this.checkAdmin(channel.admin)
       }
     });
   }

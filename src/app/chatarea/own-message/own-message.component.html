@@ -46,11 +46,11 @@
                   <span *ngIf="message.messageEdit">(Bearbeitet)</span>
             </div>
             
-          
             <div *ngIf="isEditingMessage(message.id)" class="edit-menu">
                 <input [(ngModel)]="message.content" type="text">
                 <div class="edit-bottom">
-                    <mat-icon>sentiment_satisfied</mat-icon>
+                    <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()"/>
+                    <mat-icon (click)="showEmojiPicker()">sentiment_satisfied</mat-icon>
                     <div class="btns">
                         <button (click)="cancelEdit(message.id)">Abbrechen</button>
                         <button (click)="saveEditMessage(message)">Speichern</button>

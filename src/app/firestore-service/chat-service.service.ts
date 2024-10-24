@@ -5,6 +5,8 @@ import { MainServiceService } from './main-service.service';
 import { Message } from '../models/messages/channel-message.model';
 import { Channel } from '../models/channels/entwickler-team.model';
 import { AuthService } from './auth.service';
+import { arrayRemove, arrayUnion, limit, writeBatch } from 'firebase/firestore';
+import { ChatareaServiceService } from './chatarea-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,13 +21,11 @@ export class ChatServiceService {
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
-      console.log('uid', this.uid);
-
     });
   }
 
@@ -80,6 +80,61 @@ export class ChatServiceService {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
+  async getReactionCount(channelId: string, messageId: string): Promise<number> {
+    const messageRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
+    try {
+      const docSnap = await getDoc(messageRef);
+      if (docSnap.exists()) {
+        const reactions = docSnap.data()?.['reactions'] || [];
+        let totalCount = 0;
+        reactions.forEach((reaction: any) => {
+          const userIds = reaction.userId || [];
+          const userCount = userIds.length;
+          totalCount = userCount;
+        });
+        return totalCount;
+      } else {
+        console.error('none Document exist');
+        return 0;
+      }
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Reaktionsanzahl:', error);
+      return 0;
+    }
+  }
+
+  async updateReactionsInAllThreads(channelId: string, messageId: string, reactionType: string, uid: string, path: string, count: number): Promise<void> {
+    const threadsSnapshot = await getDocs(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`)),
+      batch = writeBatch(this.firestore),
+      reaction = { type: reactionType, userId: [uid], path, count: count };
+    threadsSnapshot.forEach((doc) => {
+      const reactions = doc.data()['reactions'] || [],
+        hasReacted = reactions.some((r: any) => r.type === reactionType && r.uid === uid);
+      batch.update(doc.ref, { reactions: hasReacted ? arrayRemove(reaction) : arrayUnion(reaction) });
+    });
+    await batch.commit();
+  }
+
+  async isThreadOpen(channelId: string): Promise<boolean> {
+    return (await getDoc(doc(this.firestore, `channels/${channelId}`))).data()?.['thread_open'];
+  }
+
+
+  async hasThreads(channelId: string, messageId: string): Promise<boolean> {
+    try {
+      const threadsCollectionRef = collection(
+        this.firestore,
+        `channels/${channelId}/messages/${messageId}/threads`
+      );
+      const threadsQuery = query(threadsCollectionRef, limit(1));
+      const snapshot = await getDocs(threadsQuery);
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('Fehler beim Überprüfen der Threads:', error);
+      return false;
+    }
+  }
+
   /**
    * Adds a reaction to a thread message.
    * @param {string} channelId - The ID of the channel.
@@ -113,11 +168,10 @@ export class ChatServiceService {
     onSnapshot(threadsCollectionRef, (threadsSnapshot) => {
       let totalMessagesCount = 0;
       let lastMessageTime: string | null = null;
-
       threadsSnapshot.docs.forEach((threadDoc) => {
         const threadId = threadDoc.id;
         this.getThreadMessages(channelId, messageId, threadId, (count, time) => {
-          totalMessagesCount += count;
+          totalMessagesCount = count;
           lastMessageTime = this.updateLastMessageTime(lastMessageTime, time);
           callback(totalMessagesCount, lastMessageTime);
         });
@@ -137,7 +191,7 @@ export class ChatServiceService {
     onSnapshot(messagesCollectionRef, (messagesSnapshot) => {
       const threadMessages = messagesSnapshot.docs
         .map(doc => doc.data())
-        .filter(message => message['content'] && message['time'])
+        .filter(message => (message['content'] || message['fileUrl']) && message['time'])
         .sort((a, b) => new Date(a['time']).getTime() - new Date(b['time']).getTime());
       const count = threadMessages.length;
       const lastMessageTime = count > 0 ? threadMessages[count - 1]['time'] : null;
@@ -171,7 +225,7 @@ export class ChatServiceService {
    * @returns {Promise<void>} A promise that resolves when the active channel is loaded.
    */
   async loadActiveChannel(): Promise<void> {
-    this.getActiveChannel().subscribe({
+    this.chatAreaService.getActiveChannel().subscribe({
       next: (channel) => {
         this.setCurrentChannel(channel);
       }
@@ -240,7 +294,7 @@ export class ChatServiceService {
       onSnapshot(messagesCollectionRef, (snapshot) => {
         const messages = snapshot.docs
           .map(doc => doc.data())
-          .filter(message => message['content'])
+          .filter(message => message['content'] || message['fileUrl'])
           .sort((a, b) => a['time'].localeCompare(b['time']));
         observer.next(messages);
       }, (error) => observer.error(error));
@@ -279,7 +333,6 @@ export class ChatServiceService {
       fileName: messageData.fileName,
       fileUrl: messageData.fileUrl,
     });
-
     await updateDoc(threadDocRef, { threadId: threadDocRef.id });
     this.loadPickedThread(channelId, messageId, threadDocRef.id);
   }
@@ -412,29 +465,13 @@ export class ChatServiceService {
    */
   updateMessage(messageId: string, updatedData: any): Observable<void> {
     return new Observable((observer) => {
-      this.getActiveChannel().subscribe({
+      this.chatAreaService.getActiveChannel().subscribe({
         next: (channel: any) => {
           const messageDocRef = doc(this.firestore, `channels/${channel.id}/messages`, messageId);
           updateDoc(messageDocRef, updatedData)
             .then(() => observer.next());
         }
       });
-    });
-  }
-
-  /**
-   * Retrieves the active channel where 'chosen' is set to true.
-   * @returns {Observable<any>} An observable that emits the active channel data.
-   */
-  getActiveChannel(): Observable<any> {
-    const channelsCollectionRef = this.mainService.getChannelRef('channels');
-    const q = query(channelsCollectionRef, where('chosen', '==', true));
-    return new Observable((observer) => {
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          observer.next({ id: doc.id, ...doc.data() });
-        });
-      }, (error) => observer.error(error));
     });
   }
 

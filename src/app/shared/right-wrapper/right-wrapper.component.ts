@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, inject } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
@@ -26,6 +26,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './right-wrapper.component.scss'
 })
 export class RightWrapperComponent {
+  @ViewChild('messageContainer') messageContainer!: ElementRef;
   isVisible: boolean = false;
   selectedThread: any;
   threads: any[] = [];
@@ -39,6 +40,7 @@ export class RightWrapperComponent {
   ownMessage: boolean = false;
   answers: string = '';
   channelName: string = '';
+  reactions: any[] = [];
 
   private chatService = inject(ChatServiceService);
   private authService = inject(AuthService)
@@ -48,15 +50,17 @@ export class RightWrapperComponent {
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
+      if (this.uid) {
+        this.chatService.loadActiveChannel();
+      }
     });
-    this.chatService.loadActiveChannel();
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
         this.currentChannel = channel;
         this.channelName = channel.channel_name
         this.isVisible = channel.thread_open;
       } else {
-        !this.isVisible
+        this.isVisible = false;
       }
     });
 
@@ -67,6 +71,7 @@ export class RightWrapperComponent {
         this.messageId = data.messageId;
         this.threadId = data.id;
         this.ownMessage = this.threadData.senderId === this.uid;
+        this.reactions = data.reactions
         this.loadThreadMessages(this.channelId, this.messageId, this.threadId);
       }
     });
@@ -80,13 +85,19 @@ export class RightWrapperComponent {
 
   loadThreadMessages(channelId: string, messageId: string, threadId: string) {
     const path = `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`;
+    console.log('RightWrapperComponent: loadThreadMessages aufgerufen mit Path:', path);
+
     this.chatService.loadMessagesFromPath(path).subscribe((messages) => {
+      console.log('RightWrapperComponent: threadMessages empfangen:', messages);
       this.threadMessages = messages.map(message => {
         return {
           ...message,
           id: message.id
         };
       });
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 250);
     });
   }
 
@@ -94,6 +105,16 @@ export class RightWrapperComponent {
     this.isVisible = !this.isVisible;
     if (this.currentChannel) {
       this.chatService.updateChannelThreadState(this.channelId, this.isVisible);
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 250);
     }
+  }
+
+  scrollToBottom(): void {
+    this.messageContainer.nativeElement.scroll({
+      top: this.messageContainer.nativeElement.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 }

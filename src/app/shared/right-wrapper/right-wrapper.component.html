@@ -8,14 +8,13 @@
             <mat-icon class="close" (click)="toggleThread()">close</mat-icon>
         </mat-card-header>
 
-        <mat-card-content>
+        <mat-card-content #messageContainer>
             <!-- Anzeige der geklickten Nachricht -->
             <ng-container *ngIf="threadData">
                 <app-own-message-thread 
                     *ngIf="threadData.senderId === uid" 
                     [thread]="threadData">
                 </app-own-message-thread>
-                
                 <app-message-thread 
                     *ngIf="threadData.senderId !== uid" 
                     [thread]="threadData">
@@ -34,7 +33,8 @@
                 <app-own-message-thread 
                     *ngIf="message.senderId === uid" 
                     [thread]="message"
-                    [id]="message.docId">
+                    [id]="message.docId"
+                    [showReactionIcon]="true">
                 </app-own-message-thread>
                 
                 <app-message-thread 

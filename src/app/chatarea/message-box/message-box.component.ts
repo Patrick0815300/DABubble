@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { User } from '../../models/user/user.model';
 import { MainServiceService } from '../../firestore-service/main-service.service';
 import { AuthService } from '../../firestore-service/auth.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, filter } from 'rxjs';
 import { EmojiService } from '../../modules/emoji.service';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
@@ -22,7 +22,9 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
   templateUrl: './message-box.component.html',
   styleUrl: './message-box.component.scss'
 })
-export class MessageBoxComponent implements AfterViewInit {
+export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
+  @ViewChild('addMember') addMember!: ElementRef;
+  @ViewChild('emojiPicker', { read: ElementRef }) emojiPicker!: ElementRef;
   uid: string | null = null;
   messageContent: string = '';
   channelName: string = '';
@@ -39,18 +41,19 @@ export class MessageBoxComponent implements AfterViewInit {
   linkDialog: boolean = false;
   linkedUsers: string[] = [];
   toggleEmojiPicker: boolean = false;
-
+  private emojiSubscription: Subscription | null = null;
   private fireService = inject(ChatareaServiceService);
   private fileUploadService = inject(FileUploadService);
   private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
 
   private uidSubscription: Subscription | null = null;
+  private destroy$ = new Subject<void>();
 
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('messageTextArea') messageTextArea!: ElementRef;
 
-  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService) { }
+  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService, private emojiRef: ElementRef) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -58,23 +61,57 @@ export class MessageBoxComponent implements AfterViewInit {
     });
     this.loadActiveChannelName();
     this.loadChannelMembers();
-
-    this.emojiService.emoji$.subscribe((emoji: string) => {
-      this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
-    });
-    this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
-      this.toggleEmojiPicker = statePicker;
-    });
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
+    }
+    if (this.emojiSubscription) {
+      this.emojiSubscription.unsubscribe();
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: Event) {
+    const targetElement = event.target as HTMLElement;
+    if (this.linkDialog && this.addMember) {
+      const clickedInsideAddMember = this.addMember.nativeElement.contains(targetElement);
+      const isMatIcon = targetElement.closest('mat-icon') !== null;
+      if (!clickedInsideAddMember && !isMatIcon) {
+        this.linkDialog = false;
+      }
+    }
+    if (this.toggleEmojiPicker && this.emojiPicker) {
+      const clickedInsideEmojiPicker = this.emojiPicker.nativeElement.contains(targetElement);
+      if (!clickedInsideEmojiPicker) {
+        this.toggleEmojiPicker = false;
+        if (this.emojiSubscription) {
+          this.emojiSubscription.unsubscribe();
+          this.emojiSubscription = null;
+        }
+      }
     }
   }
 
   showEmojiPicker() {
-    this.emojiService.handleShowPicker();
+    this.toggleEmojiPicker = !this.toggleEmojiPicker;
+    if (this.toggleEmojiPicker) {
+      this.emojiSubscription = this.emojiService.emoji$
+        .pipe(
+          filter((emoji: string) => emoji.trim() !== '')
+        )
+        .subscribe((emoji: string) => {
+          this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
+        });
+    } else {
+      if (this.emojiSubscription) {
+        this.emojiSubscription.unsubscribe();
+        this.emojiSubscription = null;
+      }
+    }
   }
 
   checkForAtSymbol(event: KeyboardEvent) {

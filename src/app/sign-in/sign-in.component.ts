@@ -98,29 +98,6 @@ export class SignInComponent {
     }
   }
 
-  // /**
-  //  * This function checks the length of the Password
-  //  */
-  // checkPasswordLength() {
-  //   if (this.password.length < 6) {
-  //     this.passwordNotLongEnough = true;
-  //     this.displayPasswordLengthError
-  //   } else {
-  //     this.passwordNotLongEnough = false;
-  //   }
-  // }
-
-  // /**
-  //  * If the Password is not long enough, an Error will be displayed
-  //  */
-  // displayPasswordLengthError() {
-  //   if (this.passwordNotLongEnough) {
-  //     this.displayPasswordNotLongEnough = true;
-  //   } else {
-  //     this.displayPasswordNotLongEnough = false;
-  //   }
-  // }
-
   /**
   * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
   */
@@ -145,18 +122,19 @@ export class SignInComponent {
   /**
    * This function sets the given data to a correct user data structure
    */
-  setData() {
+  async setData() {
     this.data.name = this.name;
     this.data.mail = this.mail;
     this.data.password = this.password;
     this.data.avatar = '';
     this.data.online = false;
+    this.data.id = '';
   }
 
   /**
    * This function creates a user-obj in the firebase authenticator and sends the user to the chosseAvatar site
    */
-  async onSubmit() {
+  async onSubmit() {    
     if (await this.firebase.findUserWithRef('email', this.mail) == false) {
       this.setData();
       let user = this.firebase.setUserObject(this.data);

@@ -190,6 +190,10 @@
 
 @media(max-width:610px) {
 
+    .loginHeader{
+        padding-top:20px;
+    }
+
     @keyframes logomovement-small {
         0% {
             top: 50%;
@@ -197,7 +201,7 @@
         }
 
         100% {
-            top:  10px;
+            top:  20px;
             left: 0%;
         }
     }
@@ -215,7 +219,8 @@
         animation-name: logomovement-small;
         width:100%;
         left:0%;
-        gap:20px;
+        gap:40px;
+        height:50px;
         justify-content: center;
         transform:none;
 
@@ -236,7 +241,8 @@
 
     .loginHeaderRegister {
         position: absolute;
-        bottom: 50px;
+        // bottom: 50px;
+        top:850px;
         right: 0;
         left: 0;
         margin-right: 0;
@@ -259,7 +265,42 @@
     }
 }
 
-@media(max-height:830px) and (max-width:610px){
+@media(max-height: 965px){
+    .loginHeader{
+        padding-top:10px;
+    }
+}
+
+@keyframes logoMovement{ // Animation Schritt 2
+    0%{
+        transform:scale(2);
+    }
+    100%{
+        top:50%;
+        left:50%;
+        transform:scale(1.2);
+    }
+}
+
+@media(max-height:950px) and (max-width:610px){
+    .loginHeaderRegister {
+        position: absolute;
+        top:700px;
+    } 
+}
+
+@media(max-height:933px) and (max-width:610px){
+    .loginHeader {
+        padding-top: 5px;
+    }
+
+    .loginHeaderRegister {
+        position: absolute;
+        top:680px;
+    } 
+}
+
+@media(max-height:930px) and (max-width:610px){//830
     .loginHeader {
         padding-top: 5px;
     }
@@ -292,4 +333,11 @@
     .loginHeader {
         padding-top: 5px;
     }
+}
+
+@media(max-height:717px) and (max-width:610px){
+    .loginHeaderRegister {
+        transform: scale(0.8);
+        top:600px;
+    } 
 }
