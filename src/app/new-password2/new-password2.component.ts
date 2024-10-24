@@ -11,7 +11,6 @@ import { PasswordResetService } from '../password_Reset/password-reset.service';
 import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { Firestore } from 'firebase/firestore';
-import { config } from 'rxjs';
 import { initializeApp } from 'firebase/app';
 
 @Component({
@@ -41,20 +40,11 @@ export class NewPassword2Component {
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
-  config = {
-    projectId: 'dabubble-57387',
-    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
-    storageBucket: 'dabubble-57387.appspot.com',
-    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
-    authDomain: 'dabubble-57387.firebaseapp.com',
-    messagingSenderId: '1040544770849',
-  };
-
-  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
+  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService, private firestore: Firestore) {
     
   }
 
-  private config2 = { // löschen
+  private config = { // löschen
     projectId: 'dabubble-57387',
     appId: '1:1040544770849:web:1df07c76989e5816c56c60',
     storageBucket: 'dabubble-57387.appspot.com',
@@ -63,7 +53,7 @@ export class NewPassword2Component {
     messagingSenderId: '1040544770849',
   };
 
-  private app = initializeApp(this.config2); // löschen
+  private app = initializeApp(this.config); // löschen
   private auth = getAuth(this.app); // this.app löschen
   urlParams = new URLSearchParams(window.location.search);
   oobCode = this.urlParams.get('oobCode');
