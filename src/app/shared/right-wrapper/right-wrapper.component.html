@@ -8,7 +8,7 @@
             <mat-icon class="close" (click)="toggleThread()">close</mat-icon>
         </mat-card-header>
 
-        <mat-card-content>
+        <mat-card-content #messageContainer>
             <!-- Anzeige der geklickten Nachricht -->
             <ng-container *ngIf="threadData">
                 <app-own-message-thread 

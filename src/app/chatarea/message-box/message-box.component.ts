@@ -217,14 +217,6 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
 
 
   sendMessage() {
-    if (this.messageContent.trim() === '') {
-      console.log('content leer');
-    }
-
-    if (!this.selectedFile) {
-      console.log('file leer');
-
-    }
     if (this.messageContent.trim() === '' && !this.selectedFile) return;
     this.fireService.loadDocument('users', this.uid!).subscribe({
       next: (user: any) => {

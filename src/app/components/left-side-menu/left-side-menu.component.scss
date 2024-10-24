@@ -2,11 +2,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  > div {
+
+  >div {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    > img {
+
+    >img {
       width: 40px;
       object-fit: cover;
     }
@@ -24,6 +26,7 @@
 .capitilize {
   text-transform: capitalize;
 }
+
 .title {
   font-weight: 700;
   font-size: 16px;
@@ -33,6 +36,7 @@
   font-weight: 700;
   font-size: 20px;
 }
+
 .list-channel {
   overflow-y: auto;
   scrollbar-width: none;
@@ -41,32 +45,39 @@
   max-height: 117px;
   gap: 5px;
   margin-bottom: 4px;
-  > li {
+
+  >li {
     margin-left: 1.5rem;
+
     &:hover img {
       filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
     }
   }
 }
+
 .add-channel {
   padding-inline: 1rem;
+
   &:hover span {
     color: #535af1;
   }
+
   &:hover img {
     filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
   }
 }
+
 .message-section-header {
   &:hover button img {
     filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
   }
+
   &:hover .icon-group .capitilize {
-    > img {
+    >img {
       filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
     }
 
-    > span {
+    >span {
       color: #535af1;
     }
   }
@@ -75,9 +86,11 @@
 .gp {
   gap: 0.5rem;
 }
+
 .icon-group {
   flex: 1;
 }
+
 .d-flex {
   display: flex;
   align-items: center;
@@ -86,13 +99,16 @@
 .space-btn {
   justify-content: space-between;
 }
+
 .l-mg-2 {
   margin-left: 1rem;
   padding-block: 4px;
 }
+
 .l-mg-7 {
   padding-block: 7px;
 }
+
 .users {
   overflow-y: auto;
   height: 245px;
@@ -103,10 +119,12 @@
   gap: 4px;
   transition: all 250ms ease-in-out;
 }
+
 .icon-small {
   width: 18px;
   height: 18px;
 }
+
 .fold_in_channel {
   max-height: 0 !important;
 }
@@ -123,6 +141,7 @@
   flex-direction: column;
   transition: all 250ms ease-in-out;
 }
+
 .rotateArrow,
 .rotateArrowExpand {
   transform: rotate(-90deg);
@@ -135,6 +154,7 @@ li {
   padding-inline: 0.5rem;
   border-radius: 30px;
   cursor: pointer;
+
   &:hover {
     background-color: #eceefe;
   }
@@ -150,7 +170,8 @@ li {
   background-color: #eceefe;
   color: #535af1;
   font-weight: 700;
-  > img {
+
+  >img {
     filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
   }
 }
@@ -166,10 +187,15 @@ li {
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   &:hover {
     background-color: #eceefe;
   }
 }
+
 .closeDialBtn {
   background-color: transparent;
   border: transparent;
@@ -183,6 +209,10 @@ li {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   &:hover {
     background-color: #eceefe;
   }
@@ -203,6 +233,7 @@ li {
 }
 
 @media (width<610px) {
+
   .users,
   .list-channel {
     gap: 13px;
@@ -211,6 +242,7 @@ li {
   .section-header {
     display: none;
   }
+
   .section-content {
     height: 100%;
   }
@@ -218,6 +250,7 @@ li {
   .title {
     font-size: 20px;
   }
+
   .l-mg-2 {
     padding-block: 7px;
   }

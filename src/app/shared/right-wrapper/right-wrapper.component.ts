@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, inject } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
@@ -26,6 +26,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './right-wrapper.component.scss'
 })
 export class RightWrapperComponent {
+  @ViewChild('messageContainer') messageContainer!: ElementRef;
   isVisible: boolean = false;
   selectedThread: any;
   threads: any[] = [];
@@ -94,7 +95,9 @@ export class RightWrapperComponent {
           id: message.id
         };
       });
-      console.log('RightWrapperComponent: threadMessages gesetzt:', this.threadMessages);
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 250);
     });
   }
 
@@ -102,6 +105,16 @@ export class RightWrapperComponent {
     this.isVisible = !this.isVisible;
     if (this.currentChannel) {
       this.chatService.updateChannelThreadState(this.channelId, this.isVisible);
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 250);
     }
+  }
+
+  scrollToBottom(): void {
+    this.messageContainer.nativeElement.scroll({
+      top: this.messageContainer.nativeElement.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 }

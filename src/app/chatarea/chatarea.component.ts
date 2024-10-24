@@ -129,7 +129,10 @@ export class ChatareaComponent {
   }
 
   scrollToBottom(): void {
-    this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+    this.messageContainer.nativeElement.scroll({
+      top: this.messageContainer.nativeElement.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 
   formatTime(timeString: string): string {
