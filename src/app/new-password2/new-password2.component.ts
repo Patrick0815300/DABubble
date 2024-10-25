@@ -41,7 +41,7 @@ export class NewPassword2Component {
   passwordNotLongEnough: boolean = false;
 
   constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService, private firestore: Firestore) {
-    
+
   }
 
   private config = { // löschen
@@ -173,5 +173,3 @@ export class NewPassword2Component {
     }
   }
 }
-
-
