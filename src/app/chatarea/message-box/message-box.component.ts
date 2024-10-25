@@ -20,7 +20,7 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
   standalone: true,
   imports: [MatIconModule, CommonModule, FormsModule, MatProgressBarModule, EmojiPickerComponent, PickerComponent, EmojiComponent],
   templateUrl: './message-box.component.html',
-  styleUrl: './message-box.component.scss'
+  styleUrl: './message-box.component.scss',
 })
 export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('addMember') addMember!: ElementRef;
@@ -173,23 +173,18 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
         this.selectedFile = input.files[0];
-
         const reader = new FileReader();
         reader.onload = () => {
           this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
           this.fileName = this.selectedFile!.name;
           this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
-        };
-        reader.readAsDataURL(this.selectedFile);
+        }; reader.readAsDataURL(this.selectedFile);
       }
-    });
-
-    this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+    }); this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
       this.checkForAtSymbol(event);
     });
+    this.messageTextArea.nativeElement.focus();
   }
-
-
 
   uploadFile(messageId: string, channelId: string) {
     if (this.selectedFile) {
@@ -201,18 +196,17 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
         this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
-          this.messageContent = '';
-          this.fileURL = null;
-          this.fileName = null;
-          this.isUploading = false;
-        });
-      }).catch((error) => {
-        console.error('Fehler beim Hochladen der Datei:', error);
-        this.isUploading = false;
-      });
+        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => { this.clearFileUploadData });
+      }).catch((error) => { this.isUploading = false; });
       this.selectedFile = null;
     }
+  }
+
+  clearFileUploadData() {
+    this.messageContent = '';
+    this.fileURL = null;
+    this.fileName = null;
+    this.isUploading = false;
   }
 
 
@@ -223,27 +217,23 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         const userName = `${user.name}`;
         this.fireService.getActiveChannel().subscribe({
           next: (channel: any) => {
-            const messageData = {
-              content: this.messageContent,
-              name: userName,
-              time: new Date().toISOString(),
-              reactions: [],
-              senderId: this.uid,
-              fileUrl: null,
-              fileName: null,
-              messageEdit: false,
-            };
+            const messageData = { content: this.messageContent, name: userName, time: new Date().toISOString(), reactions: [], senderId: this.uid, fileUrl: null, fileName: null, messageEdit: false };
             this.fireService.addMessage(channel.id, messageData).then((docRef) => {
               const messageId = docRef.id;
               this.messageContent = '';
-              if (this.selectedFile) {
-                this.uploadFile(messageId, channel.id);
-              }
+              if (this.selectedFile) { this.uploadFile(messageId, channel.id); }
             });
           }
         });
       }
     });
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
   }
 
   async loadActiveChannelName() {

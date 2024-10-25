@@ -16,6 +16,7 @@ import { MainServiceService } from '../firestore-service/main-service.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-chatarea',
@@ -33,7 +34,28 @@ import { Subscription } from 'rxjs';
     AddMemberDialogComponent
   ],
   templateUrl: './chatarea.component.html',
-  styleUrl: './chatarea.component.scss'
+  styleUrl: './chatarea.component.scss',
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ maxHeight: '0px', opacity: 0, overflow: 'hidden', transform: 'translateY(-10px)' }), // Startzustand
+        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' })) // Endzustand mit maxHeight
+      ]),
+      transition(':leave', [
+        animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' })) // Ausgang mit maxHeight
+      ])
+    ]),
+
+    trigger('flyInRight', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }), // Startzustand: Element außerhalb des Bildschirms rechts und unsichtbar
+        animate('600ms ease-out', style({ transform: 'translateX(0)' })) // Endzustand: Element in Position und sichtbar
+      ]),
+      transition(':leave', [
+        animate('600ms ease-in', style({ transform: 'translateX(100%)' })) // Ausgang: Nach rechts aus dem Bildschirm herausfliegen und unsichtbar werden
+      ])
+    ])
+  ]
 })
 export class ChatareaComponent {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
@@ -50,7 +72,14 @@ export class ChatareaComponent {
   previousMessageDate: string | null = null;
   allChannelsAreFalse: boolean = false;
 
-  constructor(public dialog: MatDialog, private fireService: ChatareaServiceService, private mainService: MainServiceService, private cdRef: ChangeDetectorRef, private authService: AuthService) { }
+  constructor
+    (
+      public dialog: MatDialog,
+      private fireService: ChatareaServiceService,
+      private mainService: MainServiceService,
+      private cdRef: ChangeDetectorRef,
+      private authService: AuthService
+    ) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -93,7 +122,7 @@ export class ChatareaComponent {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
         this.scrollToBottom();
-      }, 250);
+      }, 1000);
     });
   }
 

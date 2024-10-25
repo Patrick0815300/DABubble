@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
-import { Observable, Subscription, catchError, filter, map, of, switchMap } from 'rxjs';
+import { Observable, Subscription, catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
 import { CollectionReference, arrayRemove, deleteDoc } from 'firebase/firestore';
@@ -31,21 +31,18 @@ export class ChatareaServiceService {
    * @returns {Observable<any>} An observable that emits the document data.
    */
   loadDocument(collection: string, docId: string): Observable<any> {
-    const docRef = this.mainService.getSingleChannelRef(collection, docId);
-    return new Observable((observer) => {
-      onSnapshot(docRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          observer.next({ id: snapshot.id, ...data });
-        }
-      }, (error) => observer.error(error));
+    return new Observable(observer => {
+      const docRef = this.mainService.getSingleChannelRef(collection, docId);
+      onSnapshot(docRef, snapshot => {
+        if (snapshot.exists()) observer.next({ id: snapshot.id, ...snapshot.data() });
+        else observer.error('Dokument nicht gefunden');
+      }, error => observer.error(error));
     });
   }
 
+
   getUserAvatar(docId: string): Observable<string | null> {
-    return this.loadDocument('users', docId).pipe(
-      map((user) => user.avatar ? user.avatar : null)
-    );
+    return this.loadDocument('users', docId).pipe(map(user => user?.avatar || null));
   }
 
   getActiveChannel(): Observable<any> {
@@ -53,32 +50,21 @@ export class ChatareaServiceService {
       filter(uid => !!uid),
       switchMap(uid => new Observable(observer => {
         const userDoc = doc(this.firestore, `users/${uid}`);
-        const unsubUser = onSnapshot(userDoc, userSnap => {
+        onSnapshot(userDoc, userSnap => {
           const channelId = userSnap.data()?.['activeChannelId'];
-          if (channelId) {
-            const channelDoc = doc(this.firestore, `channels/${channelId}`);
-            const unsubChannel = onSnapshot(channelDoc, channelSnap => {
-              observer.next(channelSnap.exists() ? { id: channelSnap.id, ...channelSnap.data() } : null);
-            }, error => { console.error(error); observer.next(null); });
-            observer.add(unsubChannel);
-          } else {
-            observer.next(null); // hier könnte eine Funktion hin für den Leeren Channel und die Anfrage am Admin
-          }
-        }, error => { console.error(error); observer.next(null); });
-        return () => unsubUser();
-      })),
-      catchError(error => { console.error(error); return of(null); })
+          if (channelId) this.subscribeToChannel(channelId, observer);
+          else observer.next(null);
+        }, error => observer.error(error));
+      }))
     );
   }
 
-  private subscribeToChannel(channelId: string, observer: any): () => void {
-    return onSnapshot(doc(this.firestore, `channels/${channelId}`), (channelSnap) => {
-      if (channelSnap.exists()) {
-        observer.next({ id: channelSnap.id, ...channelSnap.data() });
-      } else {
-        observer.error('Kanal nicht gefunden');
-      }
-    }, (error) => observer.error(error));
+  private subscribeToChannel(channelId: string, observer: any) {
+    const channelDoc = doc(this.firestore, `channels/${channelId}`);
+    onSnapshot(channelDoc, channelSnap => {
+      if (channelSnap.exists()) observer.next({ id: channelSnap.id, ...channelSnap.data() });
+      else observer.error('Kanal nicht gefunden');
+    }, error => observer.error(error));
   }
 
   leaveActiveChannel(): Observable<void> {
@@ -147,16 +133,12 @@ export class ChatareaServiceService {
    * @returns {Observable<void>} An observable that completes when the users are added.
    */
   addMembersToActiveChannel(userIds: string[]): Observable<void> {
-    return new Observable((observer) => {
-      this.getActiveChannel().subscribe({
-        next: (channel: any) => {
-          const channelDocRef = this.mainService.getSingleChannelRef('channels', channel.id);
-          updateDoc(channelDocRef, { member: arrayUnion(...userIds) })
-            .then(() => observer.next())
-            .catch((error) => observer.error(error));
-        },
-      });
-    });
+    return this.getActiveChannel().pipe(
+      switchMap(channel => {
+        const channelDocRef = this.mainService.getSingleChannelRef('channels', channel.id);
+        return from(updateDoc(channelDocRef, { member: arrayUnion(...userIds) }));
+      })
+    );
   }
 
   /**
@@ -166,12 +148,9 @@ export class ChatareaServiceService {
    */
   loadMessages(channelId: string): Observable<any[]> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
-    return new Observable((observer) => {
-      onSnapshot(messagesCollectionRef, (snapshot) => {
-        const messages = snapshot.docs.map(doc => {
-          const messageData = doc.data();
-          return { id: doc.id, ...messageData, isOwnMessage: messageData['senderId'] === this.uid };
-        });
+    return new Observable(observer => {
+      onSnapshot(messagesCollectionRef, snapshot => {
+        const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isOwnMessage: doc.data()['senderId'] === this.uid }));
         observer.next(messages);
       });
     });
@@ -189,17 +168,12 @@ export class ChatareaServiceService {
   }
 
   async deleteMessageWithSubcollections(channelId: string, messageId: string): Promise<void> {
-    // Hauptdokument löschen
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
     await deleteDoc(messageDocRef);
-
-    // Unterkollektion 'replies' löschen
     const repliesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
     const repliesSnapshot = await getDocs(repliesCollectionRef);
     const deletePromises = repliesSnapshot.docs.map(doc => deleteDoc(doc.ref));
     await Promise.all(deletePromises);
-
-    // Weitere bekannte Unterkollektionen können hier hinzugefügt werden
   }
 
   /**
@@ -233,14 +207,10 @@ export class ChatareaServiceService {
    */
   async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string, reactionPath: string): Promise<void> {
     const messageDocRef = this.mainService.getSingleChannelRef(`channels/${channelId}/messages`, messageId);
-    const messageData = (await getDoc(messageDocRef)).data();
-    const reactions = messageData?.['reactions'] || [];
+    const messageData = (await getDoc(messageDocRef)).data() || {};
+    const reactions = messageData['reactions'] || [];
     const existingReaction = reactions.find((reaction: any) => reaction.type === reactionType && reaction.userId === userId);
-    if (existingReaction) {
-      existingReaction.count += 1;
-    } else {
-      reactions.push({ type: reactionType, userId, count: 1, path: reactionPath });
-    }
+    existingReaction ? existingReaction.count++ : reactions.push({ type: reactionType, userId, count: 1, path: reactionPath });
     await updateDoc(messageDocRef, { reactions });
   }
 

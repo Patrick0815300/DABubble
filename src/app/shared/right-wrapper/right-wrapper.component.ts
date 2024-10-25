@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Inject, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MessageThreadComponent } from "../../chatarea/thread/message-thread/message-thread.component";
@@ -23,7 +23,7 @@ import { Subscription } from 'rxjs';
     CommonModule
   ],
   templateUrl: './right-wrapper.component.html',
-  styleUrl: './right-wrapper.component.scss'
+  styleUrl: './right-wrapper.component.scss',
 })
 export class RightWrapperComponent {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
@@ -52,18 +52,18 @@ export class RightWrapperComponent {
       this.uid = uid;
       if (this.uid) {
         this.chatService.loadActiveChannel();
+        this.checkThreadOpenStatus();
       }
     });
     this.chatService.currentChannel$.subscribe((channel: Channel | null) => {
       if (channel) {
         this.currentChannel = channel;
         this.channelName = channel.channel_name
-        this.isVisible = channel.thread_open;
+        //this.isVisible = channel.thread_open;
       } else {
         this.isVisible = false;
       }
     });
-
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -83,38 +83,45 @@ export class RightWrapperComponent {
     }
   }
 
+  checkThreadOpenStatus() {
+    this.chatService.threadOpenStatus(this.uid!, (isOpen: boolean) => {
+      this.isVisible = isOpen;
+    });
+  }
+
   loadThreadMessages(channelId: string, messageId: string, threadId: string) {
     const path = `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`;
-    console.log('RightWrapperComponent: loadThreadMessages aufgerufen mit Path:', path);
-
     this.chatService.loadMessagesFromPath(path).subscribe((messages) => {
-      console.log('RightWrapperComponent: threadMessages empfangen:', messages);
       this.threadMessages = messages.map(message => {
         return {
           ...message,
           id: message.id
         };
       });
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 250);
+      if (this.threadData) {
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 250);
+      }
     });
   }
 
   toggleThread() {
     this.isVisible = !this.isVisible;
-    if (this.currentChannel) {
-      this.chatService.updateChannelThreadState(this.channelId, this.isVisible);
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 250);
+    if (this.currentChannel && this.uid) {
+      this.chatService.updateChannelThreadState(this.uid!, this.isVisible);
     }
   }
 
   scrollToBottom(): void {
-    this.messageContainer.nativeElement.scroll({
-      top: this.messageContainer.nativeElement.scrollHeight,
-      behavior: 'smooth'
-    });
+    if (this.messageContainer && this.messageContainer.nativeElement) {
+      const element = this.messageContainer.nativeElement;
+      if (element.scrollHeight > element.clientHeight) {
+        element.scroll({
+          top: element.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
   }
 }

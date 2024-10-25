@@ -3,6 +3,7 @@
       #messageTextArea
       placeholder="Nachricht an #{{ channelName }}" 
       [(ngModel)]="messageContent"
+      (keydown)="onKeyDown($event)"
       name="" id="" cols="30" rows="3">
     </textarea>
     <ng-container *ngIf="fileURL">

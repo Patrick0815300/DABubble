@@ -170,7 +170,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   openThread(messageId: string) {
-    this.chatService.setThreadDataFromMessage(this.channelId, messageId);
+    this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
   }
 
   loadActiveChannelId() {
@@ -209,7 +209,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     if (await this.chatService.hasThreads(this.channelId, messageId)) {
       const count = await this.chatService.getReactionCount(this.channelId, messageId);
       this.chatService.updateReactionsInAllThreads(this.channelId, messageId, reactionType, this.uid!, path, count)
-      if (await this.chatService.isThreadOpen(this.channelId)) {
+      if (await this.chatService.isThreadOpen(this.uid!)) {
         this.openThread(messageId);
       }
     }

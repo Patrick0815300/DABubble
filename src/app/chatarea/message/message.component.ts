@@ -98,7 +98,7 @@ export class MessageComponent {
   }
 
   openThread(messageId: string) {
-    this.chatService.setThreadDataFromMessage(this.channelId, messageId);
+    this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
   }
 
   loadActiveChannelId() {

@@ -216,4 +216,11 @@ export class MessageBoxThreadComponent {
     };
     this.content = '';
   }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
+  }
 }

@@ -3,6 +3,7 @@
     #inputBox
     [(ngModel)]="content"
     placeholder="Antworten ..." 
+    (keydown)="onKeyDown($event)"
     cols="30" 
     rows="3">
   </textarea>
