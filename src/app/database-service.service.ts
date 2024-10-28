@@ -142,6 +142,7 @@ export class DatabaseServiceService {
       console.error('Error adding document: ', e);
     }
   }
+
   async addMessage(newMessage: object) {
     try {
       const docRef = await addDoc(this.getMessagesRef(), newMessage);
@@ -243,14 +244,18 @@ export class DatabaseServiceService {
 
   async getDocumentIdByMemberId(collectionName: string, field: string, parameter: any) {
     const collectionRef = collection(this.firestore, collectionName);
-    const q = query(collectionRef, where(field, '==', parameter));
-    const querySnapshot = await getDocs(q);
+    if (parameter) {
+      const q = query(collectionRef, where(field, '==', parameter));
+      const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      const docSnapshot = querySnapshot.docs[0];
-      return docSnapshot.id;
+      if (!querySnapshot.empty) {
+        const docSnapshot = querySnapshot.docs[0];
+        return docSnapshot.id;
+      } else {
+        console.log(`No Member found with ID:', ${parameter}`);
+        return null;
+      }
     } else {
-      console.log(`No Member found with ID:', ${parameter}`);
       return null;
     }
   }
@@ -263,7 +268,7 @@ export class DatabaseServiceService {
         await deleteDoc(userDocRef);
         console.log(parameter, 'Document deleted');
       } catch (e) {
-        console.error('Error adding document: ', e);
+        console.error('Document not deleted: ', e);
       }
     }
   }
@@ -300,31 +305,10 @@ export class DatabaseServiceService {
 
   /**
    *
-   * @param {string} id - Id of the user whose name need to be found
-   * @returns {string} - name of the user
+   * @param {string} currentUserId - Id of the current user
+   * @returns {Observable<Message[]>} - Messages to the user or from the user whose Id is
+   * passed as input
    */
-
-  // userFromId(id: string | undefined): Observable<User> {
-  //   return this.snapUsers().pipe(
-  //     map(users => users.filter(user => user.id === id)[0]) // Filter users by the given ID
-  //   );
-  // }
-
-  // pictureFromId(id: string | undefined): Observable<string> {
-  //   return this.snapUsers().pipe(
-  //     map(users => users.filter(user => user.id === id)[0].avatar) // Filter users by the given ID
-  //   );
-  // }
-
-  // pictureFromID(id: string): string {
-  //   let user = this.users.find(user => user.id === id)!;
-  //   return `${user?.avatar}`;
-  // }
-  // nameFromId(id: string | undefined): string {
-  //   let user = this.users.find(user => user.id === id);
-  //   return `${user?.first_name}`;
-  // }
-
   directMessages(currentUserId: string | undefined): Observable<Message[]> {
     return this.snapMessages().pipe(
       map(messages => {

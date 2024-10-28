@@ -8,6 +8,9 @@ export class User {
   image_file!: string;
   password!: string;
   online!: boolean;
+  thread_open!: boolean;
+  activeChannelId!: string;
+  avatar!: string;
 
   constructor(obj?: any) {
     this.id = obj ? obj.id || nanoid() : '';
@@ -16,6 +19,9 @@ export class User {
     this.image_file = obj ? obj.image_file : '';
     this.password = obj ? obj.password : '';
     this.online = obj ? obj.online : false;
+    this.thread_open = obj ? obj.thread_open : false;
+    this.activeChannelId = obj ? obj.activeChannelId : '';
+    this.avatar = obj ? obj.avatar : '';
   }
 
   public toObject() {
@@ -26,6 +32,9 @@ export class User {
       password: this.password,
       image_file: this.image_file,
       online: this.online,
+      thread_open: this.thread_open,
+      activeChannelId: this.activeChannelId,
+      avatar: this.avatar,
     };
   }
 }
@@ -41,6 +50,8 @@ export class Message {
   to_user!: string;
   is_updated!: boolean;
   reaction!: string;
+  fileName!: string;
+  fileUrl!: string;
 
   constructor(obj?: any) {
     this.message_id = obj ? obj.message_id || nanoid() : '';
@@ -52,6 +63,8 @@ export class Message {
     this.to_user = obj ? obj.to_user || '' : '';
     this.is_updated = obj ? obj.is_updated || false : '';
     this.reaction = obj ? obj.reaction || '' : '';
+    this.fileName = obj ? obj.fileName || null : '';
+    this.fileUrl = obj ? obj.fileUrl || null : '';
   }
 
   public toObject(): object {
@@ -65,6 +78,8 @@ export class Message {
       to_user: this.to_user,
       is_updated: this.is_updated,
       reaction: this.reaction,
+      fileName: this.fileName,
+      fileUrl: this.fileUrl,
     };
   }
 }

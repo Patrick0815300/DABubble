@@ -49,12 +49,6 @@ export class UpdateProfilComponent implements OnInit {
           this.user_email = this.authenticatedUser?.email;
         });
     });
-
-    // this.databaseService.authenticatedUser().subscribe(user => {
-    //   this.authenticatedUser = user;
-    //   this.username = this.authenticatedUser?.name;
-    //   this.user_email = this.authenticatedUser?.email;
-    // });
   }
 
   ngOnDestroy() {

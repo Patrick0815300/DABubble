@@ -17,6 +17,12 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
+import { FormsModule } from '@angular/forms';
+import { SearchDevspaceComponent } from '../components/search-devspace/search-devspace.component';
+import { Channel } from '../modules/database.model';
+import { ChannelService } from '../modules/channel.service';
+import { DatabaseServiceService } from '../database-service.service';
+import { NavService } from '../modules/nav.service';
 
 @Component({
   selector: 'app-chatarea',
@@ -33,6 +39,8 @@ import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.
     MemberDialogComponent,
     AddMemberDialogComponent,
     MiddleWrapperComponent,
+    FormsModule,
+    SearchDevspaceComponent,
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss',
@@ -64,6 +72,7 @@ export class ChatareaComponent {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
+
     this.loadActiveChannelData();
     this.checkChannelsStatus();
   }
@@ -139,7 +148,7 @@ export class ChatareaComponent {
   scrollToBottom(): void {
     this.messageContainer.nativeElement.scroll({
       top: this.messageContainer.nativeElement.scrollHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }
 

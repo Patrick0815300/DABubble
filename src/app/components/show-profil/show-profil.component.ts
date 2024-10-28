@@ -1,3 +1,4 @@
+import { CurrentUserService } from './../../modules/current-user.service';
 import { Component, Input, OnInit } from '@angular/core';
 import { ShowProfilService } from '../../modules/show-profil.service';
 import { UpdateProfilService } from '../../modules/update-profil.service';
@@ -21,6 +22,7 @@ export class ShowProfilComponent implements OnInit {
   open_update_profile!: boolean;
   authenticatedUser: User | undefined;
   selectedUser: User = new User();
+  onlineUser: any = null;
   @Input() isNavBar: boolean = false;
 
   private uidSubscription: Subscription | null = null;
@@ -29,6 +31,7 @@ export class ShowProfilComponent implements OnInit {
     private showProfileService: ShowProfilService,
     private updateProfilService: UpdateProfilService,
     private databaseService: DatabaseServiceService,
+    private currentUserService: CurrentUserService,
     private authService: AuthService
   ) {
     this.showProfileService.open_show_profile$.subscribe(state => {
@@ -64,6 +67,10 @@ export class ShowProfilComponent implements OnInit {
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
     });
+
+    this.currentUserService.onlineUser$.subscribe(user => {
+      this.onlineUser = user;
+    });
   }
 
   onCloseShowProfil() {
@@ -80,5 +87,10 @@ export class ShowProfilComponent implements OnInit {
       this.showProfileService.updateNavProfile();
     }
     this.updateProfilService.updateProfile();
+  }
+
+  onAutoFocus() {
+    this.showProfileService.emitAutoFocus(true);
+    this.onCloseShowProfil();
   }
 }

@@ -15,11 +15,12 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
   box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.2);
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 input {
   height: 30px;
-  width: 100%;
   border-radius: 60px;
   border: 1px solid #adb0d9;
   outline: none;

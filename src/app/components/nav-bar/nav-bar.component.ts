@@ -55,9 +55,6 @@ export class NavBarComponent implements OnInit {
       });
     });
 
-    // this.databaseService.authenticatedUser().subscribe(user => {
-    //   this.authenticatedUser = user;
-    // });
     this.databaseService.users$.subscribe(users => {
       this.all_users = users;
     });
@@ -106,5 +103,10 @@ export class NavBarComponent implements OnInit {
     } else {
       this.showSearchUserName = false;
     }
+  }
+
+  closeDevSpace() {
+    this.showSearchUserName = false;
+    this.search_input = '';
   }
 }

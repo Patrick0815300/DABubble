@@ -9,29 +9,23 @@ import { UserService } from '../service/user.service/user.service';
 @Component({
   selector: 'app-desktop',
   standalone: true,
-  imports: [
-    
-  ],
+  imports: [],
   templateUrl: './desktop.component.html',
-  styleUrl: './desktop.component.scss'
+  styleUrl: './desktop.component.scss',
 })
 export class DesktopComponent {
-
   userId: any = '';
-  img:string = '';
-  name:string = '';
+  img: string = '';
+  name: string = '';
 
-  constructor(private firebase: FirebaseLoginService, private route: ActivatedRoute, private userService: UserService){
+  constructor(private firebase: FirebaseLoginService, private route: ActivatedRoute, private userService: UserService) {
     this.loadData();
-
   }
 
-  loadData(){
+  loadData() {
     let user = this.userService.getUser();
-    console.log(user);
+
     this.name = user.name;
     this.img = user.avatar;
   }
-
-
 }

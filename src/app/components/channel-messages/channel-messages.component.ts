@@ -50,7 +50,6 @@ export class ChannelMessagesComponent implements OnInit {
       this.channel = channel;
       this.show_error_message = false;
       this.channel_is_deleted = false;
-      console.log('current channel', this.channel);
     });
 
     this.channelService.channelMembers$.subscribe(members => {
@@ -62,7 +61,6 @@ export class ChannelMessagesComponent implements OnInit {
       this.channelChat = msg.sort((a, b) => b.send_date - a.send_date);
       this.groupedChat = this.groupMessagesByDate(this.channelChat);
       this.loadChatData(this.groupedChat, this.channel.channel_id);
-      //console.log('Group channel', this.groupMessagesByDate(this.channelChat));
     });
 
     this.channelService.open_update_channel$.subscribe(state => {
@@ -79,7 +77,6 @@ export class ChannelMessagesComponent implements OnInit {
 
     let all_subscribers = this.ChannelMembers.map(member => member.member_id);
     let newMessage = new Message(msg);
-    console.log('subscribers', all_subscribers);
 
     let msgObject = newMessage.toObject();
 

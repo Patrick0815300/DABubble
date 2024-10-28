@@ -26,7 +26,6 @@ export class RegisterComponent {
     createUserWithEmailAndPassword(this.aut, emailAdress, password)
       .then(userCredential => {
         const user = userCredential.user;
-        console.log('Logged User', user);
         return updateProfile(user, { displayName: name });
       })
       .then(() => console.log('User registered and name updated successfully'))

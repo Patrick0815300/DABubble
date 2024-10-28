@@ -1,5 +1,5 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, DoCheck, AfterViewInit, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, DoCheck, AfterViewInit, ElementRef, inject, OnInit, ViewChild, SimpleChanges, Renderer2 } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
 import { FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
@@ -49,7 +49,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   channelChat: Message[] = [];
   groupedChat: any;
   userByIdMap: { [userId: string]: any } = {};
-  // authenticatedUser: User | undefined;
+  autoFocusSendMessage: boolean = false;
   today!: string;
   open_show_profile!: boolean;
   selectedUser: User = new User();
@@ -81,7 +81,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   private fileUploadService = inject(FileUploadService);
   private sanitizer = inject(DomSanitizer);
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
-
   constructor(
     private channelService: ChannelService,
     private elementRef: ElementRef,
@@ -89,7 +88,8 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     private userService: UserService,
     private databaseService: DatabaseServiceService,
     private emojiService: EmojiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private renderer: Renderer2
   ) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
@@ -109,14 +109,8 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         });
     });
 
-    // this.databaseService.authenticatedUser().subscribe(user => {
-    //   this.authenticatedUser = user;
-    //   console.log('Auth User ooo', this.authenticatedUser.id);
-    // });
-
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
-      console.log('current to user no', this.toUserId);
     });
 
     this.userService.chatMessages$.subscribe(msg => {
@@ -148,7 +142,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
      * this method add the selected emoji to the current tipped message
      */
     this.emojiService.emoji$.subscribe((emoji: string) => {
-      console.log('chat_up', this.update_chat, 'group_up', this.update_group);
       this.chosenReaction = emoji;
 
       if (this.update_chat != undefined && this.update_chat !== -1) {
@@ -186,6 +179,10 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
     this.channelService.userPicked$.subscribe(users => {
       this.pickedUserArray = users;
+    });
+
+    this.showProfileService.auto_focus$.subscribe(focus => {
+      this.autoFocusSendMessage = focus;
     });
   }
 
@@ -247,6 +244,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     } else {
       let msgObject = this.messageSender(to_user_id);
       this.databaseService.addMessage(msgObject);
+      // if (this.selectedFile) {
+      //   this.uploadFile(messageId, to_user_id);
+      // }
     }
     this.message_content = '';
   }
@@ -317,7 +317,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.update_group = index_group;
     this.update_message = msgContent;
     this.show_delete_msg = -1;
-    console.log('Chat:', this.update_chat, 'Group', this.update_group);
   }
 
   handleUpdateMsg(currentMsgId: string) {
@@ -326,6 +325,14 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       .then(() => this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { is_updated: true }));
     this.update_message = '';
     this.onCancelUpdateMsg();
+  }
+
+  loadFileUpload(msg: Message) {
+    if (msg.fileName) {
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
+      this.fileName = msg.fileName;
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl);
+    }
   }
 
   onCancelUpdateMsg() {
@@ -418,10 +425,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         reader.readAsDataURL(this.selectedFile);
       }
     });
-
-    // this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
-    //   this.checkForAtSymbol(event);
-    // });
   }
 
   uploadFile(messageId: string, channelId: string) {

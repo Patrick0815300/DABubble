@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { Channel, Message, User } from './database.model';
+import { collection, Firestore, onSnapshot, query, where } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class UserService {
   private officeSource = new Subject<string[]>();
   private logShowSearchSubject = new BehaviorSubject<boolean>(false);
   private clickedInsideButton = new BehaviorSubject<boolean>(false);
+  private onlineUsersSubject = new BehaviorSubject<any>(null);
 
   clickedInsideButton$ = this.clickedInsideButton.asObservable();
   userIds$ = this.userIdsSource.asObservable();
@@ -27,6 +29,7 @@ export class UserService {
   chatMessages$ = this.chatSource.asObservable();
   officeMembers$ = this.officeSource.asObservable();
   channelMessages$ = this.channelMsgSource.asObservable();
+  onlineUsers$ = this.onlineUsersSubject.asObservable();
   toggle_show_search_user$ = this.logShowSearchSubject.asObservable();
 
   constructor() {}

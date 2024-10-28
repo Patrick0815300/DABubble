@@ -1,3 +1,4 @@
+import { CurrentUserService } from './../../modules/current-user.service';
 import { AuthService } from './../../firestore-service/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
@@ -10,7 +11,6 @@ import { combineLatest, Observable, of, switchMap, map, Subscription } from 'rxj
 import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
 import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
-import { CurrentUserService } from '../../modules/current-user.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -44,7 +44,7 @@ export class LeftSideMenuComponent implements OnInit {
   toUserId!: string;
   all_channel!: Channel[];
   channel: Channel = new Channel();
-  onlineUsers: any[] = [];
+  onlineUser: any = null;
   selectedUser: User | undefined;
   userById: any | null = null;
   userByIdMap: { [userId: string]: any } = {};
@@ -74,12 +74,10 @@ export class LeftSideMenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.essay();
     this.authService.userID$.subscribe(userId => {
       this.auth_user_id = userId;
-      sessionStorage.setItem('sessionid', userId!);
       this.databaseService.authUser(userId!).then(user => {
-        user ? console.log('This is the logged user:', user) : console.log('NO USER IS LOGGED IN');
+      
         if (user && user !== null) {
           this.authenticatedUser = user;
           this.sendSelectedUser(user);
@@ -93,11 +91,10 @@ export class LeftSideMenuComponent implements OnInit {
       this.observeUser = this.databaseService.snapUsers().pipe(map(users => users.filter(user => user.id === uid)[0]));
     });
 
-    console.log('Hi I am also available here', this.authenticatedUser);
-
-    this.databaseService.onlineUsers$.subscribe(users => {
-      this.onlineUsers = users;
+    this.authService.onlineUser$.subscribe(user => {
+      this.onlineUser = user;
     });
+
     this.navService.stateOpenDevSearch$.subscribe(state => {
       this.openDevSearch = state;
     });
@@ -183,10 +180,9 @@ export class LeftSideMenuComponent implements OnInit {
   onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
-    console.log('I load again msg');
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
-        console.log('Messages', messages);
+     
         if (currentUserId !== targetUserId) {
           messages = messages.filter(m => m.from_user !== m.to_user);
         }
@@ -200,8 +196,7 @@ export class LeftSideMenuComponent implements OnInit {
   loadChannelMembers(channel_id: string) {
     this.databaseService.getChannelMembers(channel_id, members => {
       if (members) {
-        //console.log('channel Members', members);
-
+       
         this.channelService.emitChannelMembers(members);
       } else {
         this.channelService.emitChannelMembers([]);
@@ -209,15 +204,11 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
-  essay() {
-    console.log('GDGSGSSH', this.observeUser);
-  }
-
   loadChannelMessages(targetChannelId: string) {
-    //console.log('I load again msg');
+   
     this.databaseService.getChannelMessages(targetChannelId, messages => {
       if (messages) {
-        //console.log('Channel Msg', messages);
+       
         this.userService.emitChannelMessage(messages);
       } else {
         this.userService.emitChannelMessage([]);
