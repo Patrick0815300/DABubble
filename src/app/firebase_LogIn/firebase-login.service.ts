@@ -1,17 +1,13 @@
 import { Injectable } from '@angular/core';
-import { collection, doc, addDoc, updateDoc, query, where, getDocs, getDoc, setDoc } from 'firebase/firestore';
 import { User } from '../../models/user.class';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { SignInComponent } from '../sign-in/sign-in.component';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
+import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { collection, doc, Firestore, getDocs, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirebaseLoginService {
   constructor(private firestore: Firestore, public auth: Auth) {
-    // this.firestore = fireService;
   }
 
   /**

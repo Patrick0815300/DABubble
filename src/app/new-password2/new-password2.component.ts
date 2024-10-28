@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,10 +8,9 @@ import { FooterComponent } from '../footer/footer.component';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
-import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
-import { Firestore } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { Auth, confirmPasswordReset } from '@angular/fire/auth';
+
 
 @Component({
   selector: 'app-new-password2',
@@ -34,38 +33,26 @@ export class NewPassword2Component {
   Password1: string = '';
   Password2: string = '';
 
+  private auth = inject(Auth);
+
   passwordAccordance: boolean = false;
   emptyInputs: boolean = true;
   displayError: boolean = false;
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
-  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService, private firestore: Firestore) {
+  constructor(private router: Router, private firebase: FirebaseLoginService, private service: PasswordResetService, ) {
 
   }
 
-  private config = { // löschen
-    projectId: 'dabubble-57387',
-    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
-    storageBucket: 'dabubble-57387.appspot.com',
-    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
-    authDomain: 'dabubble-57387.firebaseapp.com',
-    messagingSenderId: '1040544770849',
-  };
-
-  private app = initializeApp(this.config); // löschen
-  private auth = getAuth(this.app); // this.app löschen
   urlParams = new URLSearchParams(window.location.search);
   oobCode = this.urlParams.get('oobCode');
 
-
-
   /**
-   * This function clears the inputs and changes the Passwords
-   */
+  //  * This function clears the inputs and changes the Passwords
+  //  */
   changePassword() {
     if (this.checkForSamePasswords()) {
-      //init.App
       this.resetPassword();
     } else {
       this.displayError = true;
@@ -96,7 +83,6 @@ export class NewPassword2Component {
     }
   }
 
-
   /**
    * This function resets the Password in the firebase-database
    */
@@ -126,8 +112,8 @@ export class NewPassword2Component {
   }
 
   /**
-   * This function calls different Password-control functions
-   */
+  //  * This function calls different Password-control functions
+  //  */
   checkPasswords() {
     this.checkPasswordLength();
     this.checkForEmptyInputs();

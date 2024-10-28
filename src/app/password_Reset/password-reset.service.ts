@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ export class PasswordResetService {
 
   constructor(private router: Router) { }
 
-  private auth = getAuth();
+  private auth = inject(Auth);
 
   /**
    * This function sends a resetPassword mail from the firebase-database to the user

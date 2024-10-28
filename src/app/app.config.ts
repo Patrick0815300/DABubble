@@ -23,10 +23,10 @@ const config = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideAnimationsAsync(),
     provideFirebaseApp(() => initializeApp(config)),
-    provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+    provideAnimationsAsync(),
     provideHttpClient()
   ],
 };
