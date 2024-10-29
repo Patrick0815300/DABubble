@@ -12,7 +12,7 @@ html {
 }
 
 body {
-  background-color: #ECEEFE;
+  background-color: #eceefe;
 }
 
 .mat-mdc-dialog-container .mdc-dialog__surface {
@@ -52,9 +52,9 @@ button {
   cursor: pointer;
 }
 
-$click-color: #444DF2;
-$font-color: #535AF1;
-$hover-color: #797EF3;
+$click-color: #444df2;
+$font-color: #535af1;
+$hover-color: #797ef3;
 $default-color: #686868;
 
 .cursor-effect {
@@ -78,7 +78,7 @@ html {
   right: 0;
   display: flex;
   justify-content: center;
-  align-items: center
+  align-items: center;
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -92,7 +92,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #797ef3, #ECEEFE, #797ef3);
+  background: linear-gradient(to bottom, #797ef3, #eceefe, #797ef3);
   border-radius: 10px;
 }
 
@@ -100,12 +100,11 @@ html {
   background: linear-gradient(to bottom, #5e63e0, #d3d6f9);
 }
 
-@media(min-height:625px) {
+@media (min-height: 625px) {
   .turnDeviceContainer {
     display: none !important;
   }
 }
-
 
 /* ---------------------------------------- fonts ---------------------------------------- */
 
@@ -292,5 +291,11 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+ul {
+  padding-inline-start: 0px;
+  margin-block-start: 0em;
+  margin-block-end: 0em;
 }

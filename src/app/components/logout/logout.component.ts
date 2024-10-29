@@ -6,6 +6,7 @@ import { User } from '../../modules/database.model';
 import { AuthService } from '../../firestore-service/auth.service';
 import { Router } from '@angular/router';
 import { map, Subscription } from 'rxjs';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-logout',
@@ -23,6 +24,7 @@ export class LogoutComponent implements OnInit {
     private userService: UserService,
     private showProfileService: ShowProfilService,
     private databaseService: DatabaseServiceService,
+    private channelService: ChannelService,
     private authService: AuthService,
     private router: Router
   ) {
@@ -60,7 +62,16 @@ export class LogoutComponent implements OnInit {
     this.userService.emitSelectedUser(user);
   }
 
+  removeGuest() {
+    this.databaseService.deleteDocument('users', 'name', 'bubble guest').then(() => {
+      if (this.authenticatedUser) {
+        this.channelService.updateChannelData('users', 'id', this.authenticatedUser.id, { online: false });
+      }
+    });
+  }
+
   logout() {
+    this.removeGuest();
     this.authService.logout();
     this.router.navigate(['/']);
   }

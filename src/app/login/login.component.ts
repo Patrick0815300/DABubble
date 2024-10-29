@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { CurrentUserService } from './../modules/current-user.service';
+import { Component, OnInit } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,29 +15,35 @@ import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore
 import { UserService } from '../service/user.service/user.service';
 import { Firestore } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
+import { DatabaseServiceService } from '../database-service.service';
+import { User } from '../modules/database.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    MatToolbarModule,
-    MatCardModule,
-    MatIconModule,
-    MatFormFieldModule,
-    RouterModule,
-    FooterComponent,
-    HeaderComponent,
-    FormsModule,
-    NgIf
-  ],
+  imports: [MatToolbarModule, MatCardModule, MatIconModule, MatFormFieldModule, RouterModule, FooterComponent, HeaderComponent, FormsModule, NgIf],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   mail: string = '';
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
+  onlineUser: any = null;
+  constructor(
+    private firebase: FirebaseLoginService,
+    private databaseService: DatabaseServiceService,
+    private router: Router,
+    private userService: UserService,
+    private firestore: Firestore,
+    private auth: Auth,
+    private currentUserService: CurrentUserService
+  ) {}
 
-  constructor(private firebase: FirebaseLoginService, private router: Router, private userService: UserService, private firestore: Firestore, private auth: Auth) { }
+  ngOnInit(): void {
+    this.currentUserService.onlineUser$.subscribe(user => {
+      this.onlineUser = user;
+    });
+  }
 
   private googleProvider = new GoogleAuthProvider();
 
@@ -51,16 +58,16 @@ export class LoginComponent {
       await this.setVarOnlineToTrue(userCredential);
     } catch (error) {
       this.displayWrongMailOrPasswordErrorMessage();
-      this.resetInputs();            
+      this.resetInputs();
     }
   }
 
   /**
    * This function sets a user in the userService for other components to get the data
-   * @param userCredential user data 
+   * @param userCredential user data
    */
   async createNewUserObject(userCredential: any) {
-    let userRef = this.firebase.getSingleUserRef('users', userCredential.user.uid)
+    let userRef = this.firebase.getSingleUserRef('users', userCredential.user.uid);
     const userSnapshot = await getDoc(userRef);
     let user = userSnapshot.data();
     this.userService.setUser(user);
@@ -129,9 +136,32 @@ export class LoginComponent {
         name: user.displayName,
         email: user.email,
         avatar: user.photoURL,
-        online: true,
+        online: false,
       },
       { merge: true }
     );
+  }
+
+  onGuestLogin() {
+    let guest = {
+      name: 'bubble guest',
+      email: 'guest@mail.com',
+      image_file: 'male_avatar.svg',
+      password: '',
+      online: true,
+      thread_open: false,
+      activeChannelId: '',
+      avatar: 'assets/img/00_general-buttons/characters/Steffen_Hoffmann.png',
+    };
+    let newUser = new User(guest);
+
+    this.databaseService
+      .deleteDocument('users', 'name', 'bubble guest')
+      .then(() => {
+        this.databaseService.addUser(newUser.toObject());
+      })
+      .then(() => {
+        this.currentUserService.getGuestUser();
+      });
   }
 }

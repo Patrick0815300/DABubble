@@ -7,11 +7,15 @@
       </span>
       <img class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
-    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" />
-    <app-messages *ngIf="isChannelView === false" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
-    <app-channel-messages *ngIf="isChannelView === true" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
-    <!-- <app-chatarea class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" /> -->
-    <app-dev-new-message *ngIf="dev_message_search === true" class="app-middle-wrapper" />
+    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" [class.OpenWrapper]="openWrapper === true" />
+    <app-messages
+      *ngIf="isChannelView === false"
+      class="app-middle-wrapper"
+      [class.OpenWrapper]="openWrapper === false"
+      [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
+    />
+    <app-chatarea *ngIf="isChannelView === true" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
+    <app-dev-space-area *ngIf="dev_message_search === true" class="app-middle-wrapper" />
     <app-right-wrapper class="app-right-wrapper" *ngIf="isThreadVisible" />
   </main>
   @if(state){
@@ -31,7 +35,9 @@
       <img src="assets/img/icons/hash_tag.svg" alt="" />
     </div>
     <div class="title-container"><span>beschreibung</span><span class="optional"> (optional)</span></div>
-    <input [(ngModel)]="channel_description" class="input" name="description" type="text" placeholder="Dein Text hier" />
+    <div class="ch-info-input">
+      <input [(ngModel)]="channel_description" class="input" name="description" type="text" placeholder="Dein Text hier" />
+    </div>
     <div class="btn-container">
       <button id="btn-create" type="submit" class="btn">Erstellen</button>
     </div>

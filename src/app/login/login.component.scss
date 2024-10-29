@@ -301,11 +301,13 @@ section {
     transform: translate(-50%);
     bottom: 300px;
     min-height: 692px;
+    min-width: 80%;
 
     main {
         mat-card {
             // min-height:692px;
             height: 100%;
+            max-height: 1000px;
         }
     }
 
@@ -479,11 +481,9 @@ form {
     height: 20px;
 }
 
-@media(max-width:900px) {
+@media(max-width:670px) {
     section {
-        left: 10%;
-        right: 10%;
-        transform: translate(0);
+        width: 80%;
     }
 }
 
@@ -495,12 +495,100 @@ form {
     }
 }
 
-@media(max-width: 450px){
-    section{
-        transform:scale(0.9);
+@media(max-width: 450px) {
+    section {
+        transform: scale(0.9) translate(-50%);
     }
 
-    .button{
+    .button {
         width: 110px;
     }
+}
+
+@media(max-height:905px) and (min-width:610px) {
+    section {
+        transform: scale(0.9);
+        transform: translate(-50%);
+        top: 170px;
+        justify-content: center;
+    }
+}
+
+@media(max-height:975px) and (min-width:610px) {
+    section {
+        transform: scale(0.9);
+        transform: translate(-50%);
+        top: 170px;
+        justify-content: center;
+    }
+}
+
+@media(max-height:865px) and (min-width:610px) {
+    section {
+        top: 110px;
+    }
+}
+
+@media(max-height:805px) and (min-width:610px) {
+    section {
+        transform: scale(0.7);
+        right: 10%;
+        left: 10%;
+        top: 10px;
+    }
+}
+
+@media(max-height:1005px) and (max-width:610px) {
+    section {
+        top: 100px;
+    }
+}
+
+@media(max-height:908px) and (max-width:610px) {
+    section {
+        transform: scale(0.8) translate(-62%);
+        top: 20px;
+        width: 115%;
+
+        main {
+
+            mat-card {
+                height: 90%;
+            }
+        }
+    }
+
+    .googleLogin,
+    .seperator,
+    .loginInputsContainer {
+        margin-bottom: 15px;
+    }
+
+    .loginInputsContainer {
+        gap: 15px;
+    }
+}
+
+@media(max-width:610px) and (max-height:690px) {
+    .inputField {
+        height: 40px;
+    }
+
+    .loginInputsContainer {
+        margin-top: 0;
+    }
+
+    form {
+        margin-top: 30px;
+        justify-content: flex-start;
+    }
+
+    section {
+        main {
+            mat-card {
+                height: 80%;
+            }
+        }
+    }
+
 }

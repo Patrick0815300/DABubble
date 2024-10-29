@@ -8,9 +8,17 @@ div {
   box-sizing: border-box;
 }
 
-@media (width<500px) {
+@media (width<700px) {
   div {
-    width: unset;
+    width: 280px;
+  }
+}
+@media (width<630px) {
+  // :host {
+  //   display: none;
+  // }
+  div {
+    width: 100%;
     padding: unset;
   }
 }

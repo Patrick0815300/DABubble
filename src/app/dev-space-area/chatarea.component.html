@@ -1,0 +1,16 @@
+<mat-card class="card">
+  <app-dev-new-message />
+  <mat-card-content #messageContainer>
+    <!-- <ng-container *ngFor="let message of messages; let i = index">
+      <div *ngIf="shouldShowDivider(message.time, i)" class="date-divider">
+        <div class="devider"></div>
+        <span>{{ formatDate(message.time) }}</span>
+        <div class="devider"></div>
+      </div>
+      <app-message *ngIf="message.senderId !== uid" [message]="message"></app-message>
+      <app-own-message *ngIf="message.senderId === uid" [message]="message"></app-own-message>
+    </ng-container> -->
+  </mat-card-content>
+  <app-message-box class="message-box"></app-message-box>
+</mat-card>
+<div class="background" *ngIf="channelInfoDialog || channelMemberDialog || addMemberDialog" (click)="closeDialogOnClick($event)"></div>

@@ -25,10 +25,10 @@ import { MainServiceService } from '../../firestore-service/main-service.service
     MatDialogActions,
     MatButtonModule,
     MatSelectModule,
-    FilterSelectedPipe
+    FilterSelectedPipe,
   ],
   templateUrl: './add-member-dialog.component.html',
-  styleUrl: './add-member-dialog.component.scss'
+  styleUrl: './add-member-dialog.component.scss',
 })
 export class AddMemberDialogComponent {
   @Output() toggleAddMemberDialog = new EventEmitter<void>();
@@ -48,9 +48,9 @@ export class AddMemberDialogComponent {
         this.memberIds = channel.member || [];
         this.filterUsers();
       },
-      error: (err) => {
+      error: err => {
         console.error('Fehler beim Laden der Mitglieder:', err);
-      }
+      },
     });
   }
 
@@ -60,9 +60,9 @@ export class AddMemberDialogComponent {
         this.users = users;
         this.filterUsers(); // Filtere die Benutzer nach dem Laden
       },
-      error: (err) => {
+      error: err => {
         console.error('Fehler beim Laden der Benutzer:', err);
-      }
+      },
     });
   }
 
@@ -72,7 +72,6 @@ export class AddMemberDialogComponent {
 
   onUserSelected(selectedUserIds: string[]) {
     this.selectedUser = selectedUserIds;
-    console.log('Ausgewählte Benutzer: ', this.selectedUser);
   }
 
   addUser() {
@@ -81,13 +80,13 @@ export class AddMemberDialogComponent {
         console.log('Benutzer erfolgreich hinzugefügt.');
         this.closeDialog();
       },
-      error: (err) => {
+      error: err => {
         console.error('Fehler beim Hinzufügen der Benutzer:', err);
-      }
+      },
     });
   }
 
   closeDialog() {
-    this.toggleAddMemberDialog.emit()
+    this.toggleAddMemberDialog.emit();
   }
 }

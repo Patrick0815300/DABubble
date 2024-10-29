@@ -1,17 +1,37 @@
 <header>
   <nav>
-    <img src="assets/img/icons/logo.svg" alt="Logo" />
+    <img class="logo" src="assets/img/icons/logo.svg" alt="Logo" />
+    <div class="d-none">
+      <button>
+        <img class="to_channel_arrow" src="assets/img/icons/arrow_to_channel.svg" alt="" />
+      </button>
+      <img class="channel_name" src="assets/img/icons/channel_name.svg" alt="" />
+    </div>
     <div class="current-user">
-      <span class="to_upper">{{ authenticatedUser?.name }}</span>
-      <app-profile class="app-profile" [left_side_profile]="false" *ngIf="authenticatedUser?.image_file" [image_user]="authenticatedUser?.image_file" />
+      @if(authenticatedUser){
+      <span class="to_upper">{{ authenticatedUser.name }}</span>
+      <app-profile
+        class="app-profile"
+        [left_side_profile]="false"
+        *ngIf="authenticatedUser.image_file"
+        [image_user]="authenticatedUser.image_file"
+        [bgColorOnline]="authenticatedUser.online === true ? '#92c83e' : '#686868'"
+      />
       <button class="btn-arrow" (click)="onOpenLogOut()">
         <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
       </button>
+      }@else {
+      <span class="to_upper">bubble guest</span>
+      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="'male_avatar.svg'" [bgColorOnline]="'#92c83e'" />
+      <button class="btn-arrow" (click)="onOpenLogOut()">
+        <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
+      </button>
+      }
     </div>
   </nav>
   <div class="input-search">
     <input [(ngModel)]="search_input" (input)="onSearchInDevspace(); sendSearchInput(search_input)" type="text" name="search-field" placeholder="Devspace durchsuchen" />
     <img src="assets/img/icons/search.svg" alt="" />
   </div>
-  <app-search-devspace *ngIf="showSearchUserName === true" />
+  <app-search-devspace (click)="closeDevSpace()" *ngIf="showSearchUserName === true" />
 </header>

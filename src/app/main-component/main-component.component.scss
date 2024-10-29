@@ -2,20 +2,19 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-
-  >main {
+  > main {
     display: flex;
     flex-grow: 1;
-    padding-bottom: 1rem;
     gap: 1rem;
     padding-inline: 1rem;
     position: relative;
-
-    >.app-middle-wrapper {
+    height: calc(100vh - 111.63px);
+    padding-bottom: 1rem;
+    > .app-middle-wrapper {
       flex-grow: 1;
     }
 
-    >.toggle-side-menu {
+    > .toggle-side-menu {
       font-family: 'Nunito';
       display: flex;
       align-items: center;
@@ -29,7 +28,7 @@
       transform-origin: top left;
       top: 90%;
       left: -1rem;
-      z-index: 1;
+      z-index: 2;
       box-shadow: 0px 4px 7px 0 rgba(0, 0, 0, 0.2);
       gap: 0.5rem;
       font-weight: 700;
@@ -38,21 +37,21 @@
       border: transparent;
       transition: all 250ms ease-in-out;
 
-      >span {
+      > span {
         transition: all 250ms ease-in-out;
       }
 
-      >img {
+      > img {
         transition: all 250ms ease-in-out;
         transform: rotate(90deg);
       }
 
       &:hover {
-        >span {
+        > span {
           color: #535af1;
         }
 
-        >img {
+        > img {
           filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
         }
       }
@@ -95,21 +94,17 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
 
-  >input {
-    padding-left: 1rem;
-  }
-
-  >.ch-creation {
+  > .ch-creation {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    >span {
+    > span {
       font-weight: 700;
       font-size: 18px;
     }
 
-    >span::first-letter {
+    > span::first-letter {
       text-transform: capitalize;
     }
   }
@@ -120,7 +115,7 @@ form {
   display: flex;
   align-items: center;
 
-  >img {
+  > img {
     position: absolute;
     left: 0.75rem;
     width: 18px;
@@ -150,7 +145,7 @@ form {
 .btn-container {
   align-self: end;
 
-  >.btn {
+  > .btn {
     font-family: 'Nunito';
     padding: 0.75rem 1rem;
     background-color: #444df2;
@@ -173,13 +168,13 @@ form {
 }
 
 .title-container {
-  >span:first-child {
+  > span:first-child {
     font-weight: 700;
     font-size: 16px;
     text-transform: capitalize;
   }
 
-  >.optional {
+  > .optional {
     color: gray;
   }
 }
@@ -200,21 +195,21 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
 
-  >.input-user {
+  > .input-user {
     padding-left: 1rem;
   }
 
-  >.ch-creation-user {
+  > .ch-creation-user {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    >span {
+    > span {
       font-weight: 700;
       font-size: 18px;
     }
 
-    >span::first-letter {
+    > span::first-letter {
       text-transform: capitalize;
     }
   }
@@ -237,7 +232,7 @@ form {
 .btn-container-user {
   align-self: end;
 
-  >.btn {
+  > .btn {
     padding: 0.75rem 1rem;
     background-color: #444df2;
     color: white;
@@ -274,11 +269,11 @@ a {
   justify-content: center;
   position: relative;
 
-  >input {
+  > input {
     width: 100%;
   }
 
-  >.app-search-user {
+  > .app-search-user {
     position: absolute;
     transform: translateY(145px);
   }
@@ -288,15 +283,20 @@ a {
   font-weight: 700;
 }
 
-@media (width<500px) {
-  .toggle-side-menu {
-    display: none !important;
+@media (width<630px) {
+  .OpenWrapper {
+    display: none;
   }
-
-  main {
-    background-color: white;
+  .main-section {
+    > main {
+      width: unset;
+      background-color: white;
+      gap: unset;
+      > .toggle-side-menu {
+        display: none;
+      }
+    }
   }
-
   .toggle-display {
     width: 100%;
   }

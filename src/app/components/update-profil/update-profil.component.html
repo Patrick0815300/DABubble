@@ -3,20 +3,28 @@
     <span>Dein Profil bearbeiten</span>
     <img class="cursor-effect close-btn" (click)="onCloseUpdateProfile()" src="assets/img/icons/close.svg" alt="" />
   </div>
-  <img class="user-profile-img" src="assets/img/profiles/{{ authenticatedUser?.image_file }}" alt="" />
+  <img class="user-profile-img" src="assets/img/profiles/{{ authenticatedUser ? authenticatedUser.image_file : 'male_avatar.svg' }}" alt="" />
 
   <div class="single-user-info top-mg-1">
-    <img class="mail" src="./../../../assets/img/icons/account_circle.svg" alt="" />
+    <img class="mail" src="assets/img/icons/account_circle.svg" alt="" />
     <span class="address">Vollständiger Name</span>
   </div>
-  <input class="capitalize" [(ngModel)]="username" type="text" placeholder="Vorname Nachname" />
+  <input
+    class="capitalize"
+    [(ngModel)]="username"
+    type="text"
+    [disabled]="!authenticatedUser?.online"
+    [placeholder]="authenticatedUser?.online ? 'Vorname Nachname' : 'Bubble Guest'"
+  />
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <input [(ngModel)]="user_email" type="text" placeholder="max-mustermann@gmail.com" />
+  <input [(ngModel)]="user_email" type="text" [disabled]="!authenticatedUser?.online" [placeholder]="authenticatedUser?.online ? 'max-mustermann@gmail.com' : 'guest@mail.com'" />
   <div class="btn-container">
     <button class="btn" (click)="onCloseUpdateProfile()">Abbrechen</button>
-    <button class="btn" (click)="save('users', authenticatedUser?.id!)">Speichern</button>
+    <button class="btn" (click)="save('users', authenticatedUser?.id!)" [disabled]="!authenticatedUser?.online" [style.opacity]="!authenticatedUser?.online ? '0.5' : '1'">
+      Speichern
+    </button>
   </div>
 </section>

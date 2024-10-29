@@ -1,12 +1,14 @@
 import { CommonModule, NgIf } from '@angular/common';
 import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { User } from '../../modules/database.model';
 import { UserService } from '../../modules/user.service';
 import { DatabaseServiceService } from '../../database-service.service';
 import { ChannelService } from '../../modules/channel.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../firestore-service/auth.service';
+import { CurrentUserService } from '../../modules/current-user.service';
 
 @Component({
   selector: 'app-search-user',
@@ -28,9 +30,17 @@ export class SearchUserComponent implements OnInit {
   all_users: User[] = [];
   filtered_users: User[] = [];
   excludeClick = false;
-  @Input({ required: true }) componentType!: 'search-input' | 'user-list';
+  authenticatedUser: User | undefined;
 
-  constructor(private userService: UserService, private databaseService: DatabaseServiceService, private channelService: ChannelService) {}
+  @Input({ required: true }) componentType!: 'search-input' | 'user-list';
+  private uidSubscription: Subscription | null = null;
+  constructor(
+    private userService: UserService,
+    private authenticatedService: AuthService,
+    private databaseService: DatabaseServiceService,
+    private channelService: ChannelService,
+    private authService: CurrentUserService
+  ) {}
 
   // @HostListener('document:click', ['$event'])
   // onDocumentClick(event: MouseEvent): void {
@@ -43,6 +53,14 @@ export class SearchUserComponent implements OnInit {
   // }
 
   ngOnInit(): void {
+    this.authService.userID$.subscribe(userId => {
+      this.databaseService.authUser(userId!).then(user => {
+        if (user && user != null) {
+          this.authenticatedUser = user;
+        }
+      });
+    });
+
     this.users$ = this.databaseService.snapUsers();
 
     this.channelService.filtered_users$.subscribe(users => {

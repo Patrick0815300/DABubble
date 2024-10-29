@@ -8,11 +8,9 @@ import { FooterComponent } from '../footer/footer.component';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PasswordResetService } from '../password_Reset/password-reset.service';
-import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
-import { Firestore } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
-import { Auth } from '@angular/fire/auth';
+import { Auth, confirmPasswordReset } from '@angular/fire/auth';
+
 
 @Component({
   selector: 'app-new-password2',
@@ -43,28 +41,19 @@ export class NewPassword2Component {
 
   private auth = inject(Auth)
 
-  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService, private firestore: Firestore) {
-    console.log("auth instance:", this.auth);
+  constructor(private router: Router, private firebase: FirebaseLoginService, private service: PasswordResetService,) {
+
   }
 
-  //private app = initializeApp(this.config); // löschen
-  //private auth = getAuth(this.app); // this.app löschen
   urlParams = new URLSearchParams(window.location.search);
   oobCode = this.urlParams.get('oobCode');
 
-
-
   /**
-   * This function clears the inputs and changes the Passwords
-   */
+  //  * This function clears the inputs and changes the Passwords
+  //  */
   changePassword() {
-    getAuth();
     if (this.checkForSamePasswords()) {
-      if (this.auth && this.oobCode) {
-        this.resetPassword();
-      } else {
-        console.error('Firebase Authentication oder oobCode nicht gefunden.')
-      }
+      this.resetPassword();
     } else {
       this.displayError = true;
       setTimeout(() => {
@@ -93,7 +82,6 @@ export class NewPassword2Component {
         });
     }
   }
-
 
   /**
    * This function resets the Password in the firebase-database
@@ -124,8 +112,8 @@ export class NewPassword2Component {
   }
 
   /**
-   * This function calls different Password-control functions
-   */
+  //  * This function calls different Password-control functions
+  //  */
   checkPasswords() {
     this.checkPasswordLength();
     this.checkForEmptyInputs();

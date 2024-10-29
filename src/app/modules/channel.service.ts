@@ -13,6 +13,7 @@ export class ChannelService {
   private logFilteredChannelsSubject = new ReplaySubject<Channel[]>(1);
   private logUserSubject = new ReplaySubject<string[]>(1);
   private logSubject = new BehaviorSubject<boolean>(false);
+  private openMessageContainerSubject = new BehaviorSubject<boolean>(false);
   private logchosenSubject = new BehaviorSubject<boolean>(false);
   showChannelMsg$ = this.isChannelSource.asObservable();
   channelMembers$ = this.channelMemberSource.asObservable();
@@ -21,6 +22,7 @@ export class ChannelService {
   filtered_channels$ = this.logFilteredChannelsSubject.asObservable();
   open_update_channel$ = this.logSubject.asObservable();
   chosen$ = this.logchosenSubject.asObservable();
+  openMessageMobile$ = this.openMessageContainerSubject.asObservable();
   isDialogOpen = false;
 
   constructor(private firestore: Firestore) {}
@@ -37,10 +39,6 @@ export class ChannelService {
     this.isDialogOpen = !this.isDialogOpen;
     this.logSubject.next(this.isDialogOpen);
   }
-
-  // emitChosen(bool:boolean) {
-  //   this.logchosenSubject.next(this.isDialogOpen);
-  // }
 
   emitFilteredUsers(users: User[]) {
     this.logFilteredUserSubject.next(users);
@@ -82,11 +80,7 @@ export class ChannelService {
     }
   }
 
-  // setActiveChannel(channelId: string): void {
-  //   getDoc(doc(this.firestore, channels/${channelId})).then((docSnap) => {
-  //     if (docSnap.exists() && docSnap.data().members?.includes(this.uid)) {
-  //       updateDoc(doc(this.firestore, users/${this.uid}), { activeChannelId: channelId });
-  //     }
-  //   });
-  // }
+  emitOpenMessageMobile(bool: boolean) {
+    this.openMessageContainerSubject.next(this.isDialogOpen);
+  }
 }

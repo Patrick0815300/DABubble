@@ -28,6 +28,7 @@ import { SearchUserComponent } from '../components/search-user/search-user.compo
 import { DevNewMessageComponent } from '../components/dev-new-message/dev-new-message.component';
 import { map, Subscription } from 'rxjs';
 import { AuthService } from '../firestore-service/auth.service';
+import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
 
 @Component({
   selector: 'app-main-component',
@@ -52,6 +53,7 @@ import { AuthService } from '../firestore-service/auth.service';
     ChatareaComponent,
     SearchUserComponent,
     DevNewMessageComponent,
+    DevSpaceAreaComponent,
   ],
   templateUrl: './main-component.component.html',
   styleUrl: './main-component.component.scss',
@@ -80,7 +82,7 @@ export class MainComponentComponent implements OnInit {
   new_person_name: string = '';
   open_edit_channel: boolean = false;
   isThreadVisible: boolean = true;
-
+  openWrapper: boolean = false;
   all_users: User[] = [];
   filtered_users: User[] = [];
   searchUser: User[] = [];
@@ -136,6 +138,10 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.filtered_users$.subscribe(user => {
       this.searchUser = user;
+    });
+
+    this.channelService.openMessageMobile$.subscribe(state => {
+      this.openWrapper = state;
     });
 
     /**

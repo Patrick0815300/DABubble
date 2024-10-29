@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-wrapper',
