@@ -19,5 +19,4 @@ export const routes: Routes = [
   { path: "desktop/:id", component: MainComponentComponent },
   { path: "imprint", component: ImprintComponent },
   { path: "privacyPolicy", component: PrivacypolicyComponent },
-  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

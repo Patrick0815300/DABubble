@@ -7,9 +7,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChannelDialogComponent } from './channel-dialog/channel-dialog.component';
 import { MemberDialogComponent } from './member-dialog/member-dialog.component';
 import { AddMemberDialogComponent } from './add-member-dialog/add-member-dialog.component';
-import { MessageComponent } from "./message/message.component";
-import { OwnMessageComponent } from "./own-message/own-message.component";
-import { MessageBoxComponent } from "./message-box/message-box.component";
+import { MessageComponent } from './message/message.component';
+import { OwnMessageComponent } from './own-message/own-message.component';
+import { MessageBoxComponent } from './message-box/message-box.component';
 import { User } from '../models/user/user.model';
 import { ChatareaServiceService } from '../firestore-service/chatarea-service.service';
 import { MainServiceService } from '../firestore-service/main-service.service';
@@ -17,6 +17,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 
 @Component({
   selector: 'app-chatarea',
@@ -31,7 +32,8 @@ import { animate, style, transition, trigger } from '@angular/animations';
     OwnMessageComponent,
     MessageBoxComponent,
     MemberDialogComponent,
-    AddMemberDialogComponent
+    AddMemberDialogComponent,
+    MiddleWrapperComponent,
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss',
@@ -72,14 +74,13 @@ export class ChatareaComponent {
   previousMessageDate: string | null = null;
   allChannelsAreFalse: boolean = false;
 
-  constructor
-    (
-      public dialog: MatDialog,
-      private fireService: ChatareaServiceService,
-      private mainService: MainServiceService,
-      private cdRef: ChangeDetectorRef,
-      private authService: AuthService
-    ) { }
+  constructor(
+    public dialog: MatDialog,
+    private fireService: ChatareaServiceService,
+    private mainService: MainServiceService,
+    private cdRef: ChangeDetectorRef,
+    private authService: AuthService
+  ) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -102,7 +103,7 @@ export class ChatareaComponent {
         if (allFalse) {
           this.clearChannelData();
         }
-      }
+      },
     });
   }
 
@@ -118,7 +119,7 @@ export class ChatareaComponent {
       this.clearChannelData();
       return;
     }
-    this.fireService.loadMessages(channelId).subscribe((messages) => {
+    this.fireService.loadMessages(channelId).subscribe(messages => {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
         this.scrollToBottom();
@@ -134,13 +135,13 @@ export class ChatareaComponent {
         this.loadMembers();
         this.loadMessages(channel.id);
         this.cdRef.detectChanges();
-      }
+      },
     });
   }
 
   loadMembers() {
     this.members = [];
-    this.memberIds.forEach((memberId) => {
+    this.memberIds.forEach(memberId => {
       this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.members.push(userInstance);

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,8 +11,8 @@ import { PasswordResetService } from '../password_Reset/password-reset.service';
 import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { Firestore } from 'firebase/firestore';
-import { config } from 'rxjs';
 import { initializeApp } from 'firebase/app';
+import { Auth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-new-password2',
@@ -41,30 +41,14 @@ export class NewPassword2Component {
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
-  config = {
-    projectId: 'dabubble-57387',
-    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
-    storageBucket: 'dabubble-57387.appspot.com',
-    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
-    authDomain: 'dabubble-57387.firebaseapp.com',
-    messagingSenderId: '1040544770849',
-  };
+  private auth = inject(Auth)
 
-  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService) {
-    
+  constructor(private router: Router, private service: PasswordResetService, private firebase: FirebaseLoginService, private firestore: Firestore) {
+    console.log("auth instance:", this.auth);
   }
 
-  private config2 = { // löschen
-    projectId: 'dabubble-57387',
-    appId: '1:1040544770849:web:1df07c76989e5816c56c60',
-    storageBucket: 'dabubble-57387.appspot.com',
-    apiKey: 'AIzaSyBSTXdqT4YVS0tJheGnc1evmzz6_kUya4k',
-    authDomain: 'dabubble-57387.firebaseapp.com',
-    messagingSenderId: '1040544770849',
-  };
-
-  private app = initializeApp(this.config2); // löschen
-  private auth = getAuth(this.app); // this.app löschen
+  //private app = initializeApp(this.config); // löschen
+  //private auth = getAuth(this.app); // this.app löschen
   urlParams = new URLSearchParams(window.location.search);
   oobCode = this.urlParams.get('oobCode');
 
@@ -74,9 +58,13 @@ export class NewPassword2Component {
    * This function clears the inputs and changes the Passwords
    */
   changePassword() {
+    getAuth();
     if (this.checkForSamePasswords()) {
-      //init.App
-      this.resetPassword();
+      if (this.auth && this.oobCode) {
+        this.resetPassword();
+      } else {
+        console.error('Firebase Authentication oder oobCode nicht gefunden.')
+      }
     } else {
       this.displayError = true;
       setTimeout(() => {
@@ -183,5 +171,3 @@ export class NewPassword2Component {
     }
   }
 }
-
-

@@ -1,3 +1,4 @@
+import { AuthService } from './../../firestore-service/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
 import { WrapperComponent } from '../../shared/wrapper/wrapper.component';
@@ -5,10 +6,11 @@ import { CommonModule } from '@angular/common';
 import { NavService } from '../../modules/nav.service';
 import { DatabaseServiceService } from '../../database-service.service';
 import { User, Channel, Message } from '../../modules/database.model';
-import { combineLatest, Observable, of, switchMap, map } from 'rxjs';
+import { combineLatest, Observable, of, switchMap, map, Subscription } from 'rxjs';
 import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
 import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
+import { CurrentUserService } from '../../modules/current-user.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -48,32 +50,51 @@ export class LeftSideMenuComponent implements OnInit {
   userByIdMap: { [userId: string]: any } = {};
   chatMap: { [key: string]: any[] } = {};
   openDevSearch: boolean = false;
-
+  auth_user_id!: any;
+  observeUser!: Observable<User>;
+  private uidSubscription: Subscription | null = null;
   /**
    * @constructor
    * @param {NavService} navService - instance of NavService for subscribing to the
    * Observable state$
    */
-  constructor(private userService: UserService, private channelService: ChannelService, private navService: NavService, private databaseService: DatabaseServiceService) {
+  constructor(
+    private userService: UserService,
+    private channelService: ChannelService,
+    private navService: NavService,
+    private databaseService: DatabaseServiceService,
+    private authService: CurrentUserService,
+    private authenticatedService: AuthService
+  ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
     });
 
     this.showChannelMessages(false);
-
-    // if (this.all_channel.length === 0) {
-    //   this.sendSelectedUser(this.authenticatedUser!);
-    //   this.sendUserId(this.authenticatedUser?.user_id!);
-    //   this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
-    // } else {
-    //   this.loadChannelMembers(this.all_channel[0].channel_id);
-    //   this.sendChannel(this.all_channel[0]);
-    //   this.showChannelMessages(true);
-    //   this.loadChannelMessages(this.all_channel[0].channel_id);
-    // }
   }
 
   ngOnInit(): void {
+    this.essay();
+    this.authService.userID$.subscribe(userId => {
+      this.auth_user_id = userId;
+      sessionStorage.setItem('sessionid', userId!);
+      this.databaseService.authUser(userId!).then(user => {
+        user ? console.log('This is the logged user:', user) : console.log('NO USER IS LOGGED IN');
+        if (user && user !== null) {
+          this.authenticatedUser = user;
+          this.sendSelectedUser(user);
+          this.sendUserId(user.id);
+          this.loadMessages(user.id, user.id);
+        }
+      });
+    });
+
+    this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
+      this.observeUser = this.databaseService.snapUsers().pipe(map(users => users.filter(user => user.id === uid)[0]));
+    });
+
+    console.log('Hi I am also available here', this.authenticatedUser);
+
     this.databaseService.onlineUsers$.subscribe(users => {
       this.onlineUsers = users;
     });
@@ -89,20 +110,13 @@ export class LeftSideMenuComponent implements OnInit {
       this.all_channel = channel;
     });
 
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
-      this.sendSelectedUser(this.authenticatedUser!);
-      this.sendUserId(this.authenticatedUser?.user_id!);
-      this.loadMessages(this.authenticatedUser?.user_id!, this.authenticatedUser?.user_id!);
-    });
-
     /**
      * find the direct messages from the authenticated user
      */
-    this.directMessages$ = combineLatest([this.databaseService.authenticatedUser(), this.messages$]).pipe(
+    this.directMessages$ = combineLatest([this.observeUser, this.messages$]).pipe(
       switchMap(([authenticatedUser, messages]) => {
         if (authenticatedUser) {
-          return this.databaseService.directMessages(authenticatedUser.user_id);
+          return this.databaseService.directMessages(authenticatedUser?.id);
         } else {
           return of([]);
         }
@@ -115,7 +129,7 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.databaseService.getAllUsers().subscribe(users => {
       this.usersMap = users.reduce((acc, user) => {
-        acc[user.user_id] = user;
+        acc[user.id] = user;
         return acc;
       }, {} as { [key: string]: User });
     });
@@ -162,12 +176,11 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
-  handleChosen(currentChannelId: string) {
-    this.channelService.updateChannelData('channels', 'chosen', true, { chosen: false });
-    this.channelService.updateChannelData('channels', 'channel_id', currentChannelId, { chosen: true });
+  handleUpdateUserChannelId(currentChannelId: string) {
+    this.channelService.updateChannelData('users', 'id', this.auth_user_id, { activeChannelId: currentChannelId });
   }
 
-  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     console.log('I load again msg');
@@ -196,6 +209,10 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
+  essay() {
+    console.log('GDGSGSSH', this.observeUser);
+  }
+
   loadChannelMessages(targetChannelId: string) {
     //console.log('I load again msg');
     this.databaseService.getChannelMessages(targetChannelId, messages => {
@@ -218,6 +235,7 @@ export class LeftSideMenuComponent implements OnInit {
 
   sendChannel(channel: Channel) {
     this.userService.emitChannel(channel);
+    console.log('current Channel', channel);
   }
 
   showChannelMessages(isShown: boolean) {

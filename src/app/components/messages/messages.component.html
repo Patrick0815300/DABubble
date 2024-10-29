@@ -11,7 +11,7 @@
           <span>{{ chatGroup.date }} </span>
           <div class="line"></div>
         </div>
-        <div *ngFor="let message of chatGroup.messages; let index_group = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.user_id">
+        <div *ngFor="let message of chatGroup.messages; let index_group = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.id">
           <div class="image-message">
             <div class="offset" *ngIf="message?.response_content"></div>
             <img *ngIf="getCachedUser(message?.from_user)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
@@ -25,7 +25,7 @@
                 alt=""
               />
               <span class="origin_msg">&#64;{{ getCachedUser(message?.from_user_origin)?.name }}</span>
-              <p class="response" [class.response-p]="message?.from_user === authenticatedUser?.user_id">{{ message?.response_content.substring(0, 100) }}</p>
+              <p class="response" [class.response-p]="message?.from_user === authenticatedUser?.id">{{ message?.response_content.substring(0, 100) }}</p>
             </div>
             <div *ngIf="update_group !== index_group || update_chat !== index_chat">
               <span>{{ getCachedUser(message?.from_user)?.name }}</span>
@@ -58,18 +58,14 @@
               </div>
             </div>
           </div>
-          <div
-            class="emoji-container"
-            [class.align-box-right]="message?.from_user !== authenticatedUser?.user_id"
-            *ngIf="update_group !== index_group || update_chat !== index_chat"
-          >
+          <div class="emoji-container" [class.align-box-right]="message?.from_user !== authenticatedUser" *ngIf="update_group !== index_group || update_chat !== index_chat">
             <div class="img-group">
               <img src="assets/img/icons/emoji_white_heavy_check_mark_.svg" alt="" />
               <img src="assets/img/icons/emoji_person_hand_celebrate_.svg" alt="" />
               <img (click)="onShowEmojiPicker(); sendSelectedMsgId(message?.message_id)" src="assets/img/icons/add_reaction.svg" alt="" />
               <img (click)="onRespond(index_chat, index_group)" src="assets/img/icons/comment.svg" alt="" />
-              <img (click)="onShowDeleteDialog(index_group)" *ngIf="message?.from_user === authenticatedUser?.user_id" src="assets/img/icons/more_vert.svg" alt="" />
-              <div *ngIf="show_delete_msg === index_group" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser?.user_id">
+              <img (click)="onShowDeleteDialog(index_group)" *ngIf="message?.from_user === authenticatedUser" src="assets/img/icons/more_vert.svg" alt="" />
+              <div *ngIf="show_delete_msg === index_group" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser">
                 <button class="btn" (click)="onUpdateMessage(message?.message_content, index_chat, index_group)">Nachricht bearbeiten</button>
                 <button class="btn" (click)="onDeleteMessage(message?.message_id)">Nachricht löschen</button>
               </div>
@@ -85,7 +81,7 @@
           <img *ngIf="getCachedUser(toUserId)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
           <span class="username text-capitalize">{{ getCachedUser(toUserId)?.name }} </span>
         </div>
-        @if(getCachedUser(toUserId)?.user_id===authenticatedUser?.user_id){
+        @if(getCachedUser(toUserId)===authenticatedUser){
         <div class="self-room">
           <span>Dieser Raum ist nur für dich da.</span> Mache dir Notizen, liste deine To-dos auf oder bewahre Links und Dateien griffbereit auf. Du kannst hier auch gerne Dinge
           mit dir selbst besprechen.
@@ -113,9 +109,26 @@
           placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}"
           autocomplete="off"
         />
+        <ng-container *ngIf="fileURL">
+          <img *ngIf="fileType === 'image'" [src]="fileURL" alt="Image" class="uploaded-image" width="200px" />
+          <iframe *ngIf="fileType === 'pdf'" [src]="fileURL" class="pdf-viewer" width="200px" height="250px"></iframe>
+          <video *ngIf="fileType === 'video'" controls>
+            <source [src]="fileURL" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div *ngIf="fileType === 'unknown'">
+            <a [href]="fileURL" target="_blank">Datei herunterladen: {{ fileName }}</a>
+          </div>
+          <mat-icon (click)="clearFileUpload()" class="delete-btn">delete</mat-icon>
+        </ng-container>
+        <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="uploadProgress"></mat-progress-bar>
         <div class="send-line">
           <div class="alternate-line">
-            <img class="icons" src="assets/img/icons/input_add.svg" alt="" />
+            <input type="file" #fileUpload hidden />
+            <label for="fileUpload">
+              <mat-icon (click)="openFileDialog()">add</mat-icon>
+            </label>
+            <!-- <img class="icons" src="assets/img/icons/input_add.svg" alt="" /> -->
             <div class="sep-line"></div>
             <button #buttonDialog>
               <img (click)="onShowEmojiPicker(); onButtonClick()" class="icons exclude-button" src="assets/img/icons/sentiment_satisfied.svg" alt="" />

@@ -8,6 +8,9 @@ import { ChannelService } from '../../modules/channel.service';
 import { SearchDevspaceComponent } from '../search-devspace/search-devspace.component';
 import { CommonModule } from '@angular/common';
 import { NavService } from '../../modules/nav.service';
+import { getAuth } from 'firebase/auth';
+import { AuthService } from '../../firestore-service/auth.service';
+import { CurrentUserService } from '../../modules/current-user.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -29,17 +32,32 @@ export class NavBarComponent implements OnInit {
   PickedArray: string[] = [];
   showSearchUserName: boolean = false;
   input_value: string = '';
+  currentUserId!: any;
 
-  constructor(private logOutService: LogOutService, public databaseService: DatabaseServiceService, private channelService: ChannelService, private navService: NavService) {
+  constructor(
+    private logOutService: LogOutService,
+    public databaseService: DatabaseServiceService,
+    private authService: CurrentUserService,
+    private channelService: ChannelService,
+    private navService: NavService
+  ) {
     this.logOutService.open_logout$.subscribe(state => {
       this.open_logout = state;
     });
   }
 
   ngOnInit(): void {
-    this.databaseService.authenticatedUser().subscribe(user => {
-      this.authenticatedUser = user;
+    this.authService.userID$.subscribe(userId => {
+      this.databaseService.authUser(userId!).then(user => {
+        if (user && user != null) {
+          this.authenticatedUser = user;
+        }
+      });
     });
+
+    // this.databaseService.authenticatedUser().subscribe(user => {
+    //   this.authenticatedUser = user;
+    // });
     this.databaseService.users$.subscribe(users => {
       this.all_users = users;
     });

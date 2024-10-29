@@ -52,7 +52,7 @@
   </div>
 
   <div class="btn-container">
-    <button type="button" class="btn btn-danger" *ngIf="authenticatedUser?.user_id === channel.admin" (click)="onTryToDeleteChannel()">Channel löschen</button>
+    <button type="button" class="btn btn-danger" *ngIf="authenticatedUser?.id === channel.admin" (click)="onTryToDeleteChannel()">Channel löschen</button>
     <button type="button" class="btn btn-info" (click)="onLeaveChannel()">Channel verlassen</button>
   </div>
   }
