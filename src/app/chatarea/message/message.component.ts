@@ -32,6 +32,7 @@ export class MessageComponent {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
+  emojiPath = 'assets/img/04_chats-message/'
 
   private sanitizer = inject(DomSanitizer);
 

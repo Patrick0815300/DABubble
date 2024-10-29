@@ -35,11 +35,9 @@ export class ChatareaServiceService {
       const docRef = this.mainService.getSingleChannelRef(collection, docId);
       onSnapshot(docRef, snapshot => {
         if (snapshot.exists()) observer.next({ id: snapshot.id, ...snapshot.data() });
-        else observer.error('Dokument nicht gefunden');
-      }, error => observer.error(error));
+      });
     });
   }
-
 
   getUserAvatar(docId: string): Observable<string | null> {
     return this.loadDocument('users', docId).pipe(map(user => user?.avatar || null));
@@ -53,8 +51,7 @@ export class ChatareaServiceService {
         onSnapshot(userDoc, userSnap => {
           const channelId = userSnap.data()?.['activeChannelId'];
           if (channelId) this.subscribeToChannel(channelId, observer);
-          else observer.next(null);
-        }, error => observer.error(error));
+        });
       }))
     );
   }
@@ -63,8 +60,7 @@ export class ChatareaServiceService {
     const channelDoc = doc(this.firestore, `channels/${channelId}`);
     onSnapshot(channelDoc, channelSnap => {
       if (channelSnap.exists()) observer.next({ id: channelSnap.id, ...channelSnap.data() });
-      else observer.error('Kanal nicht gefunden');
-    }, error => observer.error(error));
+    });
   }
 
   leaveActiveChannel(): Observable<void> {
@@ -74,31 +70,11 @@ export class ChatareaServiceService {
           const userRef = doc(this.firestore, `users/${this.uid}`);
           const userSnap = await getDoc(userRef);
           const channelId = userSnap.data()?.['activeChannelId'];
+          await updateDoc(doc(this.firestore, `channels/${channelId}`), { member: arrayRemove(this.uid) });
           await updateDoc(userRef, { activeChannelId: '' });
-          if (channelId) await updateDoc(doc(this.firestore, `channels/${channelId}`), { members: arrayRemove(this.uid) });
           observer.next();
         } catch (error) { observer.error(error); }
       })();
-    });
-  }
-
-  /**
-   * Checks if all channels have 'chosen' set to false.
-   * @returns {Observable<boolean>} An observable that emits true if all channels are inactive, otherwise false.
-   */
-  checkIfAllChannelsAreFalse(): Observable<boolean> {
-    const channelsCollectionRef = collection(this.firestore, 'channels');
-    return new Observable((observer) => {
-      onSnapshot(channelsCollectionRef, (snapshot) => {
-        let allFalse = true;
-        snapshot.docs.forEach((doc) => {
-          const channelData = doc.data();
-          if (channelData['chosen'] === true) {
-            allFalse = false;
-          }
-        });
-        observer.next(allFalse);
-      }, (error) => observer.error(error));
     });
   }
 
@@ -123,7 +99,7 @@ export class ChatareaServiceService {
       onSnapshot(usersCollectionRef, (snapshot) => {
         const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         observer.next(users);
-      }, (error) => observer.error(error));
+      });
     });
   }
 
@@ -164,8 +140,20 @@ export class ChatareaServiceService {
    */
   addMessage(channelId: string, messageData: any): Promise<DocumentReference<any>> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
-    return addDoc(messagesCollectionRef, messageData);
+    if (messageData.content.trim() !== '' || messageData.fileUrl != null) {
+      return addDoc(messagesCollectionRef, messageData);
+    } else {
+      return new Promise((resolve) => {
+        const dummyDocRef = {
+          id: 'dummy-id',
+          path: `channels/${channelId}/messages/dummy-id`
+        } as DocumentReference<any>;
+        resolve(dummyDocRef);
+      });
+    }
   }
+
+
 
   async deleteMessageWithSubcollections(channelId: string, messageId: string): Promise<void> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
@@ -189,9 +177,7 @@ export class ChatareaServiceService {
           const messageDocRef = doc(this.firestore, `channels/${channel.id}/messages`, messageId);
           updateDoc(messageDocRef, updatedData)
             .then(() => observer.next())
-            .catch(error => observer.error('Error updating the message: ' + error));
-        },
-        error: (error) => observer.error('Error retrieving the active channel: ' + error)
+        }
       });
     });
   }

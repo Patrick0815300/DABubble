@@ -80,7 +80,7 @@ export class ChatareaComponent {
   messages: any[] = [];
   uid: string | null = null;
   previousMessageDate: string | null = null;
-  allChannelsAreFalse: boolean = false;
+  noChannelChosen: boolean = false;
 
   constructor(
     public dialog: MatDialog,
@@ -94,26 +94,13 @@ export class ChatareaComponent {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
-
     this.loadActiveChannelData();
-    this.checkChannelsStatus();
   }
 
   ngOnDestroy() {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
-  }
-
-  checkChannelsStatus() {
-    this.fireService.checkIfAllChannelsAreFalse().subscribe({
-      next: (allFalse: boolean) => {
-        this.allChannelsAreFalse = allFalse;
-        if (allFalse) {
-          this.clearChannelData();
-        }
-      },
-    });
   }
 
   clearChannelData() {
@@ -139,14 +126,23 @@ export class ChatareaComponent {
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelName = channel.channel_name || null;
-        this.memberIds = channel.member || [];
-        this.loadMembers();
-        this.loadMessages(channel.id);
-        this.cdRef.detectChanges();
+        if (channel) {
+          this.channelName = channel.channel_name || null;
+          this.memberIds = channel.member || [];
+          this.members = [];
+          this.loadMessages(channel.id);
+          this.loadMembers();
+          this.cdRef.detectChanges();
+        } else {
+          this.clearChannelData();
+        }
       },
+      error: () => {
+        this.clearChannelData();
+      }
     });
   }
+
 
   loadMembers() {
     this.members = [];

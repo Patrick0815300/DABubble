@@ -234,7 +234,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
               messageEdit: false,
             };
             this.fireService.addMessage(channel.id, messageData).then((docRef) => {
-              const messageId = docRef.id;
+              const messageId = docRef!.id;
               this.messageContent = '';
               if (this.selectedFile) {
                 this.uploadFile(messageId, channel.id);

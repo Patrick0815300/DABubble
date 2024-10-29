@@ -55,6 +55,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   avatar: string | null = null;
   messageEdited: boolean = false;
   toggleEmojiPicker: boolean = false;
+  emojiPath = 'assets/img/04_chats-message/'
 
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
