@@ -132,7 +132,37 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateLocalReactions(reactionType: string) {
+    if (this.message.reactions) {
+      const reaction = this.message.reactions.find((r: { type: string; }) => r.type === reactionType);
+      if (reaction) {
+        if (!reaction.userId.includes(this.uid!)) {
+          reaction.userId.push(this.uid!);
+          reaction.count += 1;
+        }
+      } else {
+        this.message.reactions.push({
+          type: reactionType,
+          userId: [this.uid!],
+          count: 1,
+          path: `assets/img/04_chats-message/${reactionType}.svg`
+        });
+      }
+    } else {
+      this.message.reactions = [{
+        type: reactionType,
+        userId: [this.uid!],
+        count: 1,
+        path: `assets/img/04_chats-message/${reactionType}.svg`
+      }];
+    }
+    this.loadReactionNames();
+    this.cdr.detectChanges();
+  }
+
+
   async loadReactionNames() {
+    this.reactionNames = [];
     if (this.message.reactions && this.message.reactions.length > 0) {
       for (let reaction of this.message.reactions) {
         const names = [];
@@ -159,6 +189,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   loadThreadDetails() {
     this.lastAnswerTime = '';
@@ -205,6 +236,15 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
+  incrementReactionCount(reactionType: string, reactionPath: string) {
+    if (!this.channelId) { return; }
+    const messageId = this.message.id;
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, reactionPath)
+      .then(() => {
+        this.updateLocalReactions(reactionType);
+      })
+  }
+
   async reactToMessage(messageId: string, reactionType: string, path: string) {
     this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
     if (await this.chatService.hasThreads(this.channelId, messageId)) {
@@ -238,8 +278,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
           this.editMode[message.id] = false;
           this.messageEdited = true;
           this.cdr.detectChanges();
-        },
-        error: (error) => console.error('Fehler beim Aktualisieren der Nachricht:', error)
+        }
       });
   }
 

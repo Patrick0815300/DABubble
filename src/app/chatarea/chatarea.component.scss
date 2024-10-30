@@ -68,6 +68,10 @@ mat-card-header {
     gap: 10px;
     padding: 3px 10px !important;
 
+    .btn-unset {
+        all: unset;
+    }
+
     .member {
         display: flex;
         align-items: center;

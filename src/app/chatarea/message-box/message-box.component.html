@@ -1,3 +1,6 @@
+<div *ngIf="!isCurrentUserMember()" class="not-member-message">
+  Sie sind leider kein Member in diesem Channel.
+</div>
 <div class="container">
     <textarea 
       #messageTextArea
@@ -16,25 +19,32 @@
       <div *ngIf="fileType === 'unknown'">
         <a [href]="fileURL" target="_blank">Datei herunterladen: {{ fileName }}</a>
       </div>
-      <mat-icon (click)="clearFileUpload()" class="delete-btn">delete</mat-icon>
+      <mat-icon (click)="clearFileUploadData()" class="delete-btn">delete</mat-icon>
     </ng-container>
     <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="uploadProgress"></mat-progress-bar>
   <div class="bottom">
     <div>
       <input type="file" #fileUpload hidden>
       <label for="fileUpload">
-        <mat-icon (click)="openFileDialog()">add</mat-icon>
+        <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="openFileDialog()"><mat-icon >add</mat-icon></button>
       </label>
       <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()" #emojiPicker/>
-      <mat-icon (click)="showEmojiPicker(); $event.stopPropagation()">sentiment_satisfied</mat-icon>
+      <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="showEmojiPicker(); $event.stopPropagation()"><mat-icon >sentiment_satisfied</mat-icon></button>
       <div class="link-someone" *ngIf="linkDialog">
-        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name, user.id!)"  #addMember>
-          <img [src]="user.avatar" alt="{{ user.name }}">
-          <span>{{ user.name }}</span>
+        <div class="fl-d" *ngIf="showUsers">
+          <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)" #addMember>
+            <img [src]="user.avatar" alt="{{ user.name }}">
+            <span>{{ user.name }}</span>
+          </div>
+        </div>
+        <div class="fl-d" *ngIf="showChannels">
+          <div class="user" *ngFor="let channel of channels" (click)="addChannelToMessage(channel.name)" #addMember>
+            <span>{{ channel.name }}</span>
+          </div>
         </div>
       </div>
-      <mat-icon (click)="toggleLinkDialog()">alternate_email</mat-icon>
+      <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="toggleLinkDialog()"><mat-icon >alternate_email</mat-icon></button>
     </div>
-    <mat-icon (click)="sendMessage()">send</mat-icon>
+    <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="sendMessage()"> <mat-icon >send</mat-icon></button>
   </div>
 </div>

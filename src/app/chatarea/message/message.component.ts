@@ -62,6 +62,7 @@ export class MessageComponent {
   }
 
   async loadReactionNames() {
+    this.reactionNames = [];
     if (this.message.reactions && this.message.reactions.length > 0) {
       for (let reaction of this.message.reactions) {
         const names = [];
@@ -119,12 +120,41 @@ export class MessageComponent {
   }
 
   reactToMessage(messageId: string, reactionType: string, path: string) {
-    this.openReactions();
     if (!this.channelId) {
-      console.error('Keine Channel-ID vorhanden.');
       return;
     }
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path).then(() => {
+      this.updateLocalReactions(reactionType);
+    }).catch(error => {
+      console.error('Fehler beim Hinzufügen der Reaktion:', error);
+    });
+  }
+
+  updateLocalReactions(reactionType: string) {
+    if (this.message.reactions) {
+      const reaction = this.message.reactions.find((r: { type: string; }) => r.type === reactionType);
+      if (reaction) {
+        if (!reaction.userId.includes(this.uid!)) {
+          reaction.userId.push(this.uid!);
+          reaction.count += 1;
+        }
+      } else {
+        this.message.reactions.push({
+          type: reactionType,
+          userId: [this.uid!],
+          count: 1,
+          path: `assets/img/04_chats-message/${reactionType}.svg`
+        });
+      }
+    } else {
+      this.message.reactions = [{
+        type: reactionType,
+        userId: [this.uid!],
+        count: 1,
+        path: `assets/img/04_chats-message/${reactionType}.svg`
+      }];
+    }
+    this.loadReactionNames();
   }
 
   formatTime(timeString: string): string {

@@ -39,6 +39,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   users: User[] = [];
   memberIds: string[] = [];
   linkDialog: boolean = false;
+  showUsers: boolean = false;
+  showChannels: boolean = false;
+  channels: any[] = [];
   linkedUsers: string[] = [];
   toggleEmojiPicker: boolean = false;
   private emojiSubscription: Subscription | null = null;
@@ -48,6 +51,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
 
   private uidSubscription: Subscription | null = null;
+  private channelsSubscription: Subscription | null = null;
+  private activeChannelSubscription: Subscription | null = null;
+  private userSubscriptions: Subscription[] = [];
   private destroy$ = new Subject<void>();
 
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
@@ -61,6 +67,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     });
     this.loadActiveChannelName();
     this.loadChannelMembers();
+    this.loadChannels();
   }
 
   ngOnDestroy() {
@@ -72,6 +79,17 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.emojiSubscription) {
       this.emojiSubscription.unsubscribe();
     }
+    if (this.channelsSubscription) {
+      this.channelsSubscription.unsubscribe();
+    }
+    if (this.activeChannelSubscription) {
+      this.activeChannelSubscription.unsubscribe();
+    }
+    this.unsubscribeFromUsers();
+  }
+
+  focusTextArea() {
+    this.messageTextArea.nativeElement.focus();
   }
 
   @HostListener('document:click', ['$event'])
@@ -117,21 +135,44 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   checkForAtSymbol(event: KeyboardEvent) {
     const textareaValue = (event.target as HTMLTextAreaElement).value;
     const lastChar = textareaValue.slice(-1);
-    if (lastChar != '@') {
-      this.linkDialog = false;
-    } else {
+    if (lastChar === '@') {
       this.linkDialog = true;
+      this.showUsers = true;
+      this.showChannels = false;
+    } else if (lastChar === '#') {
+      this.linkDialog = true;
+      this.showUsers = false;
+      this.showChannels = true;
+    } else {
+      this.linkDialog = false;
     }
   }
 
   toggleLinkDialog() {
-    this.linkDialog = !this.linkDialog;
+    if (this.linkDialog && this.showUsers) {
+      this.linkDialog = false;
+      this.showUsers = false;
+    } else {
+      this.linkDialog = true;
+      this.showUsers = true;
+      this.showChannels = false;
+    }
   }
 
-  addMemberToMessage(name: string, userId: string) {
+  addChannelToMessage(channelName: string) {
+    this.messageContent += `#${channelName} `;
+    this.linkDialog = false;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      if (this.messageTextArea) {
+        this.messageTextArea.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  addMemberToMessage(name: string) {
     this.messageContent += `@${name} `;
-    this.linkedUsers.push(userId);
-    this.toggleLinkDialog();
+    this.linkDialog = false;
     this.cdr.detectChanges();
     setTimeout(() => {
       if (this.messageTextArea) {
@@ -141,20 +182,44 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   loadChannelMembers() {
-    this.fireService.getActiveChannel().subscribe((channel: any) => {
-      this.memberIds = channel.member || [];
-      this.loadUsers();
+    this.activeChannelSubscription = this.fireService.getActiveChannel().subscribe((channel: any) => {
+      const newMemberIds = channel.member || [];
+      if (!this.arraysEqual(this.memberIds, newMemberIds)) {
+        this.memberIds = newMemberIds;
+        this.loadUsers();
+      }
     });
   }
 
+  isCurrentUserMember(): boolean {
+    return this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
+  }
+
   loadUsers() {
+    this.unsubscribeFromUsers();
     this.users = [];
     this.memberIds.forEach((memberId) => {
-      this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
+      const userSubscription = this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
-        this.users.push(userInstance);
+        const index = this.users.findIndex(u => u.id === userInstance.id);
+        if (index !== -1) {
+          this.users[index] = userInstance;
+        } else {
+          this.users.push(userInstance);
+        }
+        this.cdr.detectChanges();
       });
+      this.userSubscriptions.push(userSubscription);
     });
+  }
+
+  unsubscribeFromUsers() {
+    this.userSubscriptions.forEach(sub => sub.unsubscribe());
+    this.userSubscriptions = [];
+  }
+
+  arraysEqual(a: any[], b: any[]): boolean {
+    return JSON.stringify(a.sort()) === JSON.stringify(b.sort());
   }
 
   clearFileUpload() {
@@ -196,9 +261,11 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
         this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => { this.clearFileUploadData });
+        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => { this.clearFileUploadData() });
       }).catch((error) => { this.isUploading = false; });
-      this.selectedFile = null;
+      setTimeout(() => {
+        this.isUploading = false
+      }, 2000);
     }
   }
 
@@ -206,9 +273,14 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     this.messageContent = '';
     this.fileURL = null;
     this.fileName = null;
+    this.selectedFile = null;
+    this.fileType = null;
     this.isUploading = false;
-  }
 
+    if (this.fileInputElement && this.fileInputElement.nativeElement) {
+      this.fileInputElement.nativeElement.value = '';
+    }
+  }
 
   sendMessage() {
     if (this.messageContent.trim() === '' && !this.selectedFile) return;
@@ -217,17 +289,33 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         const userName = `${user.name}`;
         this.fireService.getActiveChannel().subscribe({
           next: (channel: any) => {
-            const messageData = { content: this.messageContent, name: userName, time: new Date().toISOString(), reactions: [], senderId: this.uid, fileUrl: null, fileName: null, messageEdit: false };
+            const messageData = {
+              content: this.messageContent,
+              name: userName,
+              time: new Date().toISOString(),
+              reactions: [],
+              senderId: this.uid,
+              fileUrl: null,
+              fileName: this.selectedFile ? this.selectedFile.name : null,
+              messageEdit: false
+            };
             this.fireService.addMessage(channel.id, messageData).then((docRef) => {
-              const messageId = docRef!.id;
-              this.messageContent = '';
-              if (this.selectedFile) { this.uploadFile(messageId, channel.id); }
+              if (docRef) {
+                const messageId = docRef.id;
+                this.messageContent = '';
+                if (this.selectedFile) {
+                  this.uploadFile(messageId, channel.id);
+                  this.clearFileUpload();
+                  this.selectedFile = null;
+                }
+              } else { }
             });
           }
         });
       }
     });
   }
+
 
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -243,6 +331,13 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         const channelData = channelDoc;
         this.channelName = channelData.name;
       });
+    });
+  }
+
+  loadChannels() {
+    this.channelsSubscription = this.fireService.getAllChannels().subscribe((channels) => {
+      this.channels = channels;
+      this.cdr.detectChanges();
     });
   }
 }

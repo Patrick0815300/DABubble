@@ -283,9 +283,11 @@ export class ChatServiceService implements OnInit, OnDestroy {
    * @param {Message} message - The message to add to the thread.
    * @returns {Promise<void>} A promise that resolves when the message is added to the thread.
    */
-  async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<void> {
+  async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<string> {
     const docRef = await addDoc(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`), message.toJSON());
     await updateDoc(docRef, { id: docRef.id });
+    message.id = docRef.id;
+    return docRef.id;
   }
 
 
@@ -479,9 +481,8 @@ export class ChatServiceService implements OnInit, OnDestroy {
   * @returns {Promise<any[]>} A promise that resolves with the updated reactions array.
   */
   async addOrUpdateReaction(reactions: any[], reactionType: string, userId: string, reactionPath: string): Promise<any[]> {
-    const existingReactionIndex = reactions.findIndex(reaction => reaction.type === reactionType);
-    if (existingReactionIndex !== -1) {
-      const existingReaction = reactions[existingReactionIndex];
+    const existingReaction = reactions.find(reaction => reaction.type === reactionType);
+    if (existingReaction) {
       if (!existingReaction.userId.includes(userId)) {
         existingReaction.userId.push(userId);
         existingReaction.count += 1;
@@ -491,6 +492,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
     }
     return reactions;
   }
+
 
   /**
    * Adds or updates a reaction for a specific message in a channel.

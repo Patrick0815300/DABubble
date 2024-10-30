@@ -13,7 +13,7 @@
                  </div>
                  <span>{{ members.length }}</span>
              </div>
-             <mat-icon class="add-member" (click)="openAddMemberDialog()">person_add</mat-icon>
+             <button class="btn-unset" *ngIf="isCurrentUserMember()" (click)="openAddMemberDialog()"><mat-icon class="add-member" >person_add</mat-icon></button>
         </div>
         <app-member-dialog class="member-dialog" @slideDown *ngIf="channelMemberDialog" (click)="$event.stopPropagation()" (toggleMemberDialog)="openMemberDialog()" (toggleAddMemberDialog)="openAddMemberDialog()"></app-member-dialog>
         <app-add-member-dialog class=" member-dialog add-member-dialog" @slideDown *ngIf="addMemberDialog" (click)="$event.stopPropagation()" (toggleAddMemberDialog)="openAddMemberDialog()"></app-add-member-dialog>

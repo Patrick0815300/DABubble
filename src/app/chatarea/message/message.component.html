@@ -26,7 +26,7 @@
           <span class="time">Letzte Antwort {{ lastAnswerTime }}</span>
         </div>
         <div class="reaction-container" *ngIf="message.reactions?.length > 0">
-          <div class="reaction" *ngFor="let reaction of message.reactions; let i = index">
+          <div class="reaction" *ngFor="let reaction of message.reactions; let i = index" (click)="reactToMessage(message.id, reaction.type, reaction.path)">
             <img [src]="reaction.path">
             <span>{{ reaction.count }}</span>
             <div class="bubble">

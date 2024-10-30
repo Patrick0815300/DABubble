@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -48,29 +48,31 @@ import { NavService } from '../modules/nav.service';
   animations: [
     trigger('slideDown', [
       transition(':enter', [
-        style({ maxHeight: '0px', opacity: 0, overflow: 'hidden', transform: 'translateY(-10px)' }), // Startzustand
-        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' })) // Endzustand mit maxHeight
+        style({ maxHeight: '0px', opacity: 0, overflow: 'hidden', transform: 'translateY(-10px)' }),
+        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' }))
       ]),
       transition(':leave', [
-        animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' })) // Ausgang mit maxHeight
+        animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' }))
       ])
     ]),
 
     trigger('flyInRight', [
       transition(':enter', [
-        style({ transform: 'translateX(100%)', opacity: 0 }), // Startzustand: Element außerhalb des Bildschirms rechts und unsichtbar
-        animate('600ms ease-out', style({ transform: 'translateX(0)' })) // Endzustand: Element in Position und sichtbar
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('600ms ease-out', style({ transform: 'translateX(0)' }))
       ]),
       transition(':leave', [
-        animate('600ms ease-in', style({ transform: 'translateX(100%)' })) // Ausgang: Nach rechts aus dem Bildschirm herausfliegen und unsichtbar werden
+        animate('600ms ease-in', style({ transform: 'translateX(100%)' }))
       ])
     ])
   ]
 })
-export class ChatareaComponent {
+export class ChatareaComponent implements AfterViewInit {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
+  @ViewChild(MessageBoxComponent) messageBoxComponent!: MessageBoxComponent;
 
   private uidSubscription: Subscription | null = null;
+  private memberSubscriptions: Subscription[] = [];
   channelInfoDialog: boolean = false;
   channelMemberDialog: boolean = false;
   addMemberDialog: boolean = false;
@@ -89,6 +91,10 @@ export class ChatareaComponent {
     private cdRef: ChangeDetectorRef,
     private authService: AuthService
   ) { }
+
+  ngAfterViewInit() {
+    this.messageBoxComponent.focusTextArea();
+  }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -143,14 +149,20 @@ export class ChatareaComponent {
     });
   }
 
+  isCurrentUserMember(): boolean {
+    return this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
+  }
 
   loadMembers() {
+    this.memberSubscriptions.forEach(sub => sub.unsubscribe());
+    this.memberSubscriptions = [];
     this.members = [];
     this.memberIds.forEach(memberId => {
-      this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
+      const sub = this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.members.push(userInstance);
       });
+      this.memberSubscriptions.push(sub);
     });
   }
 
@@ -168,6 +180,7 @@ export class ChatareaComponent {
       top: this.messageContainer.nativeElement.scrollHeight,
       behavior: 'smooth',
     });
+    this.messageBoxComponent.focusTextArea();
   }
 
   formatTime(timeString: string): string {

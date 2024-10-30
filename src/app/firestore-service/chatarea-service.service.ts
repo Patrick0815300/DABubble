@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference, Firestore, addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, addDoc, arrayUnion, collection, collectionData, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { Observable, Subscription, catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
@@ -71,7 +71,7 @@ export class ChatareaServiceService {
           const userSnap = await getDoc(userRef);
           const channelId = userSnap.data()?.['activeChannelId'];
           await updateDoc(doc(this.firestore, `channels/${channelId}`), { member: arrayRemove(this.uid) });
-          await updateDoc(userRef, { activeChannelId: '' });
+          //await updateDoc(userRef, { activeChannelId: '' });
           observer.next();
         } catch (error) { observer.error(error); }
       })();
@@ -138,22 +138,14 @@ export class ChatareaServiceService {
    * @param {any} messageData - The message data to add.
    * @returns {Promise<DocumentReference<any>>} A promise that resolves with the reference to the new message.
    */
-  addMessage(channelId: string, messageData: any): Promise<DocumentReference<any>> {
+  addMessage(channelId: string, messageData: any): Promise<DocumentReference<any> | null> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
-    if (messageData.content.trim() !== '' || messageData.fileUrl != null) {
+    if (messageData.content.trim() !== '' || messageData.fileUrl != null || messageData.fileName != null) {
       return addDoc(messagesCollectionRef, messageData);
     } else {
-      return new Promise((resolve) => {
-        const dummyDocRef = {
-          id: 'dummy-id',
-          path: `channels/${channelId}/messages/dummy-id`
-        } as DocumentReference<any>;
-        resolve(dummyDocRef);
-      });
+      return Promise.resolve(null);
     }
   }
-
-
 
   async deleteMessageWithSubcollections(channelId: string, messageId: string): Promise<void> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
@@ -213,5 +205,10 @@ export class ChatareaServiceService {
       path: doc.data()['path']
     }));
     return reactions;
+  }
+
+  getAllChannels(): Observable<any[]> {
+    const channelsRef = collection(this.firestore, 'channels');
+    return collectionData(channelsRef, { idField: 'id' });
   }
 }

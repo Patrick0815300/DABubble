@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -33,6 +33,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./channel-dialog.component.scss']
 })
 export class ChannelDialogComponent {
+  @Input() isMember: boolean = false;
   @Output() toggleChannelInfoDialog = new EventEmitter<void>();
   uid: string | null = null;
   private uidSubscription: Subscription | null = null;

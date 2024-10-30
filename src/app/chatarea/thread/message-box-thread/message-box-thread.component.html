@@ -30,12 +30,20 @@
       <span></span>
       <app-emoji-picker class="emoji-picker" *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()" #emojiPicker/>
       <mat-icon  (click)="showEmojiPicker(); $event.stopPropagation()">sentiment_satisfied</mat-icon>
-        <div class="link-someone" *ngIf="linkDialog">
-        <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)" #addMember>
-          <img [src]="user.avatar" alt="{{ user.name }}">
-          <span>{{ user.name }}</span>
+      <div class="link-someone" *ngIf="linkDialog">
+        <div class="fl-d" *ngIf="showUsers">
+          <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)" #addMember>
+            <img [src]="user.avatar" alt="{{ user.name }}">
+            <span>{{ user.name }}</span>
+          </div>
+        </div>
+        <div class="fl-d" *ngIf="showChannels">
+          <div class="user" *ngFor="let channel of channels" (click)="addChannelToMessage(channel.name)" #addMember>
+            <span>{{ channel.name }}</span>
+          </div>
         </div>
       </div>
+      
       <mat-icon (click)="toggleLinkDialog()">alternate_email</mat-icon>
     </div>
     <mat-icon (click)="sendMessage()">send</mat-icon>

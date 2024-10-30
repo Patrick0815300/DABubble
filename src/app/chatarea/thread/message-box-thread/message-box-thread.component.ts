@@ -38,7 +38,10 @@ export class MessageBoxThreadComponent {
   fileType: string | null = null;
   users: User[] = [];
   memberIds: string[] = [];
-  linkDialog: boolean = false
+  linkDialog: boolean = false;
+  showUsers: boolean = false;
+  showChannels: boolean = false;
+  channels: any[] = [];
   toggleEmojiPicker: boolean = false;
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
@@ -57,6 +60,7 @@ export class MessageBoxThreadComponent {
       this.uid = uid;
     });
     this.loadChannelMembers();
+    this.loadChannels();
   }
 
   ngOnDestroy() {
@@ -78,6 +82,8 @@ export class MessageBoxThreadComponent {
       const isMatIcon = targetElement.closest('mat-icon') !== null;
       if (!clickedInsideAddMember && !isMatIcon) {
         this.linkDialog = false;
+        this.showUsers = false;
+        this.showChannels = false;
       }
     }
     if (this.toggleEmojiPicker && this.emojiPicker) {
@@ -112,19 +118,16 @@ export class MessageBoxThreadComponent {
   }
 
   toggleLinkDialog() {
-    this.linkDialog = !this.linkDialog;
+    if (this.linkDialog && this.showUsers) {
+      this.linkDialog = false;
+      this.showUsers = false;
+    } else {
+      this.linkDialog = true;
+      this.showUsers = true;
+      this.showChannels = false;
+    }
   }
 
-  addMemberToMessage(name: string) {
-    this.content += `@${name} `;
-    this.toggleLinkDialog();
-    this.cdr.detectChanges();
-    setTimeout(() => {
-      if (this.inputBox) {
-        this.inputBox.nativeElement.focus();
-      }
-    }, 0);
-  }
 
   loadChannelMembers() {
     this.fireService.getActiveChannel().subscribe((channel: any) => {
@@ -167,31 +170,45 @@ export class MessageBoxThreadComponent {
         };
         reader.readAsDataURL(this.selectedFile);
       }
+    }); this.inputBox.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+      this.checkForAtSymbol(event);
     });
+    this.inputBox.nativeElement.focus();
   }
+
+  clearFileUploadData() {
+    this.content = '';
+    this.fileURL = null;
+    this.fileName = null;
+    this.selectedFile = null;
+    this.fileType = null;
+    this.isUploading = false;
+
+    if (this.fileInputThreadElement && this.fileInputThreadElement.nativeElement) {
+      this.fileInputThreadElement.nativeElement.value = '';
+    }
+  }
+
 
   uploadFile(channelId: string, messageId: string, threadId: string, threadMessageId: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
+      this.fileUploadService.uploadFile(this.selectedFile, threadMessageId, (progress) => {
         this.uploadProgress = progress;
       }).then((result: { url: string, fileName: string }) => {
         this.cleanUrl = result.url;
         this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
         this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName).then(() => {
-          this.content = '';
-          this.fileURL = null;
-          this.fileName = null;
-          this.isUploading = false;
-          this.cdr.detectChanges();
-        });
+        this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName)
+          .then(() => {
+            this.clearFileUploadData();
+            this.cdr.detectChanges();
+          });
       }).catch((error) => {
         console.error('Fehler beim Hochladen der Datei:', error);
         this.isUploading = false;
       });
-      this.selectedFile = null;
     }
   }
 
@@ -208,13 +225,59 @@ export class MessageBoxThreadComponent {
         fileName: null,
         messageEdit: false
       });
-      await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
-      const latestMessageId = newMessage.id;
+      const latestMessageId = await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
       if (this.selectedFile) {
         this.uploadFile(this.channelId, this.messageId, this.threadId, latestMessageId);
+      } else {
+        this.clearFileUploadData();
       }
-    };
-    this.content = '';
+    } else {
+      this.clearFileUploadData();
+    }
+  }
+
+  loadChannels() {
+    this.fireService.getAllChannels().subscribe((channels) => {
+      this.channels = channels;
+    });
+  }
+
+  checkForAtSymbol(event: KeyboardEvent) {
+    const textareaValue = (event.target as HTMLTextAreaElement).value;
+    const lastChar = textareaValue.slice(-1);
+    if (lastChar === '@') {
+      this.linkDialog = true;
+      this.showUsers = true;
+      this.showChannels = false;
+    } else if (lastChar === '#') {
+      this.linkDialog = true;
+      this.showUsers = false;
+      this.showChannels = true;
+    } else {
+      this.linkDialog = false;
+    }
+  }
+
+  addChannelToMessage(channelName: string) {
+    this.content += `#${channelName} `;
+    this.linkDialog = false;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      if (this.inputBox) {
+        this.inputBox.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  addMemberToMessage(name: string) {
+    this.content += `@${name} `;
+    this.linkDialog = false;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      if (this.inputBox) {
+        this.inputBox.nativeElement.focus();
+      }
+    }, 0);
   }
 
   onKeyDown(event: KeyboardEvent): void {

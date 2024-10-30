@@ -8,10 +8,7 @@ import { deleteObject, getDownloadURL, getStorage, ref, uploadBytesResumable } f
 })
 export class FileUploadThreadService {
   private firestore = inject(Firestore);
-
-
   private maxFileSizeMB: number = 5;
-
   private isFileSizeValid(fileSize: number): boolean {
     const fileSizeMB = fileSize / (1024 * 1024);
     return fileSizeMB <= this.maxFileSizeMB;
