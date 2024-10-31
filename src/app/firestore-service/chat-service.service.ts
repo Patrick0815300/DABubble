@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, where } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { MainServiceService } from './main-service.service';
@@ -11,7 +11,7 @@ import { ChatareaServiceService } from './chatarea-service.service';
 @Injectable({
   providedIn: 'root'
 })
-export class ChatServiceService {
+export class ChatServiceService implements OnInit, OnDestroy {
   uid: string | null = null;
   private uidSubscription: Subscription | null = null;
   senderId: string = '';
@@ -115,10 +115,17 @@ export class ChatServiceService {
     await batch.commit();
   }
 
-  async isThreadOpen(channelId: string): Promise<boolean> {
-    return (await getDoc(doc(this.firestore, `channels/${channelId}`))).data()?.['thread_open'];
+  async isThreadOpen(uid: string): Promise<boolean> {
+    return (await getDoc(doc(this.firestore, `users/${uid}`))).data()?.['thread_open'];
   }
 
+  threadOpenStatus(uid: string, callback: (isOpen: boolean) => void) {
+    const userRef = doc(this.firestore, `users/${uid}`);
+    return onSnapshot(userRef, (doc) => {
+      const threadOpen = doc.data()?.['thread_open'] || false;
+      callback(threadOpen);
+    });
+  }
 
   async hasThreads(channelId: string, messageId: string): Promise<boolean> {
     try {
@@ -215,12 +222,12 @@ export class ChatServiceService {
  * @param {boolean} isVisible - Whether the thread should be visible or not.
  * @returns {Promise<void>} A promise that resolves when the channel's thread state is updated.
  */
-  async updateChannelThreadState(channelId: string, isVisible: boolean): Promise<void> {
-    const channelDocRef = doc(this.firestore, `channels/${channelId}`);
+  async updateChannelThreadState(uid: string, isVisible: boolean): Promise<void> {
+    const channelDocRef = doc(this.firestore, `users/${uid}`);
     await updateDoc(channelDocRef, { thread_open: isVisible });
   }
 
-  /**
+  /**s
    * Loads the currently active channel and sets it as the current channel.
    * @returns {Promise<void>} A promise that resolves when the active channel is loaded.
    */
@@ -276,12 +283,13 @@ export class ChatServiceService {
    * @param {Message} message - The message to add to the thread.
    * @returns {Promise<void>} A promise that resolves when the message is added to the thread.
    */
-  async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<void> {
-    const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
-    const docRef = await addDoc(messagesCollectionRef, message.toJSON());
+  async addMessageToThread(channelId: string, messageId: string, threadId: string, message: Message): Promise<string> {
+    const docRef = await addDoc(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`), message.toJSON());
     await updateDoc(docRef, { id: docRef.id });
     message.id = docRef.id;
+    return docRef.id;
   }
+
 
   /**
    * Loads messages from a specified path in Firestore.
@@ -301,17 +309,10 @@ export class ChatServiceService {
     });
   }
 
-  /**
-   * Checks if a thread exists for a specific message sent by a given user.
-   * @param {string} channelId - The ID of the channel.
-   * @param {string} messageId - The ID of the message.
-   * @param {string} senderId - The ID of the message sender.
-   * @returns {Promise<boolean>} A promise that resolves with a boolean indicating whether the thread exists.
-   */
-  async checkIfThreadExists(channelId: string, messageId: string, senderId: string): Promise<boolean> {
-    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    const querySnapshot = await getDocs(query(threadsCollectionRef, where('senderId', '==', senderId)));
-    return !querySnapshot.empty;
+  async getThreadIdIfExists(channelId: string, messageId: string, senderId: string): Promise<string | null> {
+    const threadsQuery = query(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`), where('senderId', '==', senderId));
+    const querySnapshot = await getDocs(threadsQuery);
+    return querySnapshot.empty ? null : querySnapshot.docs[0].id;
   }
 
   /**
@@ -386,41 +387,23 @@ export class ChatServiceService {
   }
 
   /**
-   * Retrieves the thread ID for a message sent by a specific user.
-   * @param {string} channelId - The ID of the channel.
-   * @param {string} messageId - The ID of the message.
-   * @param {string} senderId - The ID of the message sender.
-   * @returns {Promise<string | null>} A promise that resolves with the thread ID or null if no thread exists.
-   */
-  async getExistingThreadId(channelId: string, messageId: string, senderId: string): Promise<string | null> {
-    const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    const querySnapshot = await getDocs(query(threadsCollectionRef, where('senderId', '==', senderId)));
-    if (!querySnapshot.empty) {
-      const threadDoc = querySnapshot.docs[0];
-      return threadDoc.id;
-    } else {
-      return null;
-    }
-  }
-
-  /**
    * Sets the thread data for a message and updates the thread state.
    * @param {string} channelId - The ID of the channel.
    * @param {string} messageId - The ID of the message.
    * @returns {Promise<void>} A promise that resolves when the thread data is set.
    */
-  async setThreadDataFromMessage(channelId: string, messageId: string): Promise<void> {
+  async setThreadDataFromMessage(uid: string, channelId: string, messageId: string): Promise<void> {
     const messageData = await this.loadMessageDataFromFirestore(channelId, messageId);
-    const threadExists = await this.checkIfThreadExists(channelId, messageId, messageData.senderId);
+    const threadExists = await this.getThreadIdIfExists(channelId, messageId, messageData.senderId);
     if (threadExists) {
-      const existingThreadId = await this.getExistingThreadId(channelId, messageId, messageData.senderId);
+      const existingThreadId = await this.getThreadIdIfExists(channelId, messageId, messageData.senderId);
       if (existingThreadId) {
         await this.openExistingThread(channelId, messageId, existingThreadId);
       }
     } else {
       await this.addNewThread(channelId, messageId, messageData);
     }
-    await this.updateChannelThreadState(channelId, true);
+    await this.updateChannelThreadState(uid, true);
     this.setThreadData(messageData);
   }
 
@@ -498,9 +481,8 @@ export class ChatServiceService {
   * @returns {Promise<any[]>} A promise that resolves with the updated reactions array.
   */
   async addOrUpdateReaction(reactions: any[], reactionType: string, userId: string, reactionPath: string): Promise<any[]> {
-    const existingReactionIndex = reactions.findIndex(reaction => reaction.type === reactionType);
-    if (existingReactionIndex !== -1) {
-      const existingReaction = reactions[existingReactionIndex];
+    const existingReaction = reactions.find(reaction => reaction.type === reactionType);
+    if (existingReaction) {
       if (!existingReaction.userId.includes(userId)) {
         existingReaction.userId.push(userId);
         existingReaction.count += 1;
@@ -510,6 +492,7 @@ export class ChatServiceService {
     }
     return reactions;
   }
+
 
   /**
    * Adds or updates a reaction for a specific message in a channel.

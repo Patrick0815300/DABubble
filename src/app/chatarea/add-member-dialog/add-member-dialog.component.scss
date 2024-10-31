@@ -149,6 +149,18 @@ h2 {
     }
 }
 
+.no-scrollbar-panel {
+    scrollbar-width: none;
+    /* Versteckt den Scrollbalken in Firefox */
+    -ms-overflow-style: none;
+    /* Versteckt den Scrollbalken in IE und Edge */
+}
+
+.no-scrollbar-panel::-webkit-scrollbar {
+    display: none;
+    /* Versteckt den Scrollbalken in Chrome, Safari und Edge */
+}
+
 // ----------------------------- MEDIA -----------------------------
 
 @media(max-width: 620px) {

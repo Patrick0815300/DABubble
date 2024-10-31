@@ -5,9 +5,9 @@
 <div class="container">
     <div><mat-icon>tag</mat-icon> Entwickler Team</div>
    
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" class="hide-scrollbar">
         <mat-label>Name</mat-label>
-        <mat-select [(value)]="selectedUser" multiple (selectionChange)="onUserSelected($event.value)">
+        <mat-select [(value)]="selectedUser" multiple (selectionChange)="onUserSelected($event.value)" panelClass="no-scrollbar-panel">
             <mat-select-trigger>
                 <div class="selected-users">
                   <div class="member-status" *ngFor="let user of filteredUsers | filterSelected: selectedUser">

@@ -33,15 +33,15 @@ export class NewPassword2Component {
   Password1: string = '';
   Password2: string = '';
 
-  private auth = inject(Auth);
-
   passwordAccordance: boolean = false;
   emptyInputs: boolean = true;
   displayError: boolean = false;
   passwordChanged: boolean = false;
   passwordNotLongEnough: boolean = false;
 
-  constructor(private router: Router, private firebase: FirebaseLoginService, private service: PasswordResetService, ) {
+  private auth = inject(Auth)
+
+  constructor(private router: Router, private firebase: FirebaseLoginService, private service: PasswordResetService,) {
 
   }
 

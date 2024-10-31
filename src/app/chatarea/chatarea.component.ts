@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { MainServiceService } from '../firestore-service/main-service.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { FormsModule } from '@angular/forms';
 import { SearchDevspaceComponent } from '../components/search-devspace/search-devspace.component';
@@ -44,11 +45,34 @@ import { NavService } from '../modules/nav.service';
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss',
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ maxHeight: '0px', opacity: 0, overflow: 'hidden', transform: 'translateY(-10px)' }),
+        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' }))
+      ])
+    ]),
+
+    trigger('flyInRight', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('600ms ease-out', style({ transform: 'translateX(0)' }))
+      ]),
+      transition(':leave', [
+        animate('600ms ease-in', style({ transform: 'translateX(100%)' }))
+      ])
+    ])
+  ]
 })
-export class ChatareaComponent {
+export class ChatareaComponent implements AfterViewInit {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
+  @ViewChild(MessageBoxComponent) messageBoxComponent!: MessageBoxComponent;
 
   private uidSubscription: Subscription | null = null;
+  private memberSubscriptions: Subscription[] = [];
   channelInfoDialog: boolean = false;
   channelMemberDialog: boolean = false;
   addMemberDialog: boolean = false;
@@ -58,7 +82,7 @@ export class ChatareaComponent {
   messages: any[] = [];
   uid: string | null = null;
   previousMessageDate: string | null = null;
-  allChannelsAreFalse: boolean = false;
+  noChannelChosen: boolean = false;
 
   constructor(
     public dialog: MatDialog,
@@ -66,32 +90,23 @@ export class ChatareaComponent {
     private mainService: MainServiceService,
     private cdRef: ChangeDetectorRef,
     private authService: AuthService
-  ) {}
+  ) { }
+
+  ngAfterViewInit() {
+    this.messageBoxComponent.focusTextArea();
+  }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
-
     this.loadActiveChannelData();
-    this.checkChannelsStatus();
   }
 
   ngOnDestroy() {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
-  }
-
-  checkChannelsStatus() {
-    this.fireService.checkIfAllChannelsAreFalse().subscribe({
-      next: (allFalse: boolean) => {
-        this.allChannelsAreFalse = allFalse;
-        if (allFalse) {
-          this.clearChannelData();
-        }
-      },
-    });
   }
 
   clearChannelData() {
@@ -110,29 +125,44 @@ export class ChatareaComponent {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
         this.scrollToBottom();
-      }, 250);
+      }, 1000);
     });
   }
 
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
-        this.channelName = channel.channel_name || null;
-        this.memberIds = channel.member || [];
-        this.loadMembers();
-        this.loadMessages(channel.id);
-        this.cdRef.detectChanges();
+        if (channel) {
+          this.channelName = channel.channel_name || null;
+          this.memberIds = channel.member || [];
+          this.members = [];
+          this.loadMessages(channel.id);
+          this.loadMembers();
+          this.cdRef.detectChanges();
+        } else {
+          this.clearChannelData();
+        }
       },
+      error: () => {
+        this.clearChannelData();
+      }
     });
   }
 
+  isCurrentUserMember(): boolean {
+    return this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
+  }
+
   loadMembers() {
+    this.memberSubscriptions.forEach(sub => sub.unsubscribe());
+    this.memberSubscriptions = [];
     this.members = [];
     this.memberIds.forEach(memberId => {
-      this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
+      const sub = this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.members.push(userInstance);
       });
+      this.memberSubscriptions.push(sub);
     });
   }
 
@@ -150,6 +180,7 @@ export class ChatareaComponent {
       top: this.messageContainer.nativeElement.scrollHeight,
       behavior: 'smooth',
     });
+    this.messageBoxComponent.focusTextArea();
   }
 
   formatTime(timeString: string): string {

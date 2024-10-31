@@ -63,6 +63,14 @@
         color: #686868;
         position: relative;
 
+        .btn-unset {
+            all: unset;
+
+            &:disabled {
+                cursor: not-allowed;
+            }
+        }
+
         app-emoji-picker {
             bottom: 123px;
             right: auto;
@@ -129,6 +137,11 @@
             border: 1px solid #adb0d9;
             background-color: white;
 
+            .fl-d {
+                flex-direction: column;
+                align-items: baseline;
+            }
+
             .user {
                 display: flex;
                 align-items: center;
@@ -153,6 +166,12 @@
             }
         }
     }
+}
+
+.not-member-message {
+    padding: 20px;
+    margin-left: 35px;
+    color: red;
 }
 
 // ----------------------------- MEDIA -----------------------------

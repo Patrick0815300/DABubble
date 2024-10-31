@@ -44,5 +44,5 @@
 <app-member-dialog></app-member-dialog>
 
 <div class="leave-channel">
-  <button (click)="leaveChannel()">Channel verlassen</button>
+  <button (click)="leaveChannel()" [disabled]="isAdmin">Channel verlassen</button>
 </div>

@@ -10,6 +10,8 @@ import { User } from '../../models/user/user.model';
 import { ProfilMemberDialogComponent } from './profil-member-dialog/profil-member-dialog.component';
 import { AddMemberDialogComponent } from '../add-member-dialog/add-member-dialog.component';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service'; // Importiere den Service
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../firestore-service/auth.service';
 
 @Component({
   selector: 'app-member-dialog',
@@ -32,9 +34,22 @@ export class MemberDialogComponent {
   @Output() toggleAddMemberDialog = new EventEmitter<void>();
   users: User[] = [];
   memberIds: string[] = [];
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
 
-  constructor(public dialog: MatDialog, private chatareaService: ChatareaServiceService) {
+
+  constructor(public dialog: MatDialog, private chatareaService: ChatareaServiceService, private authService: AuthService) {
     this.loadChannelMembers();
+  }
+
+  ngOnInit() {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
+  }
+
+  isCurrentUserMember(): boolean {
+    return this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
   }
 
   loadChannelMembers() {

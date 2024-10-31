@@ -35,6 +35,10 @@ h2 {
     flex-direction: column;
     gap: 13px;
 
+    button {
+        all: unset;
+    }
+
     .member {
         display: flex;
         align-items: center;

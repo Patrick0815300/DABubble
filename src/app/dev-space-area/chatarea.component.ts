@@ -67,7 +67,7 @@ export class DevSpaceAreaComponent {
     private mainService: MainServiceService,
     private cdRef: ChangeDetectorRef,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -75,24 +75,12 @@ export class DevSpaceAreaComponent {
     });
 
     this.loadActiveChannelData();
-    this.checkChannelsStatus();
   }
 
   ngOnDestroy() {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
-  }
-
-  checkChannelsStatus() {
-    this.fireService.checkIfAllChannelsAreFalse().subscribe({
-      next: (allFalse: boolean) => {
-        this.allChannelsAreFalse = allFalse;
-        if (allFalse) {
-          this.clearChannelData();
-        }
-      },
-    });
   }
 
   clearChannelData() {
