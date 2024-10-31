@@ -8,6 +8,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideHttpClient } from '@angular/common/http';
+import { getStorage, provideStorage } from '@angular/fire/storage';
 
 registerLocaleData(localeDe);
 
@@ -26,7 +27,8 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(config)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
+    provideStorage(() => getStorage()),
     provideAnimationsAsync(),
-    provideHttpClient()
+    provideHttpClient(),
   ],
 };

@@ -33,8 +33,25 @@ header {
   }
 }
 
-.d-none {
+.dMobile {
   display: none;
+}
+
+.return {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  > button {
+    background-color: transparent;
+    border: transparent;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    > .to_channel_arrow {
+      width: 50px;
+      height: 50px;
+    }
+  }
 }
 
 .btn-arrow {
@@ -88,6 +105,10 @@ header {
   }
 }
 
+.d-none {
+  display: none;
+}
+
 @media (width<1200px) {
   .input-search {
     width: 50vw;
@@ -122,26 +143,20 @@ header {
   }
 }
 @media (width<630px) {
-  .d-none {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    > button {
-      background-color: transparent;
-      border: transparent;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      > .to_channel_arrow {
-        width: 50px;
-        height: 50px;
-      }
-    }
-  }
-
-  .logo {
+  .dDestop {
     display: none;
   }
+  .dMobile {
+    display: inline;
+  }
+  .d-flex {
+    display: flex !important;
+  }
+
+  .ShowLogo {
+    display: none !important;
+  }
+
   header {
     background: white;
     position: unset;
@@ -153,7 +168,7 @@ header {
     }
   }
   .input-search {
-    height: 55px;
+    height: 48px;
     margin: 0rem auto;
     margin-top: 1rem;
     position: unset;
@@ -163,8 +178,8 @@ header {
     transform: unset;
     > input {
       border: 1px solid #adb0d9;
+      margin-left: 0.5rem;
     }
-    display: none;
   }
   .btn-arrow {
     display: none;

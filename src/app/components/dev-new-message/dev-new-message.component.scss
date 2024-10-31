@@ -218,7 +218,7 @@ button {
     > input {
       border: 1px solid #adb0d9;
       border-radius: 30px;
-      height: 35px;
+      height: 48px;
       width: 100%;
     }
   }
@@ -263,5 +263,13 @@ button {
   margin-bottom: 1rem;
   > span {
     font-weight: 700;
+  }
+}
+
+@media (width<630px) {
+  .current-nav-user {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-inline: -1rem;
   }
 }

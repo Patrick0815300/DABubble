@@ -1,7 +1,7 @@
 import { Message, User } from './../../modules/database.model';
 import { Component, DoCheck, AfterViewInit, ElementRef, inject, OnInit, ViewChild, SimpleChanges, Renderer2 } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
-import { FirestoreModule } from '@angular/fire/firestore';
+import { addDoc, collection, FirestoreModule } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
 import { DatabaseServiceService } from '../../database-service.service';
 import { CommonModule, formatDate } from '@angular/common';
@@ -17,9 +17,12 @@ import { SearchUserComponent } from '../search-user/search-user.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { map, Subscription } from 'rxjs';
+import { finalize, map, Subscription } from 'rxjs';
 import { AuthService } from '../../firestore-service/auth.service';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
+import { nanoid } from 'nanoid';
+import { getFirestore, provideFirestore, Firestore } from '@angular/fire/firestore';
+import { getDownloadURL, getStorage, provideStorage, ref, Storage, uploadBytes } from '@angular/fire/storage';
 
 @Component({
   selector: 'app-messages',
@@ -69,8 +72,11 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   isMainEmoji: boolean = true;
   messageId: string = '';
   fileURL: SafeResourceUrl | null = null;
+  messageFileURL: SafeResourceUrl | null = null;
   fileType: string | null = null;
+  messageFileType: string | null = null;
   fileName: string | null = null;
+  messageFileName: string | null = null;
   selectedFile: File | null = null;
   isUploading: boolean = false;
   uploadProgress: number = 0;
@@ -89,7 +95,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     private databaseService: DatabaseServiceService,
     private emojiService: EmojiService,
     private authService: AuthService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private firestore: Firestore,
+    private storage: Storage
   ) {
     this.databaseService.messages$.subscribe(state => {
       this.chatMessages = state;
@@ -243,10 +251,11 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       });
     } else {
       let msgObject = this.messageSender(to_user_id);
-      this.databaseService.addMessage(msgObject);
-      // if (this.selectedFile) {
-      //   this.uploadFile(messageId, to_user_id);
-      // }
+      this.databaseService.addMessage(msgObject).then(id => {
+        if (this.selectedFile) {
+          this.uploadFile(id!);
+        }
+      });
     }
     this.message_content = '';
   }
@@ -278,7 +287,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   }
 
   checkDateIfToday(date: Date) {
-    const formattedDate = formatDate(date, 'EEEE, dd MMMM y', 'de-DE');
+    const formattedDate = formatDate(date, 'EEEE, dd MMMM yyyy', 'de-DE');
     return formattedDate === this.today ? 'heute' : formattedDate;
   }
 
@@ -329,9 +338,14 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
   loadFileUpload(msg: Message) {
     if (msg.fileName) {
-      this.fileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
-      this.fileName = msg.fileName;
-      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl);
+      // msg.fileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
+      // msg.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl as string);
+      this.messageFileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
+      this.messageFileName = msg.fileName;
+      this.messageFileURL = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl);
+    } else {
+      this.messageFileType = null;
+      this.messageFileURL = null;
     }
   }
 
@@ -415,7 +429,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
         this.selectedFile = input.files[0];
-
         const reader = new FileReader();
         reader.onload = () => {
           this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
@@ -427,19 +440,19 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  uploadFile(messageId: string, channelId: string) {
+  uploadFile(msg_id: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
       this.fileUploadService
-        .uploadFile(this.selectedFile, messageId, progress => {
+        .uploadFile(this.selectedFile, msg_id, progress => {
           this.uploadProgress = progress;
         })
         .then((result: { url: string; fileName: string }) => {
           this.cleanUrl = result.url;
           this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
           this.fileName = result.fileName;
-          this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
+          this.fileUploadService.updateMessageFileUrlDirectMsg(msg_id, this.cleanUrl, this.fileName).then(() => {
             this.message_content = '';
             this.fileURL = null;
             this.fileName = null;
@@ -451,6 +464,8 @@ export class MessagesComponent implements OnInit, AfterViewInit {
           this.isUploading = false;
         });
       this.selectedFile = null;
+    } else {
+      console.log('Error');
     }
   }
 }

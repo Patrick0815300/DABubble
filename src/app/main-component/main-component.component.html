@@ -7,15 +7,21 @@
       </span>
       <img class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
-    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" [class.OpenWrapper]="openWrapper === true" />
+    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'" />
     <app-messages
       *ngIf="isChannelView === false"
       class="app-middle-wrapper"
-      [class.OpenWrapper]="openWrapper === false"
+      [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'"
       [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
     />
-    <app-chatarea *ngIf="isChannelView === true" class="app-middle-wrapper" [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }" />
-    <app-dev-space-area *ngIf="dev_message_search === true" class="app-middle-wrapper" />
+    <app-chatarea
+      [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'"
+      *ngIf="isChannelView === true"
+      class="app-middle-wrapper"
+      [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
+    />
+
+    <app-dev-space-area [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'" *ngIf="dev_message_search === true" class="app-middle-wrapper" />
     <app-right-wrapper class="app-right-wrapper" *ngIf="isThreadVisible" />
   </main>
   @if(state){
@@ -85,5 +91,8 @@
   } @if(open_edit_channel){
   <app-edit-channel />
   <div (click)="onCloseEditChannel()" class="overlay"></div>
+  } @if(openLogoutMobile){
+  <app-mobile-logout />
+  <div (click)="onCloseMobileLogout()" class="overlay"></div>
   }
 </section>

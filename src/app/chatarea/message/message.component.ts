@@ -9,13 +9,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-message',
   standalone: true,
   imports: [MatIconModule, CommonModule, OwnMessageComponent],
   templateUrl: './message.component.html',
-  styleUrl: './message.component.scss'
+  styleUrl: './message.component.scss',
 })
 export class MessageComponent {
   @Input() message: any;
@@ -32,10 +33,18 @@ export class MessageComponent {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
+  openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
 
   private sanitizer = inject(DomSanitizer);
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
+  constructor(
+    private chatService: ChatServiceService,
+    private mainService: MainServiceService,
+    private fileUploadService: FileUploadService,
+    private authService: AuthService,
+    private chatAreaService: ChatareaServiceService,
+    private channelService: ChannelService
+  ) {}
 
   ngOnInit() {
     this.uid = this.authService.getUID();
@@ -43,20 +52,24 @@ export class MessageComponent {
     this.loadActiveChannelId();
     this.loadReactionNames();
     this.loadAvatar();
+
+    this.channelService.openMessageMobile$.subscribe(state => {
+      this.openNextWrapper = state;
+    });
   }
 
   loadAvatar() {
     const docId = this.message.senderId;
-    this.chatAreaService.getUserAvatar(docId).subscribe((avatar) => {
+    this.chatAreaService.getUserAvatar(docId).subscribe(avatar => {
       this.avatar = avatar;
     });
   }
 
   async loadFileUpload() {
     if (this.message.fileName) {
-      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
-      this.fileName = this.message.fileName
-      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl)
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName);
+      this.fileName = this.message.fileName;
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl);
     }
   }
 
@@ -107,9 +120,9 @@ export class MessageComponent {
         this.channelId = channel.id;
         this.loadThreadDetails();
       },
-      error: (err) => {
+      error: err => {
         console.error('Fehler beim Laden des aktiven Channels:', err);
-      }
+      },
     });
   }
 
@@ -123,7 +136,7 @@ export class MessageComponent {
       console.error('Keine Channel-ID vorhanden.');
       return;
     }
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path);
   }
 
   formatTime(timeString: string): string {
@@ -132,5 +145,10 @@ export class MessageComponent {
 
   formatDate(dateString: string): string {
     return this.mainService.formatDate(dateString);
+  }
+
+  handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.channelService.emitOpenMessageMobile(val);
+    console.log(val);
   }
 }

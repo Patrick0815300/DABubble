@@ -9,13 +9,14 @@ import { FileUploadThreadService } from '../../../firestore-service/file-upload-
 import { ChatareaServiceService } from '../../../firestore-service/chatarea-service.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../firestore-service/auth.service';
+import { ChannelService } from '../../../modules/channel.service';
 
 @Component({
   selector: 'app-message-thread',
   standalone: true,
   imports: [MatIconModule, CommonModule, MatMenu],
   templateUrl: './message-thread.component.html',
-  styleUrl: './message-thread.component.scss'
+  styleUrl: './message-thread.component.scss',
 })
 export class MessageThreadComponent implements OnInit, OnDestroy {
   @ViewChild('reactionContainer') reactionContainer!: ElementRef;
@@ -36,9 +37,16 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
   reactionNames: string[] = [];
   showReactions: boolean = false;
   reactions: any[] = [];
-
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService, private chatareaService: ChatareaServiceService, private authService: AuthService) {
-    this.chatService.pickedThread$.subscribe((data) => {
+  openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  constructor(
+    private chatService: ChatServiceService,
+    private mainService: MainServiceService,
+    private fileUploadServiceThread: FileUploadThreadService,
+    private chatareaService: ChatareaServiceService,
+    private authService: AuthService,
+    private channelService: ChannelService
+  ) {
+    this.chatService.pickedThread$.subscribe(data => {
       if (data) {
         this.threadData = data;
       }
@@ -54,6 +62,10 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     this.loadThreadMessages();
     this.loadUserAvatar();
     this.loadFileUpload();
+
+    this.channelService.openMessageMobile$.subscribe(state => {
+      this.openNextWrapper = state;
+    });
   }
 
   ngOnDestroy() {
@@ -63,7 +75,7 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
   }
 
   toggleReactions() {
-    this.showReactions = !this.showReactions
+    this.showReactions = !this.showReactions;
   }
 
   @HostListener('document:click', ['$event'])
@@ -113,15 +125,15 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
 
   async loadFileUpload() {
     if (this.thread.fileName) {
-      this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName)
-      this.fileName = this.thread.fileName
-      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl)
+      this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName);
+      this.fileName = this.thread.fileName;
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl);
     }
   }
 
   loadThreadMessages(): void {
     const { channelId, messageId, id: threadId } = this.threadData;
-    this.chatService.loadThreadMessages(channelId, messageId, threadId).then((messages) => {
+    this.chatService.loadThreadMessages(channelId, messageId, threadId).then(messages => {
       this.threadMessages = messages;
     });
   }
@@ -129,7 +141,7 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
   reactToThreadMessage(reactionType: string, path: string, id: string): void {
     const { channelId, messageId, id: threadId } = this.threadData;
     if (channelId && messageId && threadId && id) {
-      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id, this.uid!)
+      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id, this.uid!);
     }
   }
 

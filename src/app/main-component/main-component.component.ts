@@ -29,6 +29,7 @@ import { DevNewMessageComponent } from '../components/dev-new-message/dev-new-me
 import { map, Subscription } from 'rxjs';
 import { AuthService } from '../firestore-service/auth.service';
 import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
+import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout.component';
 
 @Component({
   selector: 'app-main-component',
@@ -54,6 +55,7 @@ import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
     SearchUserComponent,
     DevNewMessageComponent,
     DevSpaceAreaComponent,
+    MobileLogoutComponent,
   ],
   templateUrl: './main-component.component.html',
   styleUrl: './main-component.component.scss',
@@ -81,8 +83,9 @@ export class MainComponentComponent implements OnInit {
   authenticatedUser: User | undefined;
   new_person_name: string = '';
   open_edit_channel: boolean = false;
+  openLogoutMobile: boolean = false;
   isThreadVisible: boolean = true;
-  openWrapper: boolean = false;
+  openWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
   all_users: User[] = [];
   filtered_users: User[] = [];
   searchUser: User[] = [];
@@ -142,6 +145,10 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.openMessageMobile$.subscribe(state => {
       this.openWrapper = state;
+    });
+
+    this.channelService.openLogoutMobile$.subscribe(state => {
+      this.openLogoutMobile = state;
     });
 
     /**
@@ -321,5 +328,13 @@ export class MainComponentComponent implements OnInit {
     } else {
       this.showSearchUserName = false;
     }
+  }
+
+  handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.channelService.emitOpenMessageMobile(val);
+  }
+
+  onCloseMobileLogout() {
+    this.channelService.emitLogoutMobile();
   }
 }

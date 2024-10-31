@@ -83,7 +83,7 @@
 }
 
 .gp {
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .icon-group {
@@ -152,7 +152,7 @@ li {
   padding-inline: 0.5rem;
   border-radius: 30px;
   cursor: pointer;
-
+  font-size: 18px;
   &:hover {
     background-color: #eceefe;
   }
@@ -224,19 +224,23 @@ li {
   height: 32px;
 }
 
-// .channel-name,
-// .user-name {
-//   font-size: 17px;
-// }
+.channel-name,
+.user-name {
+  font-size: 18px !important;
+}
 
 .sub-sec-1 {
   height: 35%;
 }
 
-@media (width<610px) {
+@media (width<630px) {
   .users,
   .list-channel {
     gap: 13px;
+  }
+
+  .channel-section-header {
+    padding-top: 2rem;
   }
 
   .section-header {
@@ -249,9 +253,5 @@ li {
 
   .l-mg-2 {
     padding-block: 7px;
-  }
-
-  .section-content {
-    padding-top: 3rem;
   }
 }

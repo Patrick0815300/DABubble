@@ -33,6 +33,7 @@ export class NavBarComponent implements OnInit {
   showSearchUserName: boolean = false;
   input_value: string = '';
   currentUserId!: any;
+  openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
 
   constructor(
     private logOutService: LogOutService,
@@ -64,6 +65,10 @@ export class NavBarComponent implements OnInit {
     });
     this.databaseService.channels$.subscribe(channel => {
       this.all_channels = channel;
+    });
+
+    this.channelService.openMessageMobile$.subscribe(state => {
+      this.openNextWrapper = state;
     });
   }
 
@@ -108,5 +113,14 @@ export class NavBarComponent implements OnInit {
   closeDevSpace() {
     this.showSearchUserName = false;
     this.search_input = '';
+  }
+
+  handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.channelService.emitOpenMessageMobile(val);
+    console.log(val);
+  }
+
+  openLogoutMobile() {
+    this.channelService.emitLogoutMobile();
   }
 }

@@ -36,6 +36,7 @@
               loadChannelMembers(channel.channel_id);
               onToggleDevSearch(false);
               sendChannel(channel);
+              handleMobileView('wrapper_2');
               showChannelMessages(true);
               loadChannelMessages(channel.channel_id);
               handleUpdateUserChannelId(channel.channel_id)
@@ -71,6 +72,7 @@
           (click)="
             selectUser(0);
             sendSelectedUser(authenticatedUser!);
+            handleMobileView('wrapper_2');
             onToggleDevSearch(false);
             showChannelMessages(false);
             sendUserId(authenticatedUser.id!);
@@ -94,6 +96,7 @@
             selectUser(0);
             onToggleDevSearch(false);
             sendSelectedUser(onlineUser!);
+            handleMobileView('wrapper_2');
             showChannelMessages(false);
             sendUserId(onlineUser?.id!);
             loadMessages(onlineUser?.id!, onlineUser?.id!)
@@ -110,7 +113,13 @@
             *ngIf="user.id !== authenticatedUser?.id && user?.name !== 'bubble guest'"
             [class.active]="selectedIndex == i + 1"
             (click)="
-              selectUser(i + 1); sendSelectedUser(user); onToggleDevSearch(false); showChannelMessages(false); sendUserId(user.id); loadMessages(authenticatedUser?.id, user.id)
+              selectUser(i + 1);
+              sendSelectedUser(user);
+              handleMobileView('wrapper_2');
+              onToggleDevSearch(false);
+              showChannelMessages(false);
+              sendUserId(user.id);
+              loadMessages(authenticatedUser?.id, user.id)
             "
             class="d-flex capitilize gp l-mg-2"
           >
@@ -126,7 +135,7 @@
           </li>
         </ng-container>
       </ul>
-      <app-scroll-to-top />
+      <app-scroll-to-top (click)="onToggleDevSearch(true); handleMobileView('wrapper_2')" />
     </div>
   </div>
 </app-wrapper>

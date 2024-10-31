@@ -11,7 +11,7 @@ import { User } from '../../../models/user/user.model';
 import { ChatareaServiceService } from '../../../firestore-service/chatarea-service.service';
 import { AuthService } from '../../../firestore-service/auth.service';
 import { EmojiService } from '../../../modules/emoji.service';
-import { EmojiPickerComponent } from "../../../shared/emoji-picker/emoji-picker.component";
+import { EmojiPickerComponent } from '../../../shared/emoji-picker/emoji-picker.component';
 import { Subject, Subscription, filter, takeUntil } from 'rxjs';
 
 @Component({
@@ -38,8 +38,9 @@ export class MessageBoxThreadComponent {
   fileType: string | null = null;
   users: User[] = [];
   memberIds: string[] = [];
-  linkDialog: boolean = false
+  linkDialog: boolean = false;
   toggleEmojiPicker: boolean = false;
+
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
   private fileUploadService = inject(FileUploadThreadService);
@@ -50,7 +51,7 @@ export class MessageBoxThreadComponent {
   @ViewChild('fileUploadThread') fileInputThreadElement!: ElementRef;
   @ViewChild('inputBox') inputBox!: ElementRef;
 
-  constructor(private chatService: ChatServiceService, private cdr: ChangeDetectorRef, private fireService: ChatareaServiceService, private authService: AuthService) { }
+  constructor(private chatService: ChatServiceService, private cdr: ChangeDetectorRef, private fireService: ChatareaServiceService, private authService: AuthService) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -92,17 +93,12 @@ export class MessageBoxThreadComponent {
     }
   }
 
-
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
-      this.emojiSubscription = this.emojiService.emoji$
-        .pipe(
-          filter((emoji: string) => emoji.trim() !== '')
-        )
-        .subscribe((emoji: string) => {
-          this.content = this.content ? this.content + emoji : emoji;
-        });
+      this.emojiSubscription = this.emojiService.emoji$.pipe(filter((emoji: string) => emoji.trim() !== '')).subscribe((emoji: string) => {
+        this.content = this.content ? this.content + emoji : emoji;
+      });
     } else {
       if (this.emojiSubscription) {
         this.emojiSubscription.unsubscribe();
@@ -135,7 +131,7 @@ export class MessageBoxThreadComponent {
 
   loadUsers() {
     this.users = [];
-    this.memberIds.forEach((memberId) => {
+    this.memberIds.forEach(memberId => {
       this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.users.push(userInstance);
@@ -174,23 +170,26 @@ export class MessageBoxThreadComponent {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
-        this.uploadProgress = progress;
-      }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url;
-        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
-        this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName).then(() => {
-          this.content = '';
-          this.fileURL = null;
-          this.fileName = null;
+      this.fileUploadService
+        .uploadFile(this.selectedFile, messageId, progress => {
+          this.uploadProgress = progress;
+        })
+        .then((result: { url: string; fileName: string }) => {
+          this.cleanUrl = result.url;
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+          this.fileName = result.fileName;
+          this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName).then(() => {
+            this.content = '';
+            this.fileURL = null;
+            this.fileName = null;
+            this.isUploading = false;
+            this.cdr.detectChanges();
+          });
+        })
+        .catch(error => {
+          console.error('Fehler beim Hochladen der Datei:', error);
           this.isUploading = false;
-          this.cdr.detectChanges();
         });
-      }).catch((error) => {
-        console.error('Fehler beim Hochladen der Datei:', error);
-        this.isUploading = false;
-      });
       this.selectedFile = null;
     }
   }
@@ -206,14 +205,14 @@ export class MessageBoxThreadComponent {
         reactions: [],
         fileUrl: null,
         fileName: null,
-        messageEdit: false
+        messageEdit: false,
       });
       await this.chatService.addMessageToThread(this.channelId, this.messageId, this.threadId, newMessage);
       const latestMessageId = newMessage.id;
       if (this.selectedFile) {
         this.uploadFile(this.channelId, this.messageId, this.threadId, latestMessageId);
       }
-    };
+    }
     this.content = '';
   }
 }

@@ -77,7 +77,6 @@ export class LeftSideMenuComponent implements OnInit {
     this.authService.userID$.subscribe(userId => {
       this.auth_user_id = userId;
       this.databaseService.authUser(userId!).then(user => {
-      
         if (user && user !== null) {
           this.authenticatedUser = user;
           this.sendSelectedUser(user);
@@ -182,7 +181,6 @@ export class LeftSideMenuComponent implements OnInit {
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
-     
         if (currentUserId !== targetUserId) {
           messages = messages.filter(m => m.from_user !== m.to_user);
         }
@@ -196,7 +194,6 @@ export class LeftSideMenuComponent implements OnInit {
   loadChannelMembers(channel_id: string) {
     this.databaseService.getChannelMembers(channel_id, members => {
       if (members) {
-       
         this.channelService.emitChannelMembers(members);
       } else {
         this.channelService.emitChannelMembers([]);
@@ -205,10 +202,8 @@ export class LeftSideMenuComponent implements OnInit {
   }
 
   loadChannelMessages(targetChannelId: string) {
-   
     this.databaseService.getChannelMessages(targetChannelId, messages => {
       if (messages) {
-       
         this.userService.emitChannelMessage(messages);
       } else {
         this.userService.emitChannelMessage([]);
@@ -290,5 +285,9 @@ export class LeftSideMenuComponent implements OnInit {
    */
   onExpand() {
     this.expand = !this.expand;
+  }
+
+  handleMobileView(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.channelService.emitOpenMessageMobile(val);
   }
 }

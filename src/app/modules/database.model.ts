@@ -1,3 +1,4 @@
+import { SafeResourceUrl } from '@angular/platform-browser';
 import { nanoid } from 'nanoid';
 
 ////////////// MODEL FOR USER ///////////////////////////////
@@ -52,6 +53,7 @@ export class Message {
   reaction!: string;
   fileName!: string;
   fileUrl!: string;
+  // fileType!: string | null;
 
   constructor(obj?: any) {
     this.message_id = obj ? obj.message_id || nanoid() : '';
@@ -64,7 +66,8 @@ export class Message {
     this.is_updated = obj ? obj.is_updated || false : '';
     this.reaction = obj ? obj.reaction || '' : '';
     this.fileName = obj ? obj.fileName || null : '';
-    this.fileUrl = obj ? obj.fileUrl || null : '';
+    this.fileUrl = obj ? obj.fileUrl || null : null;
+    // this.fileType = obj ? obj.fileType || null : null;
   }
 
   public toObject(): object {
@@ -80,6 +83,7 @@ export class Message {
       reaction: this.reaction,
       fileName: this.fileName,
       fileUrl: this.fileUrl,
+      // fileType: this.fileType,
     };
   }
 }

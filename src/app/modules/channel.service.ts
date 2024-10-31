@@ -13,7 +13,8 @@ export class ChannelService {
   private logFilteredChannelsSubject = new ReplaySubject<Channel[]>(1);
   private logUserSubject = new ReplaySubject<string[]>(1);
   private logSubject = new BehaviorSubject<boolean>(false);
-  private openMessageContainerSubject = new BehaviorSubject<boolean>(false);
+  private openMessageContainerSubject = new BehaviorSubject<'wrapper_1' | 'wrapper_2' | 'wrapper_3'>('wrapper_1');
+  private openLogoutContainerSubject = new BehaviorSubject<boolean>(false);
   private logchosenSubject = new BehaviorSubject<boolean>(false);
   showChannelMsg$ = this.isChannelSource.asObservable();
   channelMembers$ = this.channelMemberSource.asObservable();
@@ -23,6 +24,7 @@ export class ChannelService {
   open_update_channel$ = this.logSubject.asObservable();
   chosen$ = this.logchosenSubject.asObservable();
   openMessageMobile$ = this.openMessageContainerSubject.asObservable();
+  openLogoutMobile$ = this.openLogoutContainerSubject.asObservable();
   isDialogOpen = false;
 
   constructor(private firestore: Firestore) {}
@@ -80,7 +82,11 @@ export class ChannelService {
     }
   }
 
-  emitOpenMessageMobile(bool: boolean) {
-    this.openMessageContainerSubject.next(this.isDialogOpen);
+  emitOpenMessageMobile(value: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.openMessageContainerSubject.next(value);
+  }
+  emitLogoutMobile() {
+    this.isDialogOpen = !this.isDialogOpen;
+    this.openLogoutContainerSubject.next(this.isDialogOpen);
   }
 }
