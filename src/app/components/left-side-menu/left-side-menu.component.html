@@ -71,6 +71,7 @@
           [class.active]="selectedIndex == 0"
           (click)="
             selectUser(0);
+            onAutoFocus();
             sendSelectedUser(authenticatedUser!);
             handleMobileView('wrapper_2');
             onToggleDevSearch(false);
@@ -95,6 +96,7 @@
           (click)="
             selectUser(0);
             onToggleDevSearch(false);
+            onAutoFocus();
             sendSelectedUser(onlineUser!);
             handleMobileView('wrapper_2');
             showChannelMessages(false);
@@ -116,6 +118,7 @@
               selectUser(i + 1);
               sendSelectedUser(user);
               handleMobileView('wrapper_2');
+              onAutoFocus();
               onToggleDevSearch(false);
               showChannelMessages(false);
               sendUserId(user.id);

@@ -30,7 +30,7 @@
       </button>
       }@else {
       <span class="to_upper">bubble guest</span>
-      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="'male_avatar.svg'" [bgColorOnline]="'#92c83e'" />
+      <app-profile class="app-profile" [left_side_profile]="false" [image_user]="'male_avatar.svg'" (click)="openLogoutMobile()" [bgColorOnline]="'#92c83e'" />
       <button class="btn-arrow" (click)="onOpenLogOut()">
         <img class="arrow-down" src="assets/img/icons/keyboard_arrow_down.svg" alt="" />
       </button>
@@ -38,13 +38,7 @@
     </div>
   </nav>
   <div class="input-search" [class.ShowLogo]="openNextWrapper === 'wrapper_2' || openNextWrapper === 'wrapper_3'">
-    <input
-      [(ngModel)]="search_input"
-      (input)="onSearchInDevspace(); sendSearchInput(search_input)"
-      type="text"
-      name="search-field"
-      [placeholder]="openNextWrapper === 'wrapper_1' ? 'Gehe zu...' : 'Devspace durchsuchen'"
-    />
+    <input [(ngModel)]="search_input" (input)="onSearchInDevspace(); sendSearchInput(search_input)" type="text" name="search-field" placeholder="Devspace durchsuchen" />
     <img src="assets/img/icons/search.svg" alt="" />
   </div>
   <app-search-devspace (click)="closeDevSpace()" *ngIf="showSearchUserName === true" />

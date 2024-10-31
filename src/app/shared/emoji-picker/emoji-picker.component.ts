@@ -12,7 +12,7 @@ import { EmojiService } from '../../modules/emoji.service';
 export class EmojiPickerComponent implements OnInit {
   selectedEmoji: string | null = null;
   toggleEmojiPicker: boolean = false;
-  constructor(private emojiService: EmojiService) { }
+  constructor(private emojiService: EmojiService) {}
 
   ngOnInit(): void {
     this.emojiService.toggle_emoji_picker$.subscribe(statePicker => {
@@ -22,8 +22,6 @@ export class EmojiPickerComponent implements OnInit {
 
   onAddEmoji(event: any) {
     const emoji = event.emoji.native;
-    console.log('emoji', emoji);
-
     this.emojiService.selectEmoji(emoji);
     this.onTogglePicker();
   }

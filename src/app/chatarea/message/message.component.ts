@@ -33,11 +33,8 @@ export class MessageComponent {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
-<<<<<<< HEAD
+  emojiPath = 'assets/img/04_chats-message/';
   openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
-=======
-  emojiPath = 'assets/img/04_chats-message/'
->>>>>>> afc0e94118e7f619162ff43b884a6fd6b1cba2a3
 
   private sanitizer = inject(DomSanitizer);
 
@@ -139,19 +136,19 @@ export class MessageComponent {
     if (!this.channelId) {
       return;
     }
-<<<<<<< HEAD
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path);
-=======
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path).then(() => {
-      this.updateLocalReactions(reactionType);
-    }).catch(error => {
-      console.error('Fehler beim Hinzufügen der Reaktion:', error);
-    });
+    this.chatService
+      .addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+      .then(() => {
+        this.updateLocalReactions(reactionType);
+      })
+      .catch(error => {
+        console.error('Fehler beim Hinzufügen der Reaktion:', error);
+      });
   }
 
   updateLocalReactions(reactionType: string) {
     if (this.message.reactions) {
-      const reaction = this.message.reactions.find((r: { type: string; }) => r.type === reactionType);
+      const reaction = this.message.reactions.find((r: { type: string }) => r.type === reactionType);
       if (reaction) {
         if (!reaction.userId.includes(this.uid!)) {
           reaction.userId.push(this.uid!);
@@ -162,19 +159,20 @@ export class MessageComponent {
           type: reactionType,
           userId: [this.uid!],
           count: 1,
-          path: `assets/img/04_chats-message/${reactionType}.svg`
+          path: `assets/img/04_chats-message/${reactionType}.svg`,
         });
       }
     } else {
-      this.message.reactions = [{
-        type: reactionType,
-        userId: [this.uid!],
-        count: 1,
-        path: `assets/img/04_chats-message/${reactionType}.svg`
-      }];
+      this.message.reactions = [
+        {
+          type: reactionType,
+          userId: [this.uid!],
+          count: 1,
+          path: `assets/img/04_chats-message/${reactionType}.svg`,
+        },
+      ];
     }
     this.loadReactionNames();
->>>>>>> afc0e94118e7f619162ff43b884a6fd6b1cba2a3
   }
 
   formatTime(timeString: string): string {

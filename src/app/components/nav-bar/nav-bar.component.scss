@@ -6,7 +6,6 @@ header {
     align-items: center;
     justify-content: space-between;
     margin-inline: auto;
-    // max-width: 1440px;
     padding-inline: 1rem;
     padding-block: 1rem;
     background-color: #eceefe;
@@ -151,6 +150,7 @@ header {
   }
   .d-flex {
     display: flex !important;
+    margin-left: -1rem;
   }
 
   .ShowLogo {

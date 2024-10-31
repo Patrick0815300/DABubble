@@ -1,7 +1,7 @@
 <app-middle-wrapper [hasDefaultPadding]="false" class="app-middle-wrapper">
   <div class="chat-content">
-    <div class="current-nav-user">
-      <button (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">
+    <div class="current-nav-user cursor-effect" (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">
+      <button>
         @if(getCachedUser(toUserId)){
         <img class="sender cursor-effect" src="assets/img/profiles/{{ getCachedUser(toUserId).image_file }}" alt="" />
         <span class="online-marker" [style.backgroundColor]="getCachedUser(toUserId).online === true ? '#92c83e' : '#686868'"></span>
@@ -65,7 +65,11 @@
               </ng-container>
               <span title="{{ update_title }}" *ngIf="message?.is_updated" class="updated_msg">(Bearbeitet)</span>
               <button class="single-reaction" *ngIf="message?.reaction">
+                @if (message?.reaction.slice(-3)==="svg") {
+                <img src="assets/img/icons/{{ message?.reaction }}" alt="" />
+                }@else {
                 {{ message?.reaction }}
+                }
               </button>
             </p>
 
@@ -91,10 +95,10 @@
           </div>
           <div class="emoji-container" [class.align-box-right]="message?.from_user !== authenticatedUser?.id" *ngIf="update_group !== index_group || update_chat !== index_chat">
             <div class="img-group">
-              <button class="emoji-icon">
+              <button class="emoji-icon" (click)="onAddEmoji(message?.message_id, 'emoji_white_heavy_check_mark_.svg')">
                 <img src="assets/img/icons/emoji_white_heavy_check_mark_.svg" alt="" />
               </button>
-              <button class="emoji-icon">
+              <button class="emoji-icon" (click)="onAddEmoji(message?.message_id, 'emoji_person_hand_celebrate_.svg')">
                 <img src="assets/img/icons/emoji_person_hand_celebrate_.svg" alt="" />
               </button>
               <button>
@@ -103,7 +107,7 @@
               <button>
                 <img (click)="onRespond(index_chat, index_group)" src="assets/img/icons/comment.svg" alt="" />
               </button>
-              <button>
+              <button *ngIf="message?.from_user === authenticatedUser?.id">
                 <img (click)="onShowDeleteDialog(index_group)" *ngIf="message?.from_user === authenticatedUser?.id" src="assets/img/icons/more_vert.svg" alt="" />
               </button>
               <div *ngIf="show_delete_msg === index_group" class="btn-group" [class.align-btn-right]="message?.from_user !== authenticatedUser?.id">

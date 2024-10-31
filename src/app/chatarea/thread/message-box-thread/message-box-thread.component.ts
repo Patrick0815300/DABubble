@@ -39,12 +39,9 @@ export class MessageBoxThreadComponent {
   users: User[] = [];
   memberIds: string[] = [];
   linkDialog: boolean = false;
-<<<<<<< HEAD
-=======
   showUsers: boolean = false;
   showChannels: boolean = false;
   channels: any[] = [];
->>>>>>> afc0e94118e7f619162ff43b884a6fd6b1cba2a3
   toggleEmojiPicker: boolean = false;
 
   private uidSubscription: Subscription | null = null;
@@ -127,7 +124,6 @@ export class MessageBoxThreadComponent {
     }
   }
 
-
   loadChannelMembers() {
     this.fireService.getActiveChannel().subscribe((channel: any) => {
       this.memberIds = channel.member || [];
@@ -169,7 +165,8 @@ export class MessageBoxThreadComponent {
         };
         reader.readAsDataURL(this.selectedFile);
       }
-    }); this.inputBox.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+    });
+    this.inputBox.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
       this.checkForAtSymbol(event);
     });
     this.inputBox.nativeElement.focus();
@@ -188,14 +185,12 @@ export class MessageBoxThreadComponent {
     }
   }
 
-
   uploadFile(channelId: string, messageId: string, threadId: string, threadMessageId: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-<<<<<<< HEAD
       this.fileUploadService
-        .uploadFile(this.selectedFile, messageId, progress => {
+        .uploadFile(this.selectedFile, threadMessageId, progress => {
           this.uploadProgress = progress;
         })
         .then((result: { url: string; fileName: string }) => {
@@ -203,10 +198,7 @@ export class MessageBoxThreadComponent {
           this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
           this.fileName = result.fileName;
           this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName).then(() => {
-            this.content = '';
-            this.fileURL = null;
-            this.fileName = null;
-            this.isUploading = false;
+            this.clearFileUploadData();
             this.cdr.detectChanges();
           });
         })
@@ -214,24 +206,6 @@ export class MessageBoxThreadComponent {
           console.error('Fehler beim Hochladen der Datei:', error);
           this.isUploading = false;
         });
-      this.selectedFile = null;
-=======
-      this.fileUploadService.uploadFile(this.selectedFile, threadMessageId, (progress) => {
-        this.uploadProgress = progress;
-      }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url;
-        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
-        this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, threadId, threadMessageId, this.cleanUrl, this.fileName)
-          .then(() => {
-            this.clearFileUploadData();
-            this.cdr.detectChanges();
-          });
-      }).catch((error) => {
-        console.error('Fehler beim Hochladen der Datei:', error);
-        this.isUploading = false;
-      });
->>>>>>> afc0e94118e7f619162ff43b884a6fd6b1cba2a3
     }
   }
 
@@ -254,17 +228,13 @@ export class MessageBoxThreadComponent {
       } else {
         this.clearFileUploadData();
       }
-<<<<<<< HEAD
-    }
-    this.content = '';
-=======
     } else {
       this.clearFileUploadData();
     }
   }
 
   loadChannels() {
-    this.fireService.getAllChannels().subscribe((channels) => {
+    this.fireService.getAllChannels().subscribe(channels => {
       this.channels = channels;
     });
   }
@@ -312,6 +282,5 @@ export class MessageBoxThreadComponent {
       event.preventDefault();
       this.sendMessage();
     }
->>>>>>> afc0e94118e7f619162ff43b884a6fd6b1cba2a3
   }
 }

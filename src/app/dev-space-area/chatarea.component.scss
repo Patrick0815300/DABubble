@@ -172,6 +172,11 @@ mat-card-content {
 @media (width<630px) {
   .mat-mdc-card {
     box-shadow: unset;
+    border-radius: 0 !important;
+  }
+
+  .card {
+    border-radius: unset !important;
   }
 
   .current-nav-user {

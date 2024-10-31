@@ -103,3 +103,19 @@ mat-card-content {
 .showRightWrapper {
   display: none;
 }
+
+@media screen and (width<=630px) {
+  mat-card-header {
+    border-radius: 0;
+  }
+  .card {
+    border-radius: unset !important;
+  }
+
+  .mat-mdc-card-content {
+    padding: 1.5rem !important;
+  }
+  mat-card-header {
+    padding-inline: 24px !important;
+  }
+}

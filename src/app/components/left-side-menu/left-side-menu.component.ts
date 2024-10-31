@@ -1,3 +1,4 @@
+import { ShowProfilService } from './../../modules/show-profil.service';
 import { CurrentUserService } from './../../modules/current-user.service';
 import { AuthService } from './../../firestore-service/auth.service';
 import { Component, OnInit } from '@angular/core';
@@ -64,7 +65,8 @@ export class LeftSideMenuComponent implements OnInit {
     private navService: NavService,
     private databaseService: DatabaseServiceService,
     private authService: CurrentUserService,
-    private authenticatedService: AuthService
+    private authenticatedService: AuthService,
+    private showProfilService: ShowProfilService
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -289,5 +291,9 @@ export class LeftSideMenuComponent implements OnInit {
 
   handleMobileView(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
+  }
+
+  onAutoFocus() {
+    this.showProfilService.emitAutoFocus(true);
   }
 }

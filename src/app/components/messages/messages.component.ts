@@ -399,6 +399,10 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.channelService.updateChannelData('messages', 'message_id', message_id, { reaction: this.chosenReaction });
   }
 
+  onAddEmoji(message_id: string, name: string) {
+    this.channelService.updateChannelData('messages', 'message_id', message_id, { reaction: name });
+  }
+
   onAddThreadMsg(event: Event) {
     if (!this.message_content && this.showSearchUserName) {
       this.userService.emitShowSearchUser(false);

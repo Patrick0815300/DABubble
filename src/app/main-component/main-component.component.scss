@@ -300,4 +300,15 @@ a {
   .toggle-display {
     width: 100%;
   }
+
+  .main-section {
+    > main {
+      padding-inline: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  form {
+    width: 80vw;
+  }
 }
