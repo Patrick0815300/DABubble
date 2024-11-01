@@ -3,7 +3,7 @@
     <div class="current-nav-user cursor-effect" (click)="onOpenShowProfile(); sendSelectedUser(getCachedUser(toUserId))">
       <button>
         @if(getCachedUser(toUserId)){
-        <img class="sender cursor-effect" src="assets/img/profiles/{{ getCachedUser(toUserId).image_file }}" alt="" />
+        <img class="sender cursor-effect" src="{{ getCachedUser(toUserId).avatar }}" alt="" />
         <span class="online-marker" [style.backgroundColor]="getCachedUser(toUserId).online === true ? '#92c83e' : '#686868'"></span>
         }@else {
         <img class="sender cursor-effect" src="assets/img/profiles/male_avatar.svg" alt="" />
@@ -23,16 +23,11 @@
         <div *ngFor="let message of chatGroup.messages; let index_group = index" class="chat-message" [class.align-right]="message?.from_user === authenticatedUser?.id">
           <div class="image-message">
             <div class="offset" *ngIf="message?.response_content"></div>
-            <img *ngIf="getCachedUser(message?.from_user)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.image_file }}" alt="" />
+            <img *ngIf="getCachedUser(message?.from_user)?.avatar" class="sender" src="{{ getCachedUser(message?.from_user)?.avatar }}" alt="" />
           </div>
           <div class="name-date-line" [class.update_msg]="update_group === index_group && update_chat === index_chat">
             <div class="response_msg" *ngIf="message?.response_content">
-              <img
-                *ngIf="getCachedUser(message?.from_user_origin)?.image_file"
-                class="sender-origin"
-                src="assets/img/profiles/{{ getCachedUser(message?.from_user_origin)?.image_file }}"
-                alt=""
-              />
+              <img *ngIf="getCachedUser(message?.from_user_origin)?.avatar" class="sender-origin" src="{{ getCachedUser(message?.from_user_origin)?.avatar }}" alt="" />
               <span class="origin_msg">&#64;{{ getCachedUser(message?.from_user_origin)?.name }}</span>
               <p class="response" [class.response-p]="message?.from_user === authenticatedUser?.id">{{ message?.response_content.substring(0, 100) }}</p>
             </div>
@@ -123,7 +118,7 @@
     <div id="message" class="message">
       <div>
         <div class="user-ref">
-          <img *ngIf="getCachedUser(toUserId)?.image_file" class="sender" src="assets/img/profiles/{{ getCachedUser(toUserId)?.image_file }}" alt="" />
+          <img *ngIf="getCachedUser(toUserId)?.avatar" class="sender" src="{{ getCachedUser(toUserId)?.avatar }}" alt="" />
           <span class="username text-capitalize">{{ getCachedUser(toUserId)?.name }} </span>
         </div>
         @if(getCachedUser(toUserId)?.id===authenticatedUser?.id){

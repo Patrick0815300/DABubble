@@ -139,7 +139,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
       this.onCancelUpdateMsg();
-      console.log('selected User is:', this.selectedUser);
     });
 
     this.userService.selectedMessageId$.subscribe(id => {

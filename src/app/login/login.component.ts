@@ -16,7 +16,8 @@ import { UserService } from '../service/user.service/user.service';
 import { Firestore } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { DatabaseServiceService } from '../database-service.service';
-import { User } from '../modules/database.model';
+import { Channel, ChannelMember, User } from '../modules/database.model';
+import { nanoid } from 'nanoid';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -29,6 +30,7 @@ export class LoginComponent implements OnInit {
   password: string = '';
   displayWrongMailOrPasswordError: boolean = false;
   onlineUser: any = null;
+  officeTeamChannel!: Channel;
   constructor(
     private firebase: FirebaseLoginService,
     private databaseService: DatabaseServiceService,
@@ -42,6 +44,10 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.currentUserService.onlineUser$.subscribe(user => {
       this.onlineUser = user;
+    });
+
+    this.databaseService.officeTeam().subscribe(team => {
+      this.officeTeamChannel = team;
     });
   }
 
@@ -142,26 +148,54 @@ export class LoginComponent implements OnInit {
     );
   }
 
+  async createDefaultChannel() {
+    let channelData = {
+      channel_name: 'office-team',
+      admin: 'unknown',
+    };
+    let defaultChannel = new Channel(channelData);
+    let channelObject = defaultChannel.toObject();
+    this.databaseService.addChannel(channelObject);
+    return channelObject.channel_id;
+  }
+
   onGuestLogin() {
     let guest = {
+      id: nanoid(),
       name: 'bubble guest',
       email: 'guest@mail.com',
-      image_file: 'male_avatar.svg',
+      avatar: 'assets/img/00_general-buttons/characters/Steffen_Hoffmann.png',
       password: '',
       online: true,
       thread_open: false,
       activeChannelId: '',
-      avatar: 'assets/img/00_general-buttons/characters/Steffen_Hoffmann.png',
     };
     let newUser = new User(guest);
 
-    this.databaseService
-      .deleteDocument('users', 'name', 'bubble guest')
-      .then(() => {
-        this.databaseService.addUser(newUser.toObject());
-      })
-      .then(() => {
-        this.currentUserService.getGuestUser();
+    if (!this.officeTeamChannel) {
+      this.createDefaultChannel().then(ch_id => {
+        this.databaseService
+          .deleteDocument('users', 'name', 'bubble guest')
+          .then(() => {
+            this.databaseService.addUser(newUser.toObject());
+          })
+          .then(() => {
+            this.currentUserService.getGuestUser();
+            const newMember = new ChannelMember({ member_id: guest.id, channel_id: ch_id }).toObject();
+            this.databaseService.addMemberToChannel(newMember);
+          });
       });
+    } else {
+      this.databaseService
+        .deleteDocument('users', 'name', 'bubble guest')
+        .then(() => {
+          this.databaseService.addUser(newUser.toObject());
+        })
+        .then(() => {
+          this.currentUserService.getGuestUser();
+          const newMember = new ChannelMember({ member_id: guest.id, channel_id: this.officeTeamChannel.channel_id }).toObject();
+          this.databaseService.addMemberToChannel(newMember);
+        });
+    }
   }
 }

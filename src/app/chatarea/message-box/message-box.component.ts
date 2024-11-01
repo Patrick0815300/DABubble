@@ -14,6 +14,10 @@ import { EmojiService } from '../../modules/emoji.service';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { UserService } from '../../modules/user.service';
+import { Channel, ChannelMember } from '../../modules/database.model';
+import { ChannelService } from '../../modules/channel.service';
+import { CurrentUserService } from '../../modules/current-user.service';
 
 @Component({
   selector: 'app-message-box',
@@ -44,6 +48,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   channels: any[] = [];
   linkedUsers: string[] = [];
   toggleEmojiPicker: boolean = false;
+  currentChannel!: Channel;
+  ChannelMembers: ChannelMember[] = [];
+  guest!: string;
   private emojiSubscription: Subscription | null = null;
   private fireService = inject(ChatareaServiceService);
   private fileUploadService = inject(FileUploadService);
@@ -59,12 +66,33 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('messageTextArea') messageTextArea!: ElementRef;
 
-  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService, private emojiRef: ElementRef) { }
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private userService: UserService,
+    private mainService: MainServiceService,
+    private authService: AuthService,
+    private emojiRef: ElementRef,
+    private channelService: ChannelService,
+    private currentGuest: CurrentUserService
+  ) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
+
+    this.userService.channel$.subscribe(channel => {
+      this.currentChannel = channel;
+    });
+
+    this.channelService.channelMembers$.subscribe(members => {
+      this.ChannelMembers = members;
+    });
+
+    this.currentGuest.onlineUser$.subscribe(user => {
+      this.guest = user?.id;
+    });
+
     this.loadActiveChannelName();
     this.loadChannelMembers();
     this.loadChannels();
@@ -117,13 +145,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
-      this.emojiSubscription = this.emojiService.emoji$
-        .pipe(
-          filter((emoji: string) => emoji.trim() !== '')
-        )
-        .subscribe((emoji: string) => {
-          this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
-        });
+      this.emojiSubscription = this.emojiService.emoji$.pipe(filter((emoji: string) => emoji.trim() !== '')).subscribe((emoji: string) => {
+        this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
+      });
     } else {
       if (this.emojiSubscription) {
         this.emojiSubscription.unsubscribe();
@@ -192,13 +216,17 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   isCurrentUserMember(): boolean {
-    return this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
+    let members = this.ChannelMembers.map(member => member?.member_id);
+    const ch = members.includes(this.uid ? this.uid : 'Unknown');
+    const ch_guest = members.includes(this.guest ? this.guest : 'Unknown');
+    const is_member = this.uid != null && this.memberIds != null && this.memberIds.includes(this.uid);
+    return ch || is_member || ch_guest;
   }
 
   loadUsers() {
     this.unsubscribeFromUsers();
     this.users = [];
-    this.memberIds.forEach((memberId) => {
+    this.memberIds.forEach(memberId => {
       const userSubscription = this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         const index = this.users.findIndex(u => u.id === userInstance.id);
@@ -243,9 +271,11 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
           this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
           this.fileName = this.selectedFile!.name;
           this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
-        }; reader.readAsDataURL(this.selectedFile);
+        };
+        reader.readAsDataURL(this.selectedFile);
       }
-    }); this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
+    });
+    this.messageTextArea.nativeElement.addEventListener('keyup', (event: KeyboardEvent) => {
       this.checkForAtSymbol(event);
     });
     this.messageTextArea.nativeElement.focus();
@@ -255,16 +285,23 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
-        this.uploadProgress = progress;
-      }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url;
-        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
-        this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => { this.clearFileUploadData() });
-      }).catch((error) => { this.isUploading = false; });
+      this.fileUploadService
+        .uploadFile(this.selectedFile, messageId, progress => {
+          this.uploadProgress = progress;
+        })
+        .then((result: { url: string; fileName: string }) => {
+          this.cleanUrl = result.url;
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+          this.fileName = result.fileName;
+          this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
+            this.clearFileUploadData();
+          });
+        })
+        .catch(error => {
+          this.isUploading = false;
+        });
       setTimeout(() => {
-        this.isUploading = false
+        this.isUploading = false;
       }, 2000);
     }
   }
@@ -297,9 +334,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
               senderId: this.uid,
               fileUrl: null,
               fileName: this.selectedFile ? this.selectedFile.name : null,
-              messageEdit: false
+              messageEdit: false,
             };
-            this.fireService.addMessage(channel.id, messageData).then((docRef) => {
+            this.fireService.addMessage(channel.id, messageData).then(docRef => {
               if (docRef) {
                 const messageId = docRef.id;
                 this.messageContent = '';
@@ -308,14 +345,14 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
                   this.clearFileUpload();
                   this.selectedFile = null;
                 }
-              } else { }
+              } else {
+              }
             });
-          }
+          },
         });
-      }
+      },
     });
   }
-
 
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -335,7 +372,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   loadChannels() {
-    this.channelsSubscription = this.fireService.getAllChannels().subscribe((channels) => {
+    this.channelsSubscription = this.fireService.getAllChannels().subscribe(channels => {
       this.channels = channels;
       this.cdr.detectChanges();
     });

@@ -78,7 +78,7 @@ export class MainComponentComponent implements OnInit {
   channel_description: string = '';
   channel_name: string = '';
   isChecked: string = 'officeTeam';
-  officeTeamChannel!: Channel;
+  Channel!: Channel;
   all_channel!: Channel[];
   authenticatedUser: User | undefined;
   new_person_name: string = '';
@@ -92,6 +92,7 @@ export class MainComponentComponent implements OnInit {
   PickedArray: string[] = [];
   showSearchUserName: boolean = false;
   dev_message_search: boolean = false;
+  officeTeamChannel!: Channel;
 
   private uidSubscription: Subscription | null = null;
   constructor(
@@ -160,7 +161,6 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.channelMembers$.subscribe(members => {
       this.ChannelMembers = members;
-      //console.log('channel_members', this.ChannelMembers);
     });
   }
 
@@ -169,6 +169,9 @@ export class MainComponentComponent implements OnInit {
     this.open_show_profil = false;
     this.open_show_profile_nav = false;
     this.open_update_profil = false;
+    this.openLogoutMobile = false;
+    this.state = false;
+    this.open_edit_channel = false;
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.databaseService
         .snapUsers()
@@ -219,7 +222,7 @@ export class MainComponentComponent implements OnInit {
     let channelData = {
       channel_name: this.channel_name,
       description: this.channel_description,
-      admin: this.authenticatedUser?.id,
+      admin: this.authenticatedUser ? this.authenticatedUser.id : 'Unknown',
     };
 
     let office = new Channel(channelData).toObject();

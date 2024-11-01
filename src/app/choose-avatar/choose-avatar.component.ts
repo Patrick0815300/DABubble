@@ -7,34 +7,22 @@ import { SignInComponent } from '../sign-in/sign-in.component';
 import { NgFor } from '@angular/common';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 
-
 @Component({
   selector: 'app-choose-avatar',
   standalone: true,
-  imports: [
-    MatCardModule,
-    FooterComponent,
-    MatIconModule,
-    RouterModule,
-    SignInComponent,
-    NgFor,
-
-  ],
+  imports: [MatCardModule, FooterComponent, MatIconModule, RouterModule, SignInComponent, NgFor],
   templateUrl: './choose-avatar.component.html',
-  styleUrl: './choose-avatar.component.scss'
+  styleUrl: './choose-avatar.component.scss',
 })
 export class ChooseAvatarComponent {
-
   userId: any = '';
 
-  constructor(private router: Router, private route: ActivatedRoute, private firebase: FirebaseLoginService) {
+  constructor(private router: Router, private route: ActivatedRoute, private firebase: FirebaseLoginService) {}
 
-  }
-
-  avatar: string[] = ["Elias_Neumann", "Elise_Roth", "Frederik_Beck", "Noah_Braun", "Sofia_Müller", "Steffen_Hoffmann"];
+  avatar: string[] = ['Elias_Neumann', 'Elise_Roth', 'Frederik_Beck', 'Noah_Braun', 'Sofia_Müller', 'Steffen_Hoffmann'];
 
   Userregistrated: boolean = false;
-  chosenImage: string = './assets/img/01_onboarding-login-signup/Profil_Default.png';
+  chosenImage: string = 'assets/img/01_onboarding-login-signup/Profil_Default.png';
   newUrl: string = '';
 
   /**
@@ -53,7 +41,7 @@ export class ChooseAvatarComponent {
   /**
    * This function collects the user id from the database
    */
-  getIDfromURL(){
+  getIDfromURL() {
     this.userId = this.route.snapshot.paramMap.get('id');
   }
 
@@ -67,20 +55,19 @@ export class ChooseAvatarComponent {
 
   /**
    * This function uploads an image of the users computer instead of choosing one of the given ones
-   * @param event 
+   * @param event
    */
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
       const file = target.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.chosenImage = e.target?.result as string;  // Setze das Bild auf die hochgeladene Datei
+      reader.onload = e => {
+        this.chosenImage = e.target?.result as string; // Setze das Bild auf die hochgeladene Datei
       };
-      reader.readAsDataURL(file);  // Liest die Datei als Daten-URL
+      reader.readAsDataURL(file); // Liest die Datei als Daten-URL
       // Reset das Input-Feld
-      target.value = '';  // Setzt das Input-Feld zurück
+      target.value = ''; // Setzt das Input-Feld zurück
     }
-
   }
 }

@@ -17,7 +17,7 @@
         sendToOpenUser(user); sendSelectedUser(user); onToggleDevSearch(false); showChannelMessages(false); sendUserId(user.id); loadMessages(authenticatedUser?.id, user.id)
       "
     >
-      <app-profile class="app-profile" [left_side_profile]="true" [image_user]="user.image_file" [bgColorOnline]="user.online === true ? '#92c83e' : '#686868'" />
+      <app-profile class="app-profile" [left_side_profile]="true" [image_user]="user.avatar" [bgColorOnline]="user.online === true ? '#92c83e' : '#686868'" />
       <span> {{ user.name }}</span>
     </li>
     }

@@ -6,7 +6,6 @@ export class User {
   id!: string;
   name!: string;
   email!: string;
-  image_file!: string;
   password!: string;
   online!: boolean;
   thread_open!: boolean;
@@ -17,7 +16,6 @@ export class User {
     this.id = obj ? obj.id || nanoid() : '';
     this.name! = obj ? obj.name : '';
     this.email = obj ? obj.email : '';
-    this.image_file = obj ? obj.image_file : '';
     this.password = obj ? obj.password : '';
     this.online = obj ? obj.online : false;
     this.thread_open = obj ? obj.thread_open : false;
@@ -31,7 +29,6 @@ export class User {
       name: this.name,
       email: this.email,
       password: this.password,
-      image_file: this.image_file,
       online: this.online,
       thread_open: this.thread_open,
       activeChannelId: this.activeChannelId,
@@ -134,7 +131,7 @@ export class ChannelMember {
   left_date!: number;
 
   constructor(obj?: any) {
-    this.member_id = obj ? obj.member_id : '';
+    this.member_id = obj ? obj.member_id || 'Unknown' : '';
     this.channel_id = obj ? obj.channel_id : '';
     this.joined_date = obj ? obj.joined_date || Date.now() : '';
     this.left_date = obj ? obj.left_date || new Date('9999-10-05T17:13:16.804Z').getTime() : '';

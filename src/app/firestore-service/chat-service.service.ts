@@ -9,19 +9,19 @@ import { arrayRemove, arrayUnion, limit, writeBatch } from 'firebase/firestore';
 import { ChatareaServiceService } from './chatarea-service.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ChatServiceService implements OnInit, OnDestroy {
   uid: string | null = null;
   private uidSubscription: Subscription | null = null;
   senderId: string = '';
-  private threadData: { channelId: string, messageId: string, senderId: string } | null = null;
+  private threadData: { channelId: string; messageId: string; senderId: string } | null = null;
   private pickedThreadSubject = new BehaviorSubject<any>(null);
   pickedThread$: Observable<any> = this.pickedThreadSubject.asObservable();
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
+  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService, private chatAreaService: ChatareaServiceService) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -39,7 +39,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${docId}`);
     await updateDoc(messageDocRef, {
       fileUrl: fileUrl,
-      fileName: fileName
+      fileName: fileName,
     });
   }
 
@@ -47,7 +47,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
    * Sets the thread data including channelId, messageId, and senderId.
    * @param {{channelId: string, messageId: string, senderId: string}} threadInfo - Information about the thread.
    */
-  setThreadData(threadInfo: { channelId: string, messageId: string, senderId: string }) {
+  setThreadData(threadInfo: { channelId: string; messageId: string; senderId: string }) {
     this.threadData = threadInfo;
   }
 
@@ -68,12 +68,12 @@ export class ChatServiceService implements OnInit, OnDestroy {
   }
 
   /**
- * Loads messages from a thread by channelId, messageId, and threadId.
- * @param {string} channelId - The ID of the channel.
- * @param {string} messageId - The ID of the message.
- * @param {string} threadId - The ID of the thread.
- * @returns {Promise<any[]>} A promise that resolves with an array of thread messages.
- */
+   * Loads messages from a thread by channelId, messageId, and threadId.
+   * @param {string} channelId - The ID of the channel.
+   * @param {string} messageId - The ID of the message.
+   * @param {string} threadId - The ID of the thread.
+   * @returns {Promise<any[]>} A promise that resolves with an array of thread messages.
+   */
   async loadThreadMessages(channelId: string, messageId: string, threadId: string): Promise<any[]> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
     const snapshot = await getDocs(messagesCollectionRef);
@@ -107,7 +107,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
     const threadsSnapshot = await getDocs(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`)),
       batch = writeBatch(this.firestore),
       reaction = { type: reactionType, userId: [uid], path, count: count };
-    threadsSnapshot.forEach((doc) => {
+    threadsSnapshot.forEach(doc => {
       const reactions = doc.data()['reactions'] || [],
         hasReacted = reactions.some((r: any) => r.type === reactionType && r.uid === uid);
       batch.update(doc.ref, { reactions: hasReacted ? arrayRemove(reaction) : arrayUnion(reaction) });
@@ -121,7 +121,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
 
   threadOpenStatus(uid: string, callback: (isOpen: boolean) => void) {
     const userRef = doc(this.firestore, `users/${uid}`);
-    return onSnapshot(userRef, (doc) => {
+    return onSnapshot(userRef, doc => {
       const threadOpen = doc.data()?.['thread_open'] || false;
       callback(threadOpen);
     });
@@ -129,10 +129,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
 
   async hasThreads(channelId: string, messageId: string): Promise<boolean> {
     try {
-      const threadsCollectionRef = collection(
-        this.firestore,
-        `channels/${channelId}/messages/${messageId}/threads`
-      );
+      const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
       const threadsQuery = query(threadsCollectionRef, limit(1));
       const snapshot = await getDocs(threadsQuery);
       return !snapshot.empty;
@@ -152,7 +149,15 @@ export class ChatServiceService implements OnInit, OnDestroy {
    * @param {string} messageIdThread - The ID of the message in the thread.
    * @returns {Promise<void>} A promise that resolves when the reaction is added.
    */
-  async addReactionToThreadMessage(channelId: string, messageId: string, threadId: string, reactionType: string, reactionPath: string, messageIdThread: string, uid: string): Promise<void> {
+  async addReactionToThreadMessage(
+    channelId: string,
+    messageId: string,
+    threadId: string,
+    reactionType: string,
+    reactionPath: string,
+    messageIdThread: string,
+    uid: string
+  ): Promise<void> {
     const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${messageIdThread}`);
     const snapshot = await getDoc(messageDocRef);
     const messageData = snapshot.data();
@@ -165,17 +170,17 @@ export class ChatServiceService implements OnInit, OnDestroy {
   }
 
   /**
- * Fetches and updates the thread details including the total message count and the time of the last message.
- * @param {string} channelId - The ID of the channel.
- * @param {string} messageId - The ID of the message.
- * @param {(count: number, lastMessageTime: string | null) => void} callback - A callback to receive the total message count and the last message time.
- */
+   * Fetches and updates the thread details including the total message count and the time of the last message.
+   * @param {string} channelId - The ID of the channel.
+   * @param {string} messageId - The ID of the message.
+   * @param {(count: number, lastMessageTime: string | null) => void} callback - A callback to receive the total message count and the last message time.
+   */
   async getThreadDetails(channelId: string, messageId: string, callback: (count: number, lastMessageTime: string | null) => void): Promise<void> {
     const threadsCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
-    onSnapshot(threadsCollectionRef, (threadsSnapshot) => {
+    onSnapshot(threadsCollectionRef, threadsSnapshot => {
       let totalMessagesCount = 0;
       let lastMessageTime: string | null = null;
-      threadsSnapshot.docs.forEach((threadDoc) => {
+      threadsSnapshot.docs.forEach(threadDoc => {
         const threadId = threadDoc.id;
         this.getThreadMessages(channelId, messageId, threadId, (count, time) => {
           totalMessagesCount = count;
@@ -195,7 +200,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
    */
   getThreadMessages(channelId: string, messageId: string, threadId: string, callback: (count: number, lastMessageTime: string) => void): void {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages`);
-    onSnapshot(messagesCollectionRef, (messagesSnapshot) => {
+    onSnapshot(messagesCollectionRef, messagesSnapshot => {
       const threadMessages = messagesSnapshot.docs
         .map(doc => doc.data())
         .filter(message => (message['content'] || message['fileUrl']) && message['time'])
@@ -213,15 +218,15 @@ export class ChatServiceService implements OnInit, OnDestroy {
    * @returns {string | null} The updated last message time.
    */
   updateLastMessageTime(currentTime: string | null, newTime: string | null): string | null {
-    return (!currentTime || (newTime && newTime > currentTime)) ? newTime : currentTime;
+    return !currentTime || (newTime && newTime > currentTime) ? newTime : currentTime;
   }
 
   /**
- * Updates the visibility state of a channel's thread.
- * @param {string} channelId - The ID of the channel.
- * @param {boolean} isVisible - Whether the thread should be visible or not.
- * @returns {Promise<void>} A promise that resolves when the channel's thread state is updated.
- */
+   * Updates the visibility state of a channel's thread.
+   * @param {string} channelId - The ID of the channel.
+   * @param {boolean} isVisible - Whether the thread should be visible or not.
+   * @returns {Promise<void>} A promise that resolves when the channel's thread state is updated.
+   */
   async updateChannelThreadState(uid: string, isVisible: boolean): Promise<void> {
     const channelDocRef = doc(this.firestore, `users/${uid}`);
     await updateDoc(channelDocRef, { thread_open: isVisible });
@@ -233,9 +238,9 @@ export class ChatServiceService implements OnInit, OnDestroy {
    */
   async loadActiveChannel(): Promise<void> {
     this.chatAreaService.getActiveChannel().subscribe({
-      next: (channel) => {
+      next: channel => {
         this.setCurrentChannel(channel);
-      }
+      },
     });
   }
 
@@ -290,7 +295,6 @@ export class ChatServiceService implements OnInit, OnDestroy {
     return docRef.id;
   }
 
-
   /**
    * Loads messages from a specified path in Firestore.
    * @param {string} path - The Firestore path to load messages from.
@@ -298,14 +302,18 @@ export class ChatServiceService implements OnInit, OnDestroy {
    */
   loadMessagesFromPath(path: string): Observable<any[]> {
     const messagesCollectionRef = collection(this.firestore, path);
-    return new Observable((observer) => {
-      onSnapshot(messagesCollectionRef, (snapshot) => {
-        const messages = snapshot.docs
-          .map(doc => doc.data())
-          .filter(message => message['content'] || message['fileUrl'])
-          .sort((a, b) => a['time'].localeCompare(b['time']));
-        observer.next(messages);
-      }, (error) => observer.error(error));
+    return new Observable(observer => {
+      onSnapshot(
+        messagesCollectionRef,
+        snapshot => {
+          const messages = snapshot.docs
+            .map(doc => doc.data())
+            .filter(message => message['content'] || message['fileUrl'])
+            .sort((a, b) => a['time'].localeCompare(b['time']));
+          observer.next(messages);
+        },
+        error => observer.error(error)
+      );
     });
   }
 
@@ -414,27 +422,31 @@ export class ChatServiceService implements OnInit, OnDestroy {
    */
   loadMessages(channelId: string): Observable<any[]> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
-    return new Observable((observer) => {
-      onSnapshot(messagesCollectionRef, (snapshot) => {
-        const messages = snapshot.docs.map(doc => {
-          const messageData = doc.data();
-          return {
-            id: doc.id,
-            ...messageData,
-            isOwnMessage: messageData['senderId'] === this.uid
-          };
-        });
-        observer.next(messages);
-      }, (error) => observer.error(error));
+    return new Observable(observer => {
+      onSnapshot(
+        messagesCollectionRef,
+        snapshot => {
+          const messages = snapshot.docs.map(doc => {
+            const messageData = doc.data();
+            return {
+              id: doc.id,
+              ...messageData,
+              isOwnMessage: messageData['senderId'] === this.uid,
+            };
+          });
+          observer.next(messages);
+        },
+        error => observer.error(error)
+      );
     });
   }
 
   /**
- * Adds a new message to a specified channel in Firestore.
- * @param {string} channelId - The ID of the channel where the message will be added.
- * @param {any} messageData - The message data to be added to the channel.
- * @returns {Promise<DocumentReference<any>>} A promise that resolves with the reference of the newly added message.
- */
+   * Adds a new message to a specified channel in Firestore.
+   * @param {string} channelId - The ID of the channel where the message will be added.
+   * @param {any} messageData - The message data to be added to the channel.
+   * @returns {Promise<DocumentReference<any>>} A promise that resolves with the reference of the newly added message.
+   */
   addMessage(channelId: string, messageData: any): Promise<DocumentReference<any>> {
     const messagesCollectionRef = collection(this.firestore, `channels/${channelId}/messages`);
     return addDoc(messagesCollectionRef, messageData);
@@ -447,13 +459,12 @@ export class ChatServiceService implements OnInit, OnDestroy {
    * @returns {Observable<void>} An observable that completes when the message is updated.
    */
   updateMessage(messageId: string, updatedData: any): Observable<void> {
-    return new Observable((observer) => {
+    return new Observable(observer => {
       this.chatAreaService.getActiveChannel().subscribe({
         next: (channel: any) => {
           const messageDocRef = doc(this.firestore, `channels/${channel.id}/messages`, messageId);
-          updateDoc(messageDocRef, updatedData)
-            .then(() => observer.next());
-        }
+          updateDoc(messageDocRef, updatedData).then(() => observer.next());
+        },
       });
     });
   }
@@ -468,18 +479,18 @@ export class ChatServiceService implements OnInit, OnDestroy {
     return snapshot.docs.map(doc => ({
       id: doc.id,
       name: doc.data()['name'],
-      path: doc.data()['path']
+      path: doc.data()['path'],
     }));
   }
 
   /**
-  * Adds or updates a reaction for a message.
-  * @param {any[]} reactions - The existing reactions array.
-  * @param {string} reactionType - The type of reaction.
-  * @param {string} userId - The ID of the user adding the reaction.
-  * @param {string} reactionPath - The path to the reaction image or asset.
-  * @returns {Promise<any[]>} A promise that resolves with the updated reactions array.
-  */
+   * Adds or updates a reaction for a message.
+   * @param {any[]} reactions - The existing reactions array.
+   * @param {string} reactionType - The type of reaction.
+   * @param {string} userId - The ID of the user adding the reaction.
+   * @param {string} reactionPath - The path to the reaction image or asset.
+   * @returns {Promise<any[]>} A promise that resolves with the updated reactions array.
+   */
   async addOrUpdateReaction(reactions: any[], reactionType: string, userId: string, reactionPath: string): Promise<any[]> {
     const existingReaction = reactions.find(reaction => reaction.type === reactionType);
     if (existingReaction) {
@@ -492,7 +503,6 @@ export class ChatServiceService implements OnInit, OnDestroy {
     }
     return reactions;
   }
-
 
   /**
    * Adds or updates a reaction for a specific message in a channel.

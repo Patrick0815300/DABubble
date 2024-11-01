@@ -88,6 +88,8 @@ export class LeftSideMenuComponent implements OnInit {
       });
     });
 
+    this.authService.getGuestUser();
+
     this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
       this.observeUser = this.databaseService.snapUsers().pipe(map(users => users.filter(user => user.id === uid)[0]));
     });
@@ -223,16 +225,11 @@ export class LeftSideMenuComponent implements OnInit {
 
   sendChannel(channel: Channel) {
     this.userService.emitChannel(channel);
-    console.log('current Channel', channel);
   }
 
   showChannelMessages(isShown: boolean) {
     this.channelService.emitChannelView(isShown);
   }
-
-  // sendChosen() {
-  //   this.channelService.emitChosen();
-  // }
 
   /**
    * This function actualize the value of the selected user defined in userService
