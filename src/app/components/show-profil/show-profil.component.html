@@ -30,7 +30,13 @@
   }@else{
   <img
     class="user-profile-img"
-    src="assets/img/profiles/{{ isNavBar === true ? onlineUser?.avatar || 'male_avatar.svg' : selectedUser ? selectedUser.avatar : 'male_avatar.svg' }}"
+    src="{{
+      isNavBar === true
+        ? 'assets/img/profiles/' + onlineUser?.avatar || 'assets/img/profiles/male_avatar.svg'
+        : selectedUser
+        ? selectedUser.avatar
+        : 'assets/img/profiles/male_avatar.svg'
+    }}"
     alt=""
   />
   <div class="user-name-update">

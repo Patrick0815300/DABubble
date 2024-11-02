@@ -106,12 +106,7 @@
           "
           class="d-flex capitilize gp l-mg-2"
         >
-          <app-profile
-            class="app-profile"
-            [left_side_profile]="true"
-            [image_user]="onlineUser ? onlineUser.avatar : 'assets/img/profiles/male_avatar.svg'"
-            [bgColorOnline]="'#92c83e'"
-          />
+          <app-profile class="app-profile" [left_side_profile]="true" [image_user]="'assets/img/profiles/male_avatar.svg'" [bgColorOnline]="'#92c83e'" />
           <span class="user-name"> {{ onlineUser ? onlineUser.name : 'bubble guest' }}</span>
           <span>(Du)</span>
         </li>

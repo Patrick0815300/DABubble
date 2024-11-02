@@ -164,7 +164,7 @@ export class LoginComponent implements OnInit {
       id: nanoid(),
       name: 'bubble guest',
       email: 'guest@mail.com',
-      avatar: 'assets/img/00_general-buttons/characters/Steffen_Hoffmann.png',
+      avatar: 'male_avatar.svg',
       password: '',
       online: true,
       thread_open: false,
