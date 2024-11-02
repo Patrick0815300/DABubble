@@ -505,14 +505,14 @@ form {
     }
 }
 
-@media(max-height:905px) and (min-width:610px) {
-    section {
-        transform: scale(0.9);
-        transform: translate(-50%);
-        top: 170px;
-        justify-content: center;
-    }
-}
+// @media(max-height:905px) and (min-width:610px) {
+//     section {
+//         transform: scale(0.9);
+//         transform: translate(-50%);
+//         top: 170px;
+//         justify-content: center;
+//     }
+// }
 
 @media(max-height:975px) and (min-width:610px) {
     section {
