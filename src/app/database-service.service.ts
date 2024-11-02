@@ -162,6 +162,7 @@ export class DatabaseServiceService {
       console.error('Error adding document: ', e);
     }
   }
+
   async addMemberToChannel(member: object) {
     try {
       const docRef = await addDoc(this.getChannelMemberRef(), member);

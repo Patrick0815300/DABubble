@@ -5,7 +5,7 @@
   </div>
 
   @if(authenticatedUser){
-  <img class="user-profile-img" src="assets/img/profiles/{{ isNavBar === true ? authenticatedUser.image_file : selectedUser.image_file }}" alt="" />
+  <img class="user-profile-img" src="{{ isNavBar === true ? authenticatedUser.avatar : selectedUser.avatar }}" alt="" />
   <div class="user-name-update">
     <span>{{ isNavBar === true ? authenticatedUser.name : selectedUser.name }}</span>
     <button *ngIf="isNavBar" (click)="onOpenUpdateProfil()">bearbeiten</button>
@@ -30,7 +30,13 @@
   }@else{
   <img
     class="user-profile-img"
-    src="assets/img/profiles/{{ isNavBar === true ? onlineUser?.image_file || 'male_avatar.svg' : selectedUser ? selectedUser.image_file : 'male_avatar.svg' }}"
+    src="{{
+      isNavBar === true
+        ? 'assets/img/profiles/' + onlineUser?.avatar || 'assets/img/profiles/male_avatar.svg'
+        : selectedUser
+        ? selectedUser.avatar
+        : 'assets/img/profiles/male_avatar.svg'
+    }}"
     alt=""
   />
   <div class="user-name-update">

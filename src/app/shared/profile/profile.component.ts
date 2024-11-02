@@ -13,6 +13,6 @@ export class ProfileComponent {
   @Input({ required: true }) bgColorOnline: string = '#686868';
 
   get imagePath() {
-    return 'assets/img/profiles/' + this.image_user;
+    return this.image_user;
   }
 }

@@ -32,7 +32,7 @@
           </div>
           <div *ngFor="let message of chatGroup.messages" class="chat-message" [class.align-right]="message?.from_user !== authenticatedUser?.id">
             <div class="image-message">
-              <img class="sender" src="assets/img/profiles/{{ getCachedUser(message?.from_user)?.avatar }}" alt="" />
+              <img class="sender" src="{{ getCachedUser(message?.from_user)?.avatar }}" alt="" />
             </div>
             <div class="name-date-line">
               <div>

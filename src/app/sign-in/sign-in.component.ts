@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { FooterComponent } from '../footer/footer.component';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,24 +7,17 @@ import { ChooseAvatarComponent } from '../choose-avatar/choose-avatar.component'
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
+import { Channel, ChannelMember } from '../modules/database.model';
+import { DatabaseServiceService } from '../database-service.service';
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [
-    FooterComponent,
-    MatCardModule,
-    MatIconModule,
-    RouterModule,
-    ChooseAvatarComponent,
-    FormsModule,
-    NgClass
-  ],
+  imports: [FooterComponent, MatCardModule, MatIconModule, RouterModule, ChooseAvatarComponent, FormsModule, NgClass],
   templateUrl: './sign-in.component.html',
-  styleUrl: './sign-in.component.scss'
+  styleUrl: './sign-in.component.scss',
 })
-export class SignInComponent {
-
+export class SignInComponent implements OnInit {
   data = {
     id: '',
     name: '',
@@ -32,7 +25,7 @@ export class SignInComponent {
     password: '',
     avatar: '',
     online: false,
-  }
+  };
 
   name: string = '';
   mail: string = '';
@@ -45,11 +38,16 @@ export class SignInComponent {
   displayPrivatPolicyError: boolean = false;
   passwordNotLongEnough: boolean = false;
   displayPasswordNotLongEnough: boolean = false;
+  officeTeamChannel!: Channel;
 
   emptyInputs: boolean = true;
 
-  constructor(private router: Router, private firebase: FirebaseLoginService) {
+  constructor(private router: Router, private firebase: FirebaseLoginService, private databaseService: DatabaseServiceService) {}
 
+  ngOnInit(): void {
+    this.databaseService.officeTeam().subscribe(team => {
+      this.officeTeamChannel = team;
+    });
   }
 
   /**
@@ -77,8 +75,8 @@ export class SignInComponent {
   }
 
   /**
-  * This function checks if the mail Input was already filled, if yes it displays an error-message
-  */
+   * This function checks if the mail Input was already filled, if yes it displays an error-message
+   */
   checkMailInput() {
     if (!this.mail) {
       this.displayMailError = true;
@@ -88,8 +86,8 @@ export class SignInComponent {
   }
 
   /**
-  * This function checks if the password Input was already filled, if yes it displays an error-message
-  */
+   * This function checks if the password Input was already filled, if yes it displays an error-message
+   */
   checkPasswordInput() {
     if (!this.password || this.password.length < 6) {
       this.displayPasswordError = true;
@@ -99,8 +97,8 @@ export class SignInComponent {
   }
 
   /**
-  * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
-  */
+   * This function checks if the Privacy Policy Checkbox was already marked, if yes it displays an error-message
+   */
   checkPrivacyPolicyInput() {
     if (!this.privacyPolicy) {
       this.displayPrivatPolicyError = true;
@@ -134,13 +132,14 @@ export class SignInComponent {
   /**
    * This function creates a user-obj in the firebase authenticator and sends the user to the chosseAvatar site
    */
-  async onSubmit() {    
-    if (await this.firebase.findUserWithRef('email', this.mail) == false) {
+  async onSubmit() {
+    if ((await this.firebase.findUserWithRef('email', this.mail)) == false) {
       this.setData();
       let user = this.firebase.setUserObject(this.data);
       let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name);
       this.router.navigate(['/chooseAvatar', id]);
       this.emptyAllInputs();
+      this.onAddChannel(id);
     } else {
       this.displayMailErrorFor3Sec();
     }
@@ -156,4 +155,26 @@ export class SignInComponent {
     }, 3000);
   }
 
+  async createDefaultChannel() {
+    let channelData = {
+      channel_name: 'office-team',
+      admin: 'unknown',
+    };
+    let defaultChannel = new Channel(channelData);
+    let channelObject = defaultChannel.toObject();
+    this.databaseService.addChannel(channelObject);
+    return channelObject.channel_id;
+  }
+
+  onAddChannel(currentUser: string) {
+    if (this.officeTeamChannel) {
+      const newMember = new ChannelMember({ member_id: currentUser, channel_id: this.officeTeamChannel.channel_id }).toObject();
+      this.databaseService.addMemberToChannel(newMember);
+    } else {
+      this.createDefaultChannel().then(ch_id => {
+        const newMember = new ChannelMember({ member_id: currentUser, channel_id: ch_id }).toObject();
+        this.databaseService.addMemberToChannel(newMember);
+      });
+    }
+  }
 }

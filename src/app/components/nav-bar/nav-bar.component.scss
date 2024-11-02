@@ -141,6 +141,20 @@ header {
     }
   }
 }
+
+@media screen and (width<800px) {
+  .input-search {
+    > input {
+      margin-left: unset !important;
+    }
+  }
+}
+@media screen and (width<770px) {
+  .input-search {
+    width: 35vw;
+  }
+}
+
 @media (width<630px) {
   .dDestop {
     display: none;

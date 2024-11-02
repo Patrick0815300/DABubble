@@ -37,6 +37,7 @@
               onToggleDevSearch(false);
               sendChannel(channel);
               handleMobileView('wrapper_2');
+              loadChannelMembers(channel.channel_id);
               showChannelMessages(true);
               loadChannelMessages(channel.channel_id);
               handleUpdateUserChannelId(channel.channel_id)
@@ -84,7 +85,7 @@
           <app-profile
             class="app-profile"
             [left_side_profile]="true"
-            [image_user]="authenticatedUser.image_file"
+            [image_user]="authenticatedUser.avatar"
             [bgColorOnline]="authenticatedUser.online === true ? '#92c83e' : '#686868'"
           />
           <span class="user-name" *ngIf="authenticatedUser"> {{ authenticatedUser.name }}</span>
@@ -105,7 +106,7 @@
           "
           class="d-flex capitilize gp l-mg-2"
         >
-          <app-profile class="app-profile" [left_side_profile]="true" [image_user]="onlineUser ? onlineUser.image_file : 'male_avatar.svg'" [bgColorOnline]="'#92c83e'" />
+          <app-profile class="app-profile" [left_side_profile]="true" [image_user]="'assets/img/profiles/male_avatar.svg'" [bgColorOnline]="'#92c83e'" />
           <span class="user-name"> {{ onlineUser ? onlineUser.name : 'bubble guest' }}</span>
           <span>(Du)</span>
         </li>
@@ -129,8 +130,8 @@
             <app-profile
               class="app-profile"
               [left_side_profile]="true"
-              *ngIf="user.image_file"
-              [image_user]="user.image_file"
+              *ngIf="user.avatar"
+              [image_user]="user.avatar"
               [bgColorOnline]="user.online === true ? '#92c83e' : '#686868'"
             />
             <span> {{ user.name }}</span>
