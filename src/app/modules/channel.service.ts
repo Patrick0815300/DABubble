@@ -27,7 +27,7 @@ export class ChannelService {
   openLogoutMobile$ = this.openLogoutContainerSubject.asObservable();
   isDialogOpen = false;
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore) { }
 
   emitChannelView(isShown: boolean) {
     this.isChannelSource.next(isShown);
@@ -59,7 +59,6 @@ export class ChannelService {
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.log(`No ${collectionName} found with field:', ${parameter}`);
       return null;
     } else {
       const docSnapshot = querySnapshot.docs[0];
@@ -73,12 +72,8 @@ export class ChannelService {
       const userDocRef = doc(this.firestore, `${collectionName}/${docId}`);
       try {
         await updateDoc(userDocRef, editedData);
-        console.log(`${collectionName} successfully updated!`);
       } catch (error) {
-        console.error(`Error updating ${collectionName} field ${parameter}: `, error);
       }
-    } else {
-      console.log(`No ${collectionName} found with ID:', ${parameter}`);
     }
   }
 

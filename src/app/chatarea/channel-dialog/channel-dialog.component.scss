@@ -181,11 +181,23 @@ app-member-dialog {
         }
     }
 
-
     app-member-dialog {
         display: block;
         border: 1px solid #ADB0D9;
         border-radius: 20px;
         padding: 20px;
+    }
+
+    h2 {
+        font-size: 20px;
+
+        mat-icon {
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     }
 }

@@ -179,5 +179,16 @@
 @media(max-width: 610px) {
     .container {
         margin: 0 16px;
+
+        .bottom {
+            app-emoji-picker {
+                left: 115%;
+            }
+
+            .link-someone {
+                padding: 5px 5px;
+                left: 114px;
+            }
+        }
     }
 }

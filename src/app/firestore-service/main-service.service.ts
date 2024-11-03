@@ -3,14 +3,26 @@ import { Firestore, collection, doc, updateDoc, getDocs } from '@angular/fire/fi
 import { ActivatedRoute, Router } from '@angular/router';
 import { getAuth, User } from 'firebase/auth';
 import { AuthService } from './auth.service';
+import { Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MainServiceService {
-  uid = this.authService.getUID();
+  uid: string | null = null;
+  private uidSubscription: Subscription | null = null;
 
-  constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router, private authService: AuthService) { }
+  constructor(private firestore: Firestore, private route: ActivatedRoute, private router: Router, private authService: AuthService) {
+    this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.uid = uid;
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.uidSubscription) {
+      this.uidSubscription.unsubscribe();
+    }
+  }
 
   /**
  * Returns a reference to a Firestore collection based on the provided collection ID.
@@ -86,4 +98,8 @@ export class MainServiceService {
     return date.toLocaleDateString('de-DE');
   }
 
+  async setThreadOpenFalse(): Promise<void> {
+    const userDocRef = doc(this.firestore, `users/${this.uid}`);
+    await updateDoc(userDocRef, { thread_open: false });
+  }
 }

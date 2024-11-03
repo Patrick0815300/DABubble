@@ -19,12 +19,10 @@ export class AuthService {
     onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         this.uidSubject.next(user.uid);
-        console.log('User is signed in:', user.uid);
         const userDocRef = doc(this.firestore, 'users', user.uid);
         await updateDoc(userDocRef, { online: true });
       } else {
         this.uidSubject.next(null);
-        console.log('No user is signed in.');
       }
     });
   }
@@ -46,6 +44,5 @@ export class AuthService {
     }
     await auth.signOut();
     this.uidSubject.next(null);
-    console.log('User signed out');
   }
 }

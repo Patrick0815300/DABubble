@@ -48,9 +48,7 @@ export class ChannelDialogComponent {
   isAdmin: boolean = false;
   channelAdminId: string = '';
 
-  constructor(private fireService: ChatareaServiceService, private chatService: ChatServiceService, private authService: AuthService) {
-
-  }
+  constructor(private fireService: ChatareaServiceService, private chatService: ChatServiceService, private authService: AuthService) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {

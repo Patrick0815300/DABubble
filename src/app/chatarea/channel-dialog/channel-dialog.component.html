@@ -44,5 +44,5 @@
 <app-member-dialog></app-member-dialog>
 
 <div class="leave-channel">
-  <button (click)="leaveChannel()" [disabled]="isAdmin">Channel verlassen</button>
+  <button *ngIf="isMember || isAdmin" (click)="leaveChannel()" [disabled]="isAdmin">Channel verlassen</button>
 </div>

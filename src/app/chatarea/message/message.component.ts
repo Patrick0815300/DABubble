@@ -45,7 +45,7 @@ export class MessageComponent {
     private authService: AuthService,
     private chatAreaService: ChatareaServiceService,
     private channelService: ChannelService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.uid = this.authService.getUID();
@@ -121,10 +121,7 @@ export class MessageComponent {
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
-      },
-      error: err => {
-        console.error('Fehler beim Laden des aktiven Channels:', err);
-      },
+      }
     });
   }
 
@@ -140,9 +137,6 @@ export class MessageComponent {
       .addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
       .then(() => {
         this.updateLocalReactions(reactionType);
-      })
-      .catch(error => {
-        console.error('Fehler beim Hinzufügen der Reaktion:', error);
       });
   }
 

@@ -146,7 +146,6 @@ export class DatabaseServiceService {
   async addMessage(newMessage: object) {
     try {
       const docRef = await addDoc(this.getMessagesRef(), newMessage);
-      console.log('Document written with ID: ', docRef.id);
       return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -157,7 +156,6 @@ export class DatabaseServiceService {
   async addChannel(channel: object) {
     try {
       const docRef = await addDoc(this.getChannelsRef(), channel);
-      console.log('Document written with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
@@ -166,7 +164,6 @@ export class DatabaseServiceService {
   async addMemberToChannel(member: object) {
     try {
       const docRef = await addDoc(this.getChannelMemberRef(), member);
-      console.log('Document written with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
@@ -255,7 +252,6 @@ export class DatabaseServiceService {
         const docSnapshot = querySnapshot.docs[0];
         return docSnapshot.id;
       } else {
-        console.log(`No Member found with ID:', ${parameter}`);
         return null;
       }
     } else {

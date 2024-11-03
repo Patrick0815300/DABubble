@@ -100,14 +100,12 @@ mat-card-content {
 .message-box {
   margin-bottom: 40px;
 }
-.showRightWrapper {
-  display: none;
-}
 
 @media screen and (width<=630px) {
   mat-card-header {
     border-radius: 0;
   }
+
   .card {
     border-radius: unset !important;
   }
@@ -115,6 +113,7 @@ mat-card-content {
   .mat-mdc-card-content {
     padding: 1.5rem !important;
   }
+
   mat-card-header {
     padding-inline: 24px !important;
   }

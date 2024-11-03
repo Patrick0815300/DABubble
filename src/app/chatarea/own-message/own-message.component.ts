@@ -91,7 +91,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
@@ -160,7 +159,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-
   async loadReactionNames() {
     this.reactionNames = [];
     if (this.message.reactions && this.message.reactions.length > 0) {
@@ -189,7 +187,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       }
     }
   }
-
 
   loadThreadDetails() {
     this.lastAnswerTime = '';

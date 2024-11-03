@@ -181,6 +181,7 @@
 @media(max-width: 610px) {
     .message-container {
         padding: 10px 16px;
+        gap: 16px;
 
         .img-container {
             img {
@@ -192,6 +193,12 @@
         .message {
             .text {
                 font-size: 17px;
+            }
+
+            .answer {
+                .counted-answers {
+                    white-space: nowrap;
+                }
             }
         }
     }

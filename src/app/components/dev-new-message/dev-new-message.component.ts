@@ -35,7 +35,7 @@ export class DevNewMessageComponent implements OnInit {
     private navService: NavService,
     private databaseService: DatabaseServiceService,
     private channelService: ChannelService
-  ) {}
+  ) { }
   ngOnInit(): void {
     this.navService.stateOpenDevSearch$.subscribe(state => {
       this.devSearchState = state;
@@ -69,7 +69,6 @@ export class DevNewMessageComponent implements OnInit {
         this.channelService.emitFilteredUsers(this.filtered_users);
       } else if (this.search_input.length > 1 && this.search_input[0] === '@') {
         this.filtered_users = this.all_users?.filter(u => u.name?.toLowerCase().includes(this.search_input?.slice(1).toLowerCase()));
-
         this.channelService.emitFilteredUsers(this.filtered_users);
       }
     } else if (this.search_input && this.search_input[0] !== '@') {

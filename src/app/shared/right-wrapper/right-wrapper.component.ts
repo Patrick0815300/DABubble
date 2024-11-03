@@ -41,7 +41,7 @@ export class RightWrapperComponent {
   private currentChannel: Channel | null = null;
   private uidSubscription: Subscription | null = null;
 
-  constructor(private channelService: ChannelService) {}
+  constructor(private channelService: ChannelService) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -128,6 +128,5 @@ export class RightWrapperComponent {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
-    console.log(val);
   }
 }

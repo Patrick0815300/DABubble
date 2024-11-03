@@ -12,6 +12,7 @@ import { combineLatest, Observable, of, switchMap, map, Subscription } from 'rxj
 import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
 import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
+import { MainServiceService } from '../../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -66,7 +67,8 @@ export class LeftSideMenuComponent implements OnInit {
     private databaseService: DatabaseServiceService,
     private authService: CurrentUserService,
     private authenticatedService: AuthService,
-    private showProfilService: ShowProfilService
+    private showProfilService: ShowProfilService,
+    private mainService: MainServiceService
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -176,11 +178,15 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
+  closeThread() {
+    this.mainService.setThreadOpenFalse();
+  }
+
   handleUpdateUserChannelId(currentChannelId: string) {
     this.channelService.updateChannelData('users', 'id', this.auth_user_id, { activeChannelId: currentChannelId });
   }
 
-  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
