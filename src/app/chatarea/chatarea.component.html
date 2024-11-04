@@ -45,7 +45,7 @@
         <div class="devider"></div>
       </div>
       <app-message @flyInRight *ngIf="message.senderId !== uid" [message]="message"></app-message>
-      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message"></app-own-message>
+      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message" (notifyThreadOpen)="onNotifyThreadOpen()"></app-own-message>
     </ng-container>
   </mat-card-content>
   <app-message-box class="message-box"></app-message-box>

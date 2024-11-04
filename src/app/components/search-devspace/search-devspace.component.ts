@@ -28,7 +28,7 @@ export class SearchDevspaceComponent implements OnInit {
     private userService: UserService,
     private databaseService: DatabaseServiceService,
     private navService: NavService
-  ) {}
+  ) { }
   ngOnInit(): void {
     this.authService.userID$.subscribe(userId => {
       this.databaseService.authUser(userId!).then(user => {
@@ -53,6 +53,11 @@ export class SearchDevspaceComponent implements OnInit {
       this.input_search = value;
     });
   }
+
+  handleUpdateUserChannelId(currentChannelId: string) {
+    this.channelService.updateChannelData('users', 'id', this.authenticatedUser?.id, { activeChannelId: currentChannelId });
+  }
+
   sendToOpenUser(user: User) {
     if (!this.PickedArray.includes(user.id)) {
       this.PickedArray.push(user.id);

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -70,7 +70,8 @@ import { NavService } from '../modules/nav.service';
 export class ChatareaComponent implements AfterViewInit {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
   @ViewChild(MessageBoxComponent) messageBoxComponent!: MessageBoxComponent;
-
+  @Output() notifyThreadOpen: EventEmitter<void> = new EventEmitter();
+  @Input() close!: boolean;
   private uidSubscription: Subscription | null = null;
   private memberSubscriptions: Subscription[] = [];
   channelInfoDialog: boolean = false;
@@ -107,6 +108,10 @@ export class ChatareaComponent implements AfterViewInit {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  onNotifyThreadOpen() {
+    this.notifyThreadOpen.emit();
   }
 
   clearChannelData() {

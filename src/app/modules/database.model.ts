@@ -96,6 +96,7 @@ export class Channel {
   thread_open!: boolean;
   chosen!: boolean;
   is_deleted!: boolean;
+  member!: string[];
 
   constructor(obj?: any) {
     this.channel_id = obj ? obj.channel_id || nanoid() : '';
@@ -106,6 +107,7 @@ export class Channel {
     this.thread_open = obj ? obj.thread_open || false : '';
     this.chosen = obj ? obj.chosen || false : '';
     this.is_deleted = obj ? obj.is_deleted || false : '';
+    this.member = obj ? obj.member || [] : [];
   }
 
   public toObject() {
@@ -118,6 +120,7 @@ export class Channel {
       thread_open: this.thread_open,
       chosen: this.chosen,
       is_deleted: this.is_deleted,
+      member: this.member,
     };
   }
 }

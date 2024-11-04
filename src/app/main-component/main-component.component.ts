@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { WrapperComponent } from '../shared/wrapper/wrapper.component';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
@@ -30,6 +30,7 @@ import { map, Subscription } from 'rxjs';
 import { AuthService } from '../firestore-service/auth.service';
 import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
 import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout.component';
+import { MainServiceService } from '../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-main-component',
@@ -93,7 +94,6 @@ export class MainComponentComponent implements OnInit {
   showSearchUserName: boolean = false;
   dev_message_search: boolean = false;
   officeTeamChannel!: Channel;
-
   private uidSubscription: Subscription | null = null;
   constructor(
     private navService: NavService,
@@ -103,7 +103,8 @@ export class MainComponentComponent implements OnInit {
     private updateProfilService: UpdateProfilService,
     private databaseService: DatabaseServiceService,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private mainService: MainServiceService,
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -273,6 +274,9 @@ export class MainComponentComponent implements OnInit {
     this.hide_navigation = !this.hide_navigation;
     this.toggleNavigation();
     this.state_icon = this.iconPath();
+    if (innerWidth < 1350 && !this.close) {
+      this.mainService.setThreadOpenFalse();
+    }
   }
 
   onCloseDialog() {
@@ -281,8 +285,6 @@ export class MainComponentComponent implements OnInit {
 
   toggleCheckTeam() {
     this.isChecked = this.isChecked;
-    console.log(this.isChecked);
-
     return this.isChecked;
   }
 

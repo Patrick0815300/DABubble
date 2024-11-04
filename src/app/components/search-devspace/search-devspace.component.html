@@ -4,7 +4,7 @@
     <li
       *ngFor="let channel of filteredChannels; let i = index"
       class="d-flex gp l-mg-2"
-      (click)="loadChannelMessages(channel.channel_id); sendChannel(channel); loadChannelMembers(channel.channel_id); onToggleDevSearch(false); showChannelMessages(true)"
+      (click)="handleUpdateUserChannelId(channel.channel_id); loadChannelMessages(channel.channel_id); sendChannel(channel); loadChannelMembers(channel.channel_id); onToggleDevSearch(false); showChannelMessages(true)"
     >
       <img class="icon-small" src="assets/img/icons/hash_tag.svg" alt="" />
       <span class="capitilize">{{ channel.channel_name }} </span>

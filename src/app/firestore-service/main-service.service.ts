@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, updateDoc, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, doc, updateDoc, getDocs, docData } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getAuth, User } from 'firebase/auth';
 import { AuthService } from './auth.service';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -101,5 +101,18 @@ export class MainServiceService {
   async setThreadOpenFalse(): Promise<void> {
     const userDocRef = doc(this.firestore, `users/${this.uid}`);
     await updateDoc(userDocRef, { thread_open: false });
+  }
+
+  getThreadOpen(uid: string): Observable<boolean> {
+    const userDocRef = doc(this.firestore, `users/${uid}`);
+    return docData(userDocRef).pipe(
+      map(userData => {
+        if (userData && 'thread_open' in userData) {
+          return userData['thread_open'] === true;
+        } else {
+          return false;
+        }
+      })
+    );
   }
 }

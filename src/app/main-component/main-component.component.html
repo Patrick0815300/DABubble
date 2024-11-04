@@ -19,6 +19,8 @@
       *ngIf="isChannelView === true"
       class="app-middle-wrapper"
       [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
+      (notifyThreadOpen)="handleToggle()"
+      [close]="close"
     />
 
     <app-dev-space-area [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'" *ngIf="dev_message_search === true" class="app-middle-wrapper" />

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -35,6 +35,8 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 })
 export class OwnMessageComponent implements OnInit, OnDestroy {
   @Input() message: any;
+  @Input() close!: boolean;
+  @Output() notifyThreadOpen: EventEmitter<void> = new EventEmitter();
   isReactionBarVisible: { [messageId: string]: boolean } = {};
   private isMenuOpen: { [messageId: string]: boolean } = {};
 
@@ -200,6 +202,12 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   openThread(messageId: string) {
     this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
+    console.log(this.close);
+
+    if (window.innerWidth < 1350 && !this.close) {
+      this.notifyThreadOpen.emit();
+
+    }
   }
 
   loadActiveChannelId() {
