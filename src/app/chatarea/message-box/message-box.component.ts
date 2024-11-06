@@ -74,7 +74,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     private emojiRef: ElementRef,
     private channelService: ChannelService,
     private currentGuest: CurrentUserService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
