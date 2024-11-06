@@ -10,7 +10,7 @@ export class GuestService {
     name: 'bubble guest',
     email: 'guest@mail.com',
     avatar: 'assets/img/profiles/male_avatar.svg',
-    password: '',
+    password: '123456789',
     online: true,
     thread_open: false,
     activeChannelId: '',

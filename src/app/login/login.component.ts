@@ -161,41 +161,15 @@ export class LoginComponent implements OnInit {
     return channelObject.channel_id;
   }
 
-  onGuestLogin() {
-    let guest = this.guestService.guestData;
-    let newUser = new User(guest);
-    localStorage.setItem('guest', JSON.stringify(guest));
-
-    if (!this.officeTeamChannel) {
-      this.createDefaultChannel().then(ch_id => {
-        this.databaseService
-          .deleteDocument('users', 'name', 'bubble guest')
-          .then(() => {
-            this.databaseService.addUser(newUser.toObject());
-          })
-          .then(() => {
-            this.currentUserService.getGuestUser();
-            const newMember = new ChannelMember({ member_id: guest.id, channel_id: ch_id }).toObject();
-            this.databaseService.addMemberToChannel(newMember);
-          });
-      });
-    } else {
-      this.databaseService
-        .deleteDocument('users', 'name', 'bubble guest')
-        .then(() => {
-          this.databaseService.addUser(newUser.toObject()).then(id => this.updateUserId(id, { id: id }));
-        })
-        .then(() => {
-          this.currentUserService.getGuestUser();
-          const newMember = new ChannelMember({ member_id: guest.id, channel_id: this.officeTeamChannel.channel_id }).toObject();
-          this.databaseService.addMemberToChannel(newMember);
-        });
+  async onGuestLogin() {
+    try {
+      const userCredential = await signInWithEmailAndPassword(this.auth, this.guestService.guestData.email, this.guestService.guestData.password);
+      await this.createNewUserObject(userCredential);
+      this.sendUserToDesktop(userCredential);
+      await this.setVarOnlineToTrue(userCredential);
+    } catch (error) {
+      this.displayWrongMailOrPasswordErrorMessage();
+      this.resetInputs();
     }
-  }
-
-  async updateUserId(id: string | undefined, data: any) {
-    const userDocRef = doc(this.firestore, `users/${id}`);
-    await updateDoc(userDocRef, data);
-    return id;
   }
 }

@@ -225,8 +225,6 @@ export class LeftSideMenuComponent implements OnInit {
   onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
-    console.log('Pam', currentUserId, 'targ', targetUserId);
-
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
         if (currentUserId !== targetUserId) {
@@ -264,7 +262,6 @@ export class LeftSideMenuComponent implements OnInit {
     this.sendUserId(selectionUser ? selectionUser.id! : currentAuthUser?.id);
     this.sendSelectedUser(selectionUser ? selectionUser : currentAuthUser);
     this.showChannelMessages(false);
-    console.log('sel', this.selectedUser, 'current', this.selectedUser);
 
     this.loadMessages(currentAuthUser?.id, selectionUser ? selectionUser.id! : currentAuthUser?.id);
   }
@@ -317,8 +314,6 @@ export class LeftSideMenuComponent implements OnInit {
    * @param {User} user - current selected user from the navigation
    */
   sendSelectedUser(user: User) {
-    console.log('you select', user);
-
     this.userService.emitSelectedUser(user);
   }
 

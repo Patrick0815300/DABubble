@@ -62,16 +62,7 @@ export class MobileLogoutComponent {
     this.userService.emitSelectedUser(user);
   }
 
-  removeGuest() {
-    this.databaseService.deleteDocument('users', 'name', 'bubble guest').then(() => {
-      if (this.authenticatedUser) {
-        this.channelService.updateChannelData('users', 'id', this.authenticatedUser.id, { online: false });
-      }
-    });
-  }
-
   logout() {
-    this.removeGuest();
     localStorage.removeItem('currentName');
     localStorage.removeItem('authUser');
     localStorage.removeItem('currentState');
