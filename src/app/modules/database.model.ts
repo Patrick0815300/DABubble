@@ -96,7 +96,7 @@ export class Channel {
   thread_open!: boolean;
   chosen!: boolean;
   is_deleted!: boolean;
-  member!: string[];
+  member!: string | undefined[];
 
   constructor(obj?: any) {
     this.channel_id = obj ? obj.channel_id || nanoid() : '';

@@ -42,6 +42,7 @@
               loadChannelMessages(channel.channel_id);
               handleUpdateUserChannelId(channel.channel_id);
               closeThread();
+              storeStateSessionInfo('no user', 'no user', 'channel', i)
             "
             class="d-flex gp l-mg-7"
           >
@@ -74,12 +75,13 @@
           (click)="
             selectUser(0);
             onAutoFocus();
-            sendSelectedUser(authenticatedUser!);
+            sendSelectedUser(authenticatedUser);
             handleMobileView('wrapper_2');
             onToggleDevSearch(false);
             showChannelMessages(false);
             sendUserId(authenticatedUser.id!);
-            loadMessages(authenticatedUser.id!, authenticatedUser.id!)
+            loadMessages(authenticatedUser.id!, authenticatedUser.id!);
+            storeStateSessionInfo(authenticatedUser, authenticatedUser, 'user', 0)
           "
           class="d-flex capitilize gp l-mg-2"
         >
@@ -103,7 +105,8 @@
             handleMobileView('wrapper_2');
             showChannelMessages(false);
             sendUserId(onlineUser?.id!);
-            loadMessages(onlineUser?.id!, onlineUser?.id!)
+            loadMessages(onlineUser?.id!, onlineUser?.id!);
+            storeStateSessionInfo(onlineUser, onlineUser, 'guest', 0)
           "
           class="d-flex capitilize gp l-mg-2"
         >
@@ -124,7 +127,8 @@
               onToggleDevSearch(false);
               showChannelMessages(false);
               sendUserId(user.id);
-              loadMessages(authenticatedUser?.id, user.id)
+              loadMessages(authenticatedUser ? authenticatedUser.id : onlineUser.id, user.id);
+              storeStateSessionInfo(authenticatedUser ? authenticatedUser : onlineUser, user, 'user', i + 1)
             "
             class="d-flex capitilize gp l-mg-2"
           >

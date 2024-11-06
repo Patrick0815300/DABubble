@@ -72,6 +72,11 @@ export class MobileLogoutComponent {
 
   logout() {
     this.removeGuest();
+    localStorage.removeItem('currentName');
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('currentState');
+    localStorage.removeItem('selectedUser');
+    localStorage.removeItem('guest');
     this.authService.logout();
     this.router.navigate(['/']);
   }

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { WrapperComponent } from '../shared/wrapper/wrapper.component';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
@@ -31,6 +31,7 @@ import { AuthService } from '../firestore-service/auth.service';
 import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
 import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout.component';
 import { MainServiceService } from '../firestore-service/main-service.service';
+import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-main-component',
@@ -105,6 +106,8 @@ export class MainComponentComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService,
     private mainService: MainServiceService,
+    private cdr: ChangeDetectorRef,
+    private firestore: Firestore
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -242,16 +245,20 @@ export class MainComponentComponent implements OnInit {
     });
   }
 
-  onAddPeopleToChannel(array: any[], office: any) {
+  async onAddPeopleToChannel(array: any[], office: any) {
     if (this.alreadyExist(office.channel_name)) {
       console.log('This channel name is already used, please enter a different name.');
       this.open_dialog_add_user = false;
       this.navService.createChannel();
     } else {
-      this.databaseService.addChannel(office);
       if (!array.includes(this.authenticatedUser?.id)) {
         array.push(this.authenticatedUser?.id);
       }
+
+      this.databaseService
+        .addChannel(office)
+        .then(id => this.updateChannelIdOrMember(id, { channel_id: id }).then(id => this.updateChannelIdOrMember(id, { member: array.filter(m => m !== undefined) })));
+
       array.forEach(member => {
         const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
         this.databaseService.addMemberToChannel(newMember);
@@ -259,6 +266,12 @@ export class MainComponentComponent implements OnInit {
       this.onCancelAddUser();
       this.channel_name = '';
     }
+  }
+
+  async updateChannelIdOrMember(id: string | undefined, data: any) {
+    const userDocRef = doc(this.firestore, `channels/${id}`);
+    await updateDoc(userDocRef, data);
+    return id;
   }
 
   iconPath() {
@@ -273,6 +286,7 @@ export class MainComponentComponent implements OnInit {
     this.close = !this.close;
     this.hide_navigation = !this.hide_navigation;
     this.toggleNavigation();
+
     this.state_icon = this.iconPath();
     if (innerWidth < 1350 && !this.close) {
       this.mainService.setThreadOpenFalse();

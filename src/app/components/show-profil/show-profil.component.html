@@ -30,18 +30,11 @@
   }@else{
   <img
     class="user-profile-img"
-    src="{{
-      isNavBar === true
-        ? 'assets/img/profiles/' + onlineUser?.avatar || 'assets/img/profiles/male_avatar.svg'
-        : selectedUser
-        ? selectedUser.avatar
-        : 'assets/img/profiles/male_avatar.svg'
-    }}"
+    src="{{ isNavBar === true ? 'assets/img/profiles/male_avatar.svg' : selectedUser ? selectedUser.avatar : 'assets/img/profiles/male_avatar.svg' }}"
     alt=""
   />
   <div class="user-name-update">
-    <span>{{ isNavBar === true ? onlineUser?.name || 'bubble guest' : selectedUser ? selectedUser.name : 'bubble guest' }}</span>
-    <!-- <button *ngIf="selectedUser?.id === onlineUser?.id" (click)="onOpenUpdateProfil()">bearbeiten</button> -->
+    <span>{{ isNavBar === true ? 'bubble guest' : selectedUser ? selectedUser.name : 'bubble guest' }}</span>
     <button *ngIf="isNavBar" (click)="onOpenUpdateProfil()">bearbeiten</button>
   </div>
   <div class="single-user-info">
@@ -54,7 +47,7 @@
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <span class="mail-address">{{ isNavBar === true ? onlineUser?.email || 'guest@mail.com' : selectedUser ? selectedUser.email : 'guest@mail.com' }}</span>
+  <span class="mail-address">{{ isNavBar === true ? 'guest@mail.com' : selectedUser ? selectedUser.email : 'guest@mail.com' }}</span>
   <div *ngIf="!isNavBar" class="btn-container">
     <button class="btn" (click)="onAutoFocus()">
       <img src="assets/img/icons/mode_comment.svg" alt="" />

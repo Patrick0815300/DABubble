@@ -537,6 +537,10 @@ button {
     padding-inline: unset;
   }
 
+  .chat-content {
+    padding-inline: 1.5rem;
+  }
+
   .chat-container {
     flex: 1;
   }
@@ -547,7 +551,7 @@ button {
     border-right: unset;
     border-top-left-radius: unset;
     border-top-right-radius: unset;
-    margin-inline: -1rem;
+    margin-inline: -1.5rem;
     padding-inline: 1rem;
   }
 }

@@ -18,6 +18,7 @@ import { Auth } from '@angular/fire/auth';
 import { DatabaseServiceService } from '../database-service.service';
 import { Channel, ChannelMember, User } from '../modules/database.model';
 import { nanoid } from 'nanoid';
+import { GuestService } from '../modules/guest.service';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -33,6 +34,7 @@ export class LoginComponent implements OnInit {
   officeTeamChannel!: Channel;
   constructor(
     private firebase: FirebaseLoginService,
+    private guestService: GuestService,
     private databaseService: DatabaseServiceService,
     private router: Router,
     private userService: UserService,
@@ -160,17 +162,9 @@ export class LoginComponent implements OnInit {
   }
 
   onGuestLogin() {
-    let guest = {
-      id: nanoid(),
-      name: 'bubble guest',
-      email: 'guest@mail.com',
-      avatar: 'male_avatar.svg',
-      password: '',
-      online: true,
-      thread_open: false,
-      activeChannelId: '',
-    };
+    let guest = this.guestService.guestData;
     let newUser = new User(guest);
+    localStorage.setItem('guest', JSON.stringify(guest));
 
     if (!this.officeTeamChannel) {
       this.createDefaultChannel().then(ch_id => {
@@ -189,7 +183,7 @@ export class LoginComponent implements OnInit {
       this.databaseService
         .deleteDocument('users', 'name', 'bubble guest')
         .then(() => {
-          this.databaseService.addUser(newUser.toObject());
+          this.databaseService.addUser(newUser.toObject()).then(id => this.updateUserId(id, { id: id }));
         })
         .then(() => {
           this.currentUserService.getGuestUser();
@@ -197,5 +191,11 @@ export class LoginComponent implements OnInit {
           this.databaseService.addMemberToChannel(newMember);
         });
     }
+  }
+
+  async updateUserId(id: string | undefined, data: any) {
+    const userDocRef = doc(this.firestore, `users/${id}`);
+    await updateDoc(userDocRef, data);
+    return id;
   }
 }

@@ -138,8 +138,10 @@ export class DatabaseServiceService {
     try {
       const docRef = await addDoc(this.getUsersRef(), newUser);
       console.log('Document written with ID: ', docRef.id);
+      return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
+      return;
     }
   }
 
@@ -156,8 +158,10 @@ export class DatabaseServiceService {
   async addChannel(channel: object) {
     try {
       const docRef = await addDoc(this.getChannelsRef(), channel);
+      return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
+      return;
     }
   }
 

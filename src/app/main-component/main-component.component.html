@@ -7,7 +7,7 @@
       </span>
       <img class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
-    <app-left-side-menu *ngIf="hide_navigation == false" class="toggle-display" [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'" />
+    <app-left-side-menu *ngIf="!hide_navigation" class="toggle-display" [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'" />
     <app-messages
       *ngIf="isChannelView === false"
       class="app-middle-wrapper"
@@ -94,7 +94,7 @@
   <app-edit-channel />
   <div (click)="onCloseEditChannel()" class="overlay"></div>
   } @if(openLogoutMobile){
-  <app-mobile-logout />
-  <div (click)="onCloseMobileLogout()" class="overlay"></div>
+  <app-mobile-logout class="showLogout" />
+  <div (click)="onCloseMobileLogout()" class="overlay showLogout"></div>
   }
 </section>

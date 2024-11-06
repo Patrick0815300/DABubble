@@ -1,7 +1,7 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, DoCheck, AfterViewInit, ElementRef, inject, OnInit, ViewChild, SimpleChanges, Renderer2 } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, OnInit, ViewChild, SimpleChanges, Renderer2 } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
-import { addDoc, collection, FirestoreModule } from '@angular/fire/firestore';
+import { FirestoreModule, Firestore } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
 import { DatabaseServiceService } from '../../database-service.service';
 import { CommonModule, formatDate } from '@angular/common';
@@ -17,12 +17,10 @@ import { SearchUserComponent } from '../search-user/search-user.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { finalize, map, Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import { AuthService } from '../../firestore-service/auth.service';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
-import { nanoid } from 'nanoid';
-import { getFirestore, provideFirestore, Firestore } from '@angular/fire/firestore';
-import { getDownloadURL, getStorage, provideStorage, ref, Storage, uploadBytes } from '@angular/fire/storage';
+import { Storage } from '@angular/fire/storage';
 
 @Component({
   selector: 'app-messages',

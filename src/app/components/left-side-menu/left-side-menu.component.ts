@@ -13,6 +13,7 @@ import { UserService } from '../../modules/user.service';
 import { ChannelService } from '../../modules/channel.service';
 import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
 import { MainServiceService } from '../../firestore-service/main-service.service';
+import { GuestService } from '../../modules/guest.service';
 
 @Component({
   selector: 'app-left-side-menu',
@@ -27,7 +28,7 @@ export class LeftSideMenuComponent implements OnInit {
   state: boolean = false;
   active: boolean = false;
   show_channel_msg!: boolean;
-  selectedIndex: number = 0;
+  selectedIndex!: number;
   selectedChannelIndex!: number;
   collapse: boolean = false;
   expand: boolean = false;
@@ -40,6 +41,7 @@ export class LeftSideMenuComponent implements OnInit {
   users: User[] = [new User()];
   messages: Message[] = [new Message()];
   chatMessages: Message[] = [];
+  selectedChannel: Channel = new Channel();
   chat!: Message[];
   usersMap: { [key: string]: User } = {};
   messagesMap: { [key: string]: Message } = {};
@@ -55,6 +57,7 @@ export class LeftSideMenuComponent implements OnInit {
   auth_user_id!: any;
   observeUser!: Observable<User>;
   private uidSubscription: Subscription | null = null;
+
   /**
    * @constructor
    * @param {NavService} navService - instance of NavService for subscribing to the
@@ -68,7 +71,8 @@ export class LeftSideMenuComponent implements OnInit {
     private authService: CurrentUserService,
     private authenticatedService: AuthService,
     private showProfilService: ShowProfilService,
-    private mainService: MainServiceService
+    private mainService: MainServiceService,
+    private guestService: GuestService
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -78,14 +82,50 @@ export class LeftSideMenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.onlineUser = this.guestService.guestData;
+    const currentName = localStorage.getItem('currentName');
+    const currentState = localStorage.getItem('currentState');
+    const currentUserData = localStorage.getItem('authUser');
+    const currentSelectedUserData = localStorage.getItem('selectedUser');
+    let currentUser;
+    let currentUserSelection;
+
+    if (currentUserData && currentUserData !== 'undefined') {
+      currentUser = JSON.parse(currentUserData);
+    } else {
+      currentUser = '';
+    }
+
+    if (currentSelectedUserData && currentSelectedUserData !== 'undefined') {
+      currentUserSelection = JSON.parse(currentSelectedUserData);
+    } else {
+      currentUserSelection = '';
+    }
+
+    this.userService.selectedUser$.subscribe(selected_user => {
+      this.selectedUser = selected_user;
+    });
+
+    this.userService.channel$.subscribe(selected_channel => {
+      this.selectedChannel = selected_channel;
+    });
+    if (currentName === '') {
+      this.selectUser(0);
+      this.onToggleDevSearch(false);
+      this.showChannelMessages(false);
+    } else if (currentName && currentName === 'user') {
+      this.userLoad(currentState, currentUser, currentUserSelection);
+    } else if (currentName && currentName === 'guest') {
+      this.guestLoad(currentState, currentUserSelection);
+    } else if (currentName && currentName === 'channel') {
+      this.channelLoad(currentState);
+    }
+
     this.authService.userID$.subscribe(userId => {
       this.auth_user_id = userId;
       this.databaseService.authUser(userId!).then(user => {
         if (user && user !== null) {
           this.authenticatedUser = user;
-          this.sendSelectedUser(user);
-          this.sendUserId(user.id);
-          this.loadMessages(user.id, user.id);
         }
       });
     });
@@ -94,10 +134,6 @@ export class LeftSideMenuComponent implements OnInit {
 
     this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
       this.observeUser = this.databaseService.snapUsers().pipe(map(users => users.filter(user => user.id === uid)[0]));
-    });
-
-    this.authService.onlineUser$.subscribe(user => {
-      this.onlineUser = user;
     });
 
     this.navService.stateOpenDevSearch$.subscribe(state => {
@@ -186,9 +222,11 @@ export class LeftSideMenuComponent implements OnInit {
     this.channelService.updateChannelData('users', 'id', this.auth_user_id, { activeChannelId: currentChannelId });
   }
 
-  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
+    console.log('Pam', currentUserId, 'targ', targetUserId);
+
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
       if (messages) {
         if (currentUserId !== targetUserId) {
@@ -201,6 +239,36 @@ export class LeftSideMenuComponent implements OnInit {
     });
   }
 
+  channelLoad(state: string | null) {
+    this.selectChannel(Number(state));
+    this.loadChannelMembers(this.selectedChannel?.channel_id);
+    setTimeout(() => this.showChannelMessages(true));
+    this.onToggleDevSearch(false);
+    this.sendChannel(this.selectedChannel);
+    this.loadChannelMembers(this.selectedChannel?.channel_id);
+    this.loadChannelMessages(this.selectedChannel?.channel_id);
+  }
+
+  guestLoad(state: string | null, selectionUser: User) {
+    this.selectUser(Number(state));
+    this.onToggleDevSearch(false);
+    this.sendUserId(selectionUser ? selectionUser.id! : this.onlineUser?.id);
+    this.sendSelectedUser(selectionUser ? selectionUser : this.onlineUser);
+    this.showChannelMessages(false);
+    this.loadMessages(this.onlineUser?.id, selectionUser ? selectionUser.id! : this.onlineUser?.id);
+  }
+
+  userLoad(state: string | null, currentAuthUser: User, selectionUser: User) {
+    this.selectUser(Number(state));
+    this.onToggleDevSearch(false);
+    this.sendUserId(selectionUser ? selectionUser.id! : currentAuthUser?.id);
+    this.sendSelectedUser(selectionUser ? selectionUser : currentAuthUser);
+    this.showChannelMessages(false);
+    console.log('sel', this.selectedUser, 'current', this.selectedUser);
+
+    this.loadMessages(currentAuthUser?.id, selectionUser ? selectionUser.id! : currentAuthUser?.id);
+  }
+
   loadChannelMembers(channel_id: string) {
     this.databaseService.getChannelMembers(channel_id, members => {
       if (members) {
@@ -209,6 +277,13 @@ export class LeftSideMenuComponent implements OnInit {
         this.channelService.emitChannelMembers([]);
       }
     });
+  }
+
+  storeStateSessionInfo(authUser: User | string | undefined, selectedUser: User | undefined | string, currentName: string, currentState: number) {
+    localStorage.setItem('currentName', currentName);
+    localStorage.setItem('authUser', JSON.stringify(authUser!));
+    localStorage.setItem('selectedUser', JSON.stringify(selectedUser!));
+    localStorage.setItem('currentState', `${currentState}`);
   }
 
   loadChannelMessages(targetChannelId: string) {
@@ -242,6 +317,8 @@ export class LeftSideMenuComponent implements OnInit {
    * @param {User} user - current selected user from the navigation
    */
   sendSelectedUser(user: User) {
+    console.log('you select', user);
+
     this.userService.emitSelectedUser(user);
   }
 

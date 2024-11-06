@@ -59,6 +59,10 @@
   }
 }
 
+.showLogout {
+  display: none;
+}
+
 .left-pad {
   padding-left: 3px;
 }
@@ -289,6 +293,10 @@ a {
 @media (width<630px) {
   .OpenWrapper {
     display: none;
+  }
+
+  .showLogout {
+    display: block !important;
   }
   .main-section {
     > main {
