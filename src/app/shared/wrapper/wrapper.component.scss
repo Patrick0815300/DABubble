@@ -13,13 +13,13 @@ div {
   }
 }
 
-@media (width<630px) {
+@media (width<970px) {
 
   // :host {
   //   display: none;
   // }
   div {
     width: 100%;
-    padding: unset;
+    padding: 16px;
   }
 }

@@ -1,7 +1,8 @@
 header {
   width: 100%;
   position: relative;
-  > nav {
+
+  >nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -9,22 +10,26 @@ header {
     padding-inline: 1rem;
     padding-block: 1rem;
     background-color: #eceefe;
-    > img {
+
+    >img {
       width: 18vw;
       max-width: 243px;
       min-width: 130px;
     }
-    > .current-user {
+
+    >.current-user {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      > span {
+
+      >span {
         font-family: 'Nunito';
         font-weight: 700;
         font-size: 20px;
         padding-right: 0.5rem;
       }
-      > img {
+
+      >img {
         cursor: pointer;
         object-fit: cover;
       }
@@ -40,13 +45,15 @@ header {
   display: none;
   align-items: center;
   gap: 0.25rem;
-  > button {
+
+  >button {
     background-color: transparent;
     border: transparent;
     border-radius: 50%;
     width: 50px;
     height: 50px;
-    > .to_channel_arrow {
+
+    >.to_channel_arrow {
       width: 50px;
       height: 50px;
     }
@@ -81,13 +88,15 @@ header {
   left: 50%;
   transform: translateX(-50%);
   padding-block: 8px;
-  > img {
+
+  >img {
     position: absolute;
     right: 2.5rem;
     width: 28px;
     height: 28px;
   }
-  > input {
+
+  >input {
     width: 100%;
     height: 100%;
     border-radius: 70px;
@@ -97,6 +106,7 @@ header {
     padding-left: 1.5rem;
     font-family: 'Nunito';
     font-size: 16px;
+
     &::placeholder {
       font-family: 'Nunito';
       font-size: 17px;
@@ -113,28 +123,33 @@ header {
     width: 50vw;
   }
 }
+
 @media (width<1075px) {
   .input-search {
     width: 45vw;
   }
 }
+
 @media (width<990px) {
   .input-search {
     width: 40vw;
     transform: translateX(-60%);
-    > img {
+
+    >img {
       width: 25px;
     }
-    > input {
+
+    >input {
       &::placeholder {
         font-size: 16px;
       }
     }
   }
+
   header {
-    > nav {
-      > .current-user {
-        > span {
+    >nav {
+      >.current-user {
+        >span {
           font-size: 18px;
         }
       }
@@ -144,24 +159,27 @@ header {
 
 @media screen and (width<800px) {
   .input-search {
-    > input {
+    >input {
       margin-left: unset !important;
     }
   }
 }
+
 @media screen and (width<770px) {
   .input-search {
     width: 35vw;
   }
 }
 
-@media (width<630px) {
+@media (width<970px) {
   .dDestop {
     display: none;
   }
+
   .dMobile {
     display: inline;
   }
+
   .d-flex {
     display: flex !important;
     margin-left: -1rem;
@@ -175,12 +193,15 @@ header {
     background: white;
     position: unset;
   }
+
   .current-user {
-    > span,
-    > .arrow-down {
+
+    >span,
+    >.arrow-down {
       display: none;
     }
   }
+
   .input-search {
     height: 48px;
     margin: 0rem auto;
@@ -190,11 +211,13 @@ header {
     top: unset;
     left: unset;
     transform: unset;
-    > input {
+
+    >input {
       border: 1px solid #adb0d9;
       margin-left: 0.5rem;
     }
   }
+
   .btn-arrow {
     display: none;
   }
