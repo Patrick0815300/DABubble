@@ -6,18 +6,20 @@
         <div class="title">Anmeldung</div>
         <div class="description">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.</div>
       </div>
-      <form>
+      <form [formGroup]="loginForm">
         <div class="loginInputsContainer">
           <div class="inputField">
             <mat-icon>mail</mat-icon>
-            <input name="email" type="mail" placeholder="beispielname@email.com" [(ngModel)]="mail" />
+            <input name="email" type="mail" placeholder="beispielname@email.com" formControlName="mail"  />
+            <!-- [(ngModel)]="mail" -->
           </div>
           <div class="inputField">
             <mat-icon>lock</mat-icon>
-            <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" />
+            <input name="password" type="password" placeholder="Passwort" formControlName="password" />
+            <!-- [(ngModel)]="password" -->
           </div>
           <div class="error">
-            <div *ngIf="displayWrongMailOrPasswordError">*E-Mail-Adresse oder Password fehlerhaft.</div>
+            <div *ngIf="mailError || passwordError">*E-Mail-Adresse oder Password fehlerhaft.</div>
           </div>
           <div class="link" [routerLink]="['newPassword']">Passwort vergessen?</div>
         </div>

@@ -19,10 +19,12 @@ import { DatabaseServiceService } from '../database-service.service';
 import { Channel, ChannelMember, User } from '../modules/database.model';
 import { nanoid } from 'nanoid';
 import { GuestService } from '../modules/guest.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [MatToolbarModule, MatCardModule, MatIconModule, MatFormFieldModule, RouterModule, FooterComponent, HeaderComponent, FormsModule, NgIf],
+  imports: [MatToolbarModule, MatCardModule, MatIconModule, MatFormFieldModule, RouterModule, FooterComponent, HeaderComponent, FormsModule, NgIf, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -33,6 +35,7 @@ export class LoginComponent implements OnInit {
   onlineUser: any = null;
   officeTeamChannel!: Channel;
   constructor(
+    private fb: FormBuilder,
     private firebase: FirebaseLoginService,
     private guestService: GuestService,
     private databaseService: DatabaseServiceService,
@@ -41,9 +44,16 @@ export class LoginComponent implements OnInit {
     private firestore: Firestore,
     private auth: Auth,
     private currentUserService: CurrentUserService
-  ) {}
+  ) { }
+
+  loginForm!: FormGroup;
 
   ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      mail: ['', [Validators.required, Validators.email]],  // Validierung für Mail
+      password: ['', [Validators.required, Validators.minLength(6)]]  // Validierung für Passwort
+    });
+
     this.currentUserService.onlineUser$.subscribe(user => {
       this.onlineUser = user;
     });
@@ -56,11 +66,18 @@ export class LoginComponent implements OnInit {
   private googleProvider = new GoogleAuthProvider();
 
   /**
-   * THis function checks, if there is a account of the user. If yes the user will be logged in and will be send to the desktop-page
+   * This function checks, if there is a account of the user. If yes the user will be logged in and will be send to the desktop-page
    */
   async login() {
+
+    if (this.loginForm.invalid) {
+      this.displayWrongMailOrPasswordErrorMessage();
+      return;
+    }
+
     try {
-      const userCredential = await signInWithEmailAndPassword(this.auth, this.mail, this.password);
+      const { mail, password } = this.loginForm.value;
+      const userCredential = await signInWithEmailAndPassword(this.auth, mail, password);
       await this.createNewUserObject(userCredential);
       this.sendUserToDesktop(userCredential);
       await this.setVarOnlineToTrue(userCredential);
@@ -68,6 +85,24 @@ export class LoginComponent implements OnInit {
       this.displayWrongMailOrPasswordErrorMessage();
       this.resetInputs();
     }
+  }
+
+  get mailError() {
+    const control = this.loginForm.get('mail');
+    if (control?.invalid && (control.dirty || control.touched)) {
+      if (control?.hasError('required')) return 'E-Mail wird benötigt';
+      if (control?.hasError('email')) return 'Ungültige E-Mail-Adresse';
+    }
+    return null;
+  }
+
+  get passwordError() {
+    const control = this.loginForm.get('password');
+    if (control?.invalid && (control.dirty || control.touched)) {
+      if (control?.hasError('required')) return 'Passwort wird benötigt';
+      if (control?.hasError('minlength')) return 'Passwort muss mindestens 6 Zeichen lang sein';
+    }
+    return null;
   }
 
   /**
