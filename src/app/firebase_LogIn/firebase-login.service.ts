@@ -54,7 +54,6 @@ export class FirebaseLoginService {
   async addUserInAuth(email: string, password: string, name: string) {    
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-      console.log(userCredential);
       const user = userCredential.user;
       this.saveUserDataToDatabase(user.uid, user.email, name, password);
       return user.uid;

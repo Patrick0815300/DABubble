@@ -68,6 +68,20 @@ mat-card-content {
     align-items: center;
     gap: 40px;
     margin-bottom: 40px;
+    position: relative;
+
+    .headline{
+        img{
+            position: absolute;
+            left:40px;
+            width: 24px;
+            height: auto;
+
+            &:hover{
+                cursor:pointer;
+            }
+        }
+    }
 
     .link {
         color: #797EF3;

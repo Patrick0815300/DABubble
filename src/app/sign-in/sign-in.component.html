@@ -9,7 +9,11 @@
     <mat-card>
         <div class="descriptionContainer">
             <form class="loginInputsContainer" (ngSubmit)="onSubmit()" #data="ngForm">
-                <mat-card-title>Konto erstellen</mat-card-title>
+                <div class="headline">
+                    <img class="arrowBack" src="./assets/img/01_onboarding-login-signup/arrow_back.png"
+                        [routerLink]="['/']">
+                    <mat-card-title>Konto erstellen</mat-card-title>
+                </div>
                 <mat-card-title-group>Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues
                     DaBubble-Konto.</mat-card-title-group>
                 <mat-card-content>
