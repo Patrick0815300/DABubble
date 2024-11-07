@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, updateDoc, getDocs, docData } from '@angular/fire/firestore';
+import { Firestore, collection, doc, updateDoc, getDocs, docData, getDoc } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getAuth, User } from 'firebase/auth';
 import { AuthService } from './auth.service';
@@ -114,5 +114,26 @@ export class MainServiceService {
         }
       })
     );
+  }
+
+  async checkAndUpdateChannelMembers(): Promise<string[]> {
+    const channelRef = this.getSingleChannelRef('channels', 'Za3v5gMhmXHumJr7483M');
+    const channelSnap = await getDoc(channelRef);
+    if (!channelSnap.exists()) {
+      return [];
+    }
+    const channelData = channelSnap.data();
+    const members = channelData['member'] || [];
+    const usersCollectionRef = collection(this.firestore, 'users');
+    const userDocsSnap = await getDocs(usersCollectionRef);
+    const allUserIds = userDocsSnap.docs.map(doc => doc.id);
+    const missingIds = allUserIds.filter(userId => !members.includes(userId));
+    if (missingIds.length > 0) {
+      const updatedMembers = [...members, ...missingIds];
+      await updateDoc(channelRef, { member: updatedMembers });
+      return updatedMembers;
+    } else {
+      return members;
+    }
   }
 }

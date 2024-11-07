@@ -29,50 +29,25 @@
         <span class="time">Letzte Antwort {{ lastAnswerTime }}</span>
       </div>
       <div class="reaction-container" *ngIf="message.reactions?.length > 0">
-        <div class="reaction" *ngFor="let reaction of message.reactions; let i = index" (click)="reactToMessage(message.id, reaction.type, reaction.path)">
-          <img [src]="reaction.path" />
+        <div class="reaction" *ngFor="let reaction of message.reactions; let i = index" (click)="reactToMessage(message.id, reaction.emoji)">
+          <span>{{ reaction.emoji }}</span>
           <span>{{ reaction.count }}</span>
           <div class="bubble">
-            <img [src]="reaction.path" />
+            <span>{{ reaction.emoji }}</span>
             <h3>{{ reactionNames[i] }}</h3>
             <span>hat reagiert</span>
           </div>
         </div>
       </div>
 
+      <app-emoji-picker *ngIf="toggleEmojiPicker" (click)="$event.stopPropagation()" #emojiPicker></app-emoji-picker>
+
       <div class="reaction-bar">
-        <mat-icon (click)="reactToMessage(message.id, 'check mark', emojiPath + 'emoji_white_heavy_check_mark_.png')"
-          ><img [src]="emojiPath + 'emoji_white_heavy_check_mark_.png'"
-        /></mat-icon>
-        <mat-icon (click)="reactToMessage(message.id, 'raising hands', emojiPath + 'emoji_person_raising_both_hands_in_celebration_.png')"
-          ><img [src]="emojiPath + 'emoji_person_raising_both_hands_in_celebration_.png'"
-        /></mat-icon>
-        <mat-icon *ngIf="allReactions" (click)="reactToMessage(message.id, 'nerd', emojiPath + 'emoji_nerd_face_.png')"
-          ><img [src]="emojiPath + 'emoji_nerd_face_.png'" class="reaction"
-        /></mat-icon>
-        <mat-icon *ngIf="allReactions" (click)="reactToMessage(message.id, 'rocket', emojiPath + 'emoji_rocket_.png')"
-          ><img [src]="emojiPath + 'emoji_rocket_.png'" class="reaction"
-        /></mat-icon>
-        <mat-icon (click)="openReactions()">add_reaction</mat-icon>
+        <span (click)="reactToMessage(message.id, '👍')">👍</span>
+        <span (click)="reactToMessage(message.id, '❤️')">❤️</span>
+        <mat-icon (click)="showEmojiPicker(); $event.stopPropagation()">add_reaction</mat-icon>
         <mat-icon (click)="openThread(message.id)">comment</mat-icon>
       </div>
     </div>
-
-    <!-- <div class="reaction-bar">
-        <mat-icon (click)="reactToMessage(message.id, 'check mark', 'assets/img/04_chats-message/emoji_white_heavy_check_mark_.png')"
-          ><img src="../../../assets/img/04_chats-message/emoji_white_heavy_check_mark_.png"
-        /></mat-icon>
-        <mat-icon (click)="reactToMessage(message.id, 'raising hands', 'assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png')"
-          ><img src="../../../assets/img/04_chats-message/emoji_person_raising_both_hands_in_celebration_.png"
-        /></mat-icon>
-        <mat-icon *ngIf="allReactions" (click)="reactToMessage(message.id, 'nerd', 'assets/img/04_chats-message/emoji_nerd_face_.png')"
-          ><img src="assets/img/04_chats-message/emoji_nerd_face_.png" class="reaction"
-        /></mat-icon>
-        <mat-icon *ngIf="allReactions" (click)="reactToMessage(message.id, 'rocket', 'assets/img/04_chats-message/emoji_rocket_.png')"
-          ><img src="assets/img/04_chats-message/emoji_rocket_.png" class="reaction"
-        /></mat-icon>
-        <mat-icon (click)="openReactions()">add_reaction</mat-icon>
-        <mat-icon (click)="openThread(message.id)">comment</mat-icon>
-      </div> -->
   </div>
 </div>

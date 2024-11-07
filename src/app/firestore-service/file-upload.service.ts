@@ -24,8 +24,6 @@ export class FileUploadService {
   }
 
   updateMessageFileUrlDirectMsg(messageId: string, fileUrl: string, fileName: string): Promise<void> {
-    console.log('das werde ich updaten', fileUrl, fileName);
-
     const messageDocRef = doc(this.firestore, `messages/${messageId}`);
     return updateDoc(messageDocRef, {
       fileUrl: fileUrl,

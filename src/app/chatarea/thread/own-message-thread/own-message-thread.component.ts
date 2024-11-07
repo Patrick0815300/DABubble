@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { ChatServiceService } from '../../../firestore-service/chat-service.service';
@@ -12,6 +12,7 @@ import { ChatareaServiceService } from '../../../firestore-service/chatarea-serv
 import { Subject, Subscription, filter } from 'rxjs';
 import { EmojiService } from '../../../modules/emoji.service';
 import { EmojiPickerComponent } from "../../../shared/emoji-picker/emoji-picker.component";
+import { ReactionService } from '../../../firestore-service/reaction.service';
 
 @Component({
   selector: 'app-own-message-thread',
@@ -43,8 +44,10 @@ export class OwnMessageThreadComponent {
   private uidSubscription: Subscription | null = null;
   private destroy$ = new Subject<void>();
   private emojiSubscription: Subscription | null = null;
+  private threadSubscription: Subscription | null = null;
+  private threadDataSubscription: Subscription | null = null;
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService, private authService: AuthService, private chatareaService: ChatareaServiceService, private emojiService: EmojiService) {
+  constructor(private chatService: ChatServiceService, private cdr: ChangeDetectorRef, private reactionService: ReactionService, private mainService: MainServiceService, private fileUploadServiceThread: FileUploadThreadService, private authService: AuthService, private chatareaService: ChatareaServiceService, private emojiService: EmojiService) {
     this.chatService.pickedThread$.subscribe((data) => {
       if (data) {
         this.threadData = data;
@@ -56,22 +59,55 @@ export class OwnMessageThreadComponent {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
-    this.loadReactionNames();
-    this.loadThreadMessages();
-    this.loadUserAvatar();
-    this.loadFileUpload();
+    this.threadDataSubscription = this.chatService.pickedThread$.subscribe((data) => {
+      if (data) {
+        this.threadData = data;
+        this.subscribeToThreadMessageUpdates();
+        this.loadReactionNames();
+        this.loadThreadMessages();
+        this.loadUserAvatar();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
+    }
+    if (this.threadDataSubscription) {
+      this.threadDataSubscription.unsubscribe();
+    }
+    if (this.threadSubscription) {
+      this.threadSubscription.unsubscribe();
     }
     if (this.emojiSubscription) {
       this.emojiSubscription.unsubscribe();
     }
   }
+
+  private subscribeToThreadMessageUpdates() {
+    const { channelId, messageId, id: threadId } = this.threadData;
+    if (!channelId || !messageId || !threadId || !this.thread) return;
+
+    if (this.threadSubscription) {
+      this.threadSubscription.unsubscribe();
+    }
+
+    this.threadSubscription = this.chatService.getThreadMessageById(
+      channelId, messageId, threadId, this.thread.id
+    ).subscribe(updatedThread => {
+      if (updatedThread) {
+        this.thread = updatedThread;
+        this.loadFileUpload();
+        this.cdr.markForCheck();
+      } else {
+      }
+    });
+  }
+
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: Event) {
@@ -88,11 +124,10 @@ export class OwnMessageThreadComponent {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
       this.emojiSubscription = this.emojiService.emoji$
-        .pipe(
-          filter((emoji: string) => emoji.trim() !== '')
-        )
+        .pipe(filter((emoji: string) => emoji.trim() !== ''))
         .subscribe((emoji: string) => {
-          this.thread.content = this.thread.content ? this.thread.content + emoji : emoji;
+          this.reactToThreadMessage(this.thread.id, emoji);
+          this.toggleEmojiPicker = false;
         });
     } else {
       if (this.emojiSubscription) {
@@ -109,10 +144,11 @@ export class OwnMessageThreadComponent {
   }
 
   async loadFileUpload() {
-    if (this.thread.fileUrl) {
-      this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName)
-      this.fileName = this.thread.fileName
-      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl)
+    if (this.thread && this.thread.fileUrl && this.thread.fileName) {
+      this.fileType = this.fileUploadServiceThread.getFileTypeFromFileName(this.thread.fileName);
+      this.fileName = this.thread.fileName;
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.thread.fileUrl);
+      this.cdr.markForCheck();
     }
   }
 
@@ -151,10 +187,10 @@ export class OwnMessageThreadComponent {
     });
   }
 
-  reactToThreadMessage(reactionType: string, path: string, id: string): void {
+  reactToThreadMessage(id: string, emoji: string): void {
     const { channelId, messageId, id: threadId } = this.threadData;
     if (channelId && messageId && threadId && id) {
-      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id, this.uid!)
+      this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, id, this.uid!)
     }
   }
 

@@ -7,14 +7,17 @@ import { MainServiceService } from '../../../firestore-service/main-service.serv
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileUploadThreadService } from '../../../firestore-service/file-upload-thread.service';
 import { ChatareaServiceService } from '../../../firestore-service/chatarea-service.service';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 import { AuthService } from '../../../firestore-service/auth.service';
 import { ChannelService } from '../../../modules/channel.service';
+import { ReactionService } from '../../../firestore-service/reaction.service';
+import { EmojiPickerComponent } from "../../../shared/emoji-picker/emoji-picker.component";
+import { EmojiService } from '../../../modules/emoji.service';
 
 @Component({
   selector: 'app-message-thread',
   standalone: true,
-  imports: [MatIconModule, CommonModule, MatMenu],
+  imports: [MatIconModule, CommonModule, MatMenu, EmojiPickerComponent],
   templateUrl: './message-thread.component.html',
   styleUrl: './message-thread.component.scss',
 })
@@ -37,6 +40,8 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
   reactionNames: string[] = [];
   showReactions: boolean = false;
   reactions: any[] = [];
+  toggleEmojiPicker: boolean = false;
+  private emojiSubscription: Subscription | null = null;
   openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
   constructor(
     private chatService: ChatServiceService,
@@ -44,7 +49,9 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     private fileUploadServiceThread: FileUploadThreadService,
     private chatareaService: ChatareaServiceService,
     private authService: AuthService,
-    private channelService: ChannelService
+    private channelService: ChannelService,
+    private reactionService: ReactionService,
+    private emojiService: EmojiService,
   ) {
     this.chatService.pickedThread$.subscribe(data => {
       if (data) {
@@ -72,6 +79,9 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+    if (this.emojiSubscription) {
+      this.emojiSubscription.unsubscribe();
+    }
   }
 
   toggleReactions() {
@@ -85,6 +95,23 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
       const isMatIcon = (event.target as HTMLElement).closest('mat-icon') !== null;
       if (!clickedInside && !isMatIcon) {
         this.showReactions = false;
+      }
+    }
+  }
+
+  showEmojiPicker() {
+    this.toggleEmojiPicker = !this.toggleEmojiPicker;
+    if (this.toggleEmojiPicker) {
+      this.emojiSubscription = this.emojiService.emoji$
+        .pipe(filter((emoji: string) => emoji.trim() !== ''))
+        .subscribe((emoji: string) => {
+          this.reactToThreadMessage(this.thread.id, emoji);
+          this.toggleEmojiPicker = false;
+        });
+    } else {
+      if (this.emojiSubscription) {
+        this.emojiSubscription.unsubscribe();
+        this.emojiSubscription = null;
       }
     }
   }
@@ -138,10 +165,10 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     });
   }
 
-  reactToThreadMessage(reactionType: string, path: string, id: string): void {
+  reactToThreadMessage(id: string, emoji: string): void {
     const { channelId, messageId, id: threadId } = this.threadData;
     if (channelId && messageId && threadId && id) {
-      this.chatService.addReactionToThreadMessage(channelId, messageId, threadId, reactionType, path, id, this.uid!);
+      this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, id, this.uid!);
     }
   }
 

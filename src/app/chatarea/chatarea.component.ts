@@ -84,6 +84,7 @@ export class ChatareaComponent implements AfterViewInit {
   uid: string | null = null;
   previousMessageDate: string | null = null;
   noChannelChosen: boolean = false;
+  channelId: string = '';
 
   constructor(
     public dialog: MatDialog,
@@ -102,12 +103,17 @@ export class ChatareaComponent implements AfterViewInit {
       this.uid = uid;
     });
     this.loadActiveChannelData();
+    this.mainService.checkAndUpdateChannelMembers();
   }
 
   ngOnDestroy() {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  trackByMessageId(index: number, message: any): string {
+    return message.id;
   }
 
   onNotifyThreadOpen() {
@@ -130,14 +136,18 @@ export class ChatareaComponent implements AfterViewInit {
       this.messages = messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       setTimeout(() => {
         this.scrollToBottom();
-      }, 1000);
+      }, 750);
     });
+
   }
+
+
 
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
         if (channel) {
+          this.channelId = channel.channel_id;
           this.channelName = channel.channel_name || null;
           this.memberIds = channel.member || [];
           this.members = [];
@@ -181,11 +191,13 @@ export class ChatareaComponent implements AfterViewInit {
   }
 
   scrollToBottom(): void {
-    this.messageContainer.nativeElement.scroll({
-      top: this.messageContainer.nativeElement.scrollHeight,
-      behavior: 'smooth',
-    });
-    this.messageBoxComponent.focusTextArea();
+    if (this.isCurrentUserMember()) {
+      this.messageContainer.nativeElement.scroll({
+        top: this.messageContainer.nativeElement.scrollHeight,
+        behavior: 'smooth',
+      });
+      this.messageBoxComponent.focusTextArea();
+    }
   }
 
   formatTime(timeString: string): string {

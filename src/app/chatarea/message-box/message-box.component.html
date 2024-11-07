@@ -7,6 +7,7 @@
       placeholder="Nachricht an #{{ channelName }}" 
       [(ngModel)]="messageContent"
       (keydown)="onKeyDown($event)"
+      (input)="checkForAtSymbol($event)"
       name="" id="" cols="30" rows="3">
     </textarea>
     <ng-container *ngIf="fileURL">
@@ -31,16 +32,36 @@
       <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()" #emojiPicker/>
       <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="showEmojiPicker(); $event.stopPropagation()"><mat-icon >sentiment_satisfied</mat-icon></button>
       <div class="link-someone" *ngIf="linkDialog">
-        <div class="fl-d" *ngIf="showUsers">
-          <div class="user" *ngFor="let user of users" (click)="addMemberToMessage(user.name)" #addMember>
-            <img [src]="user.avatar" alt="{{ user.name }}">
-            <span>{{ user.name }}</span>
+        <div *ngIf="showUsers">
+          <div class="fl-d" *ngIf="filteredUsers.length > 0; else noUsersFound">
+            <div
+              class="user"
+              *ngFor="let user of filteredUsers"
+              (click)="addMemberToMessage(user.name)"
+              #addMember
+            >
+              <img [src]="user.avatar" alt="{{ user.name }}" />
+              <span>{{ user.name }}</span>
+            </div>
           </div>
+          <ng-template #noUsersFound>
+            <span class="not-found">Kein Member gefunden</span>
+          </ng-template>
         </div>
-        <div class="fl-d" *ngIf="showChannels">
-          <div class="user" *ngFor="let channel of channels" (click)="addChannelToMessage(channel.channel_name)" #addMember>
-            <span>{{ channel.channel_name }}</span>
+        <div  *ngIf="showChannels">
+          <div class="fl-d" *ngIf="filteredChannels.length > 0; else noChannelsFound">
+            <div
+              class="user"
+              *ngFor="let channel of filteredChannels"
+              (click)="addChannelToMessage(channel.channel_name)"
+              #addMember
+            >
+              <span>{{ channel.channel_name }}</span>
+            </div>
           </div>
+          <ng-template #noChannelsFound>
+            <span class="not-found">Kein Channel gefunden</span>
+          </ng-template>
         </div>
       </div>
       <button class="btn-unset" [disabled]="!isCurrentUserMember()" (click)="toggleLinkDialog()"><mat-icon >alternate_email</mat-icon></button>

@@ -2,6 +2,7 @@ mat-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .message-container {
@@ -34,6 +35,10 @@ mat-icon {
     gap: 8px;
     font-size: 18px;
     font-weight: 400;
+
+    mat-icon {
+      cursor: pointer;
+    }
 
     .name-time {
       display: flex;

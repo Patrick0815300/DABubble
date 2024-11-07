@@ -139,7 +139,8 @@
         top: -18px;
         right: 43px;
 
-        mat-icon {
+        mat-icon,
+        span {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -150,11 +151,6 @@
             border-radius: 20px;
             transition: ease-in 80ms;
             cursor: pointer;
-
-            img {
-                width: 20px;
-                height: 20px;
-            }
 
             &:hover {
                 background-color: #ECEEFE;
@@ -174,6 +170,11 @@
     &:hover {
         background-color: #ECEEFE;
     }
+}
+
+app-emoji-picker {
+    left: auto;
+    right: 0;
 }
 
 // ------------------------------ MEDIA ------------------------------

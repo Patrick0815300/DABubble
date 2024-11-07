@@ -142,6 +142,12 @@
                 align-items: baseline;
             }
 
+            .not-found {
+                width: auto;
+                height: auto;
+                background-color: unset;
+            }
+
             .user {
                 display: flex;
                 align-items: center;

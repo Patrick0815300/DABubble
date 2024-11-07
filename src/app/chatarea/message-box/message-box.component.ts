@@ -51,6 +51,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   currentChannel!: Channel;
   ChannelMembers: ChannelMember[] = [];
   guest!: string;
+  searchTerm: string = '';
+  filteredUsers: User[] = [];
+  filteredChannels: any[] = [];
   private emojiSubscription: Subscription | null = null;
   private fireService = inject(ChatareaServiceService);
   private fileUploadService = inject(FileUploadService);
@@ -154,21 +157,28 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  checkForAtSymbol(event: KeyboardEvent) {
-    const textareaValue = (event.target as HTMLTextAreaElement).value;
-    const lastChar = textareaValue.slice(-1);
-    if (lastChar === '@') {
-      this.linkDialog = true;
-      this.showUsers = true;
-      this.showChannels = false;
-    } else if (lastChar === '#') {
-      this.linkDialog = true;
-      this.showUsers = false;
-      this.showChannels = true;
+  checkForAtSymbol(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
+    const cursorPos = textarea.selectionStart || 0;
+    const text = textarea.value.substring(0, cursorPos);
+    const words = text.split(/\s+/);
+    const currentWord = words[words.length - 1];
+
+    if (currentWord.startsWith('@')) {
+      this.linkDialog = true; this.showUsers = true; this.showChannels = false;
+      this.searchTerm = currentWord.substring(1);
+      this.filteredUsers = this.users.filter(u =>
+        u.name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
+    } else if (currentWord.startsWith('#')) {
+      this.linkDialog = true; this.showUsers = false; this.showChannels = true;
+      this.searchTerm = currentWord.substring(1);
+      this.filteredChannels = this.channels.filter(c =>
+        c.channel_name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
     } else {
-      this.linkDialog = false;
+      this.linkDialog = false; this.filteredUsers = []; this.filteredChannels = [];
     }
   }
+
 
   toggleLinkDialog() {
     if (this.linkDialog && this.showUsers) {
@@ -181,25 +191,32 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  addChannelToMessage(channelName: string) {
-    this.messageContent += `#${channelName} `;
+  addMemberToMessage(name: string) {
+    this.replaceCurrentWordWith(`@${name} `);
     this.linkDialog = false;
     this.cdr.detectChanges();
-    setTimeout(() => {
-      if (this.messageTextArea) {
-        this.messageTextArea.nativeElement.focus();
-      }
-    }, 0);
+    setTimeout(() => this.focusTextArea(), 0);
   }
 
-  addMemberToMessage(name: string) {
-    this.messageContent += `@${name} `;
+  addChannelToMessage(name: string) {
+    this.replaceCurrentWordWith(`#${name} `);
     this.linkDialog = false;
     this.cdr.detectChanges();
+    setTimeout(() => this.focusTextArea(), 0);
+  }
+
+  replaceCurrentWordWith(replacement: string) {
+    const textarea = this.messageTextArea.nativeElement;
+    const cursorPos = textarea.selectionStart || 0;
+    const text = textarea.value;
+    const wordStart = text.lastIndexOf(' ', cursorPos - 1) + 1;
+    const newText = text.substring(0, wordStart) + replacement + text.substring(cursorPos);
+    this.messageContent = newText;
+    const newCursorPos = wordStart + replacement.length;
+    this.cdr.detectChanges();
     setTimeout(() => {
-      if (this.messageTextArea) {
-        this.messageTextArea.nativeElement.focus();
-      }
+      textarea.selectionStart = newCursorPos;
+      textarea.selectionEnd = newCursorPos;
     }, 0);
   }
 
@@ -266,9 +283,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
         this.selectedFile = input.files[0];
         const reader = new FileReader();
         reader.onload = () => {
-          this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
           this.fileName = this.selectedFile!.name;
           this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(reader.result as string);
         };
         reader.readAsDataURL(this.selectedFile);
       }

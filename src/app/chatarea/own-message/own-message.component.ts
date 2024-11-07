@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,7 @@ import { EmojiService } from '../../modules/emoji.service';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { ReactionService } from '../../firestore-service/reaction.service';
 
 @Component({
   selector: 'app-own-message',
@@ -31,7 +32,8 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
     EmojiComponent
   ],
   templateUrl: './own-message.component.html',
-  styleUrl: './own-message.component.scss'
+  styleUrl: './own-message.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwnMessageComponent implements OnInit, OnDestroy {
   @Input() message: any;
@@ -54,19 +56,32 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   fileType: string | null = null;
   fileURL: SafeResourceUrl | null = null;
   fileName: string | null = null;
+  originalFileURL: SafeResourceUrl | null = null;
+  originalFileType: string | null = null;
+  originalFileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
   toggleEmojiPicker: boolean = false;
-  emojiPath = 'assets/img/04_chats-message/'
 
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
+  private messageSubscription: Subscription | null = null;
+  private channelSubscription: Subscription | null = null;
+
   private fireService = inject(ChatareaServiceService);
   private emojiService = inject(EmojiService);
   private sanitizer = inject(DomSanitizer);
   private destroy$ = new Subject<void>();
 
-  constructor(private emojiRef: ElementRef, private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
+  constructor(
+    private emojiRef: ElementRef,
+    private reactionService: ReactionService,
+    private cdr: ChangeDetectorRef,
+    private chatService: ChatServiceService,
+    private mainService: MainServiceService,
+    private fileUploadService: FileUploadService,
+    private authService: AuthService,
+  ) {
     this.fireService.loadReactions();
   }
 
@@ -74,7 +89,13 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
       this.uid = uid;
     });
-    this.loadFileUpload();
+    this.channelSubscription = this.fireService.getActiveChannel().subscribe(channel => {
+      if (channel && channel.id) {
+        this.channelId = channel.id;
+        this.subscribeToMessageUpdates();
+      }
+    });
+    this.subscribeToMessageUpdates();
     this.loadActiveChannelMessages();
     this.renderReact();
     this.loadActiveChannelId();
@@ -91,17 +112,52 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     if (this.emojiSubscription) {
       this.emojiSubscription.unsubscribe();
     }
+    if (this.channelSubscription) {
+      this.channelSubscription.unsubscribe();
+    }
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
+  }
+
+  private subscribeToMessageUpdates() {
+    if (!this.channelId || !this.message.id) return;
+
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
+
+    this.messageSubscription = this.fireService.getMessageById(this.channelId, this.message.id)
+      .subscribe(updatedMessage => {
+        this.message = updatedMessage;
+        this.loadFileUpload();
+        this.cdr.markForCheck();
+      });
+  }
+
+  deleteFileTemporarily() {
+    // Originalzustand speichern
+    this.originalFileURL = this.fileURL;
+    this.originalFileType = this.fileType;
+    this.originalFileName = this.fileName;
+
+    // Datei nur lokal "löschen"
+    this.fileURL = null;
+    this.fileType = null;
+    this.fileName = null;
+
+    // Änderungen anzeigen
+    this.cdr.detectChanges();
   }
 
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
       this.emojiSubscription = this.emojiService.emoji$
-        .pipe(
-          filter((emoji: string) => emoji.trim() !== '')
-        )
+        .pipe(filter((emoji: string) => emoji.trim() !== ''))
         .subscribe((emoji: string) => {
-          this.message.content = this.message.content ? this.message.content + emoji : emoji;
+          this.reactToMessage(this.message.id, emoji);
+          this.toggleEmojiPicker = false;
         });
     } else {
       if (this.emojiSubscription) {
@@ -126,39 +182,38 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   async loadFileUpload() {
-    if (this.message.fileName) {
-      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName)
-      this.fileName = this.message.fileName
-      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl)
+    if (this.message.fileName && this.message.fileUrl) {
+      this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName);
+      this.fileName = this.message.fileName;
+      this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl);
+      this.cdr.markForCheck();
     }
   }
 
-  updateLocalReactions(reactionType: string) {
-    if (this.message.reactions) {
-      const reaction = this.message.reactions.find((r: { type: string; }) => r.type === reactionType);
-      if (reaction) {
-        if (!reaction.userId.includes(this.uid!)) {
-          reaction.userId.push(this.uid!);
-          reaction.count += 1;
-        }
-      } else {
-        this.message.reactions.push({
-          type: reactionType,
-          userId: [this.uid!],
-          count: 1,
-          path: `assets/img/04_chats-message/${reactionType}.svg`
-        });
-      }
-    } else {
-      this.message.reactions = [{
-        type: reactionType,
-        userId: [this.uid!],
-        count: 1,
-        path: `assets/img/04_chats-message/${reactionType}.svg`
-      }];
+  updateLocalReactions(emoji: string, isAdding: boolean) {
+    const reactions = this.message.reactions || [];
+    const reactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
+
+    if (reactionIndex !== -1) {
+      this.modifyReactionUsers(reactions[reactionIndex], isAdding);
+      if (reactions[reactionIndex].count === 0) reactions.splice(reactionIndex, 1);
+    } else if (isAdding) {
+      reactions.push({ emoji, userId: [this.uid!], count: 1 });
     }
+    this.message.reactions = reactions;
     this.loadReactionNames();
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
+  }
+
+  private modifyReactionUsers(reaction: any, isAdding: boolean) {
+    const userIndex = reaction.userId.indexOf(this.uid!);
+    if (isAdding && userIndex === -1) {
+      reaction.userId.push(this.uid!);
+      reaction.count += 1;
+    } else if (!isAdding && userIndex !== -1) {
+      reaction.userId.splice(userIndex, 1);
+      reaction.count -= 1;
+    }
   }
 
   async loadReactionNames() {
@@ -190,6 +245,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
+
   loadThreadDetails() {
     this.lastAnswerTime = '';
     if (this.message && this.channelId) {
@@ -202,11 +258,8 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   openThread(messageId: string) {
     this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
-    console.log(this.close);
-
-    if (window.innerWidth < 1350 && !this.close) {
+    if (window.innerWidth > 970 && window.innerWidth < 1350 && !this.close) {
       this.notifyThreadOpen.emit();
-
     }
   }
 
@@ -244,22 +297,46 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   incrementReactionCount(reactionType: string, reactionPath: string) {
     if (!this.channelId) { return; }
     const messageId = this.message.id;
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, reactionPath)
-      .then(() => {
-        this.updateLocalReactions(reactionType);
-      })
+    // this.reactionService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, reactionPath)
+    //   .then(() => {
+    //     this.updateLocalReactions(reactionType);
+    //   })
   }
 
-  async reactToMessage(messageId: string, reactionType: string, path: string) {
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
-    if (await this.chatService.hasThreads(this.channelId, messageId)) {
-      const count = await this.chatService.getReactionCount(this.channelId, messageId);
-      this.chatService.updateReactionsInAllThreads(this.channelId, messageId, reactionType, this.uid!, path, count)
+  async reactToMessage(messageId: string, emoji: string) {
+    if (!this.channelId) return;
+
+    const hasReacted = this.hasUserReacted(emoji);
+    await this.toggleReaction(messageId, emoji, hasReacted);
+    await this.updateThreadsIfNecessary(messageId, emoji);
+  }
+
+  private hasUserReacted(emoji: string): boolean {
+    return this.message.reactions?.some((reaction: any) =>
+      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
+    );
+  }
+
+  private async toggleReaction(messageId: string, emoji: string, hasReacted: boolean) {
+    if (hasReacted) {
+      await this.reactionService.removeReactionFromMessage(this.channelId!, messageId, emoji, this.uid!);
+      this.updateLocalReactions(emoji, false);
+    } else {
+      await this.reactionService.addReactionToMessage(this.channelId!, messageId, emoji, this.uid!);
+      this.updateLocalReactions(emoji, true);
+    }
+  }
+
+  private async updateThreadsIfNecessary(messageId: string, emoji: string) {
+    if (await this.chatService.hasThreads(this.channelId!, messageId)) {
+      const count = await this.chatService.getReactionCount(this.channelId!, messageId);
+      await this.reactionService.updateReactionsInAllThreads(this.channelId!, messageId, emoji, this.uid!, count);
       if (await this.chatService.isThreadOpen(this.uid!)) {
         this.openThread(messageId);
       }
     }
   }
+
 
   editMessage(messageId: string) {
     this.editMode[messageId] = true;
@@ -267,15 +344,22 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   cancelEdit(messageId: string) {
     this.editMode[messageId] = false;
+    this.fileURL = this.originalFileURL;
+    this.fileType = this.originalFileType;
+    this.fileName = this.originalFileName;
   }
 
   isEditingMessage(messageId: string): boolean {
     return this.editMode[messageId] || false;
   }
 
-  saveEditMessage(message: any) {
+  async saveEditMessage(message: any) {
+    console.log(message);
+
     this.fireService.updateMessage(message.id, {
       content: message.content,
+      fileUrl: this.fileURL,
+      fileName: this.fileName,
       messageEdit: true
     })
       .subscribe({
@@ -339,9 +423,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   onMessageHover(messageId: string, isHovering: boolean) {
     if (!this.isMenuOpen[messageId]) {
-      setTimeout(() => {
-        this.isReactionBarVisible[messageId] = isHovering;
-      });
+      this.isReactionBarVisible[messageId] = isHovering;
     }
   }
 }

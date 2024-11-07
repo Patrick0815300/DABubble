@@ -2,12 +2,12 @@ export class Message {
     id: string;
     content: string;
     name: string;
-    reactions: { type: string, userId: string, count: number }[];
+    reactions: { emoji: string; userId: string[]; count: number }[];
     time: string;
     senderId: string;
     fileUrl: string;
     fileName: string;
-    edit: boolean;
+    messageEdit: boolean;
 
     constructor(obj?: any) {
         this.id = obj && obj.id ? obj.id : '';
@@ -18,7 +18,7 @@ export class Message {
         this.senderId = obj && obj.senderId ? obj.senderId : '';
         this.fileUrl = obj && obj.fileUrl ? obj.fileUrl : '';
         this.fileName = obj && obj.fileName ? obj.fileName : '';
-        this.edit = obj && obj.edit ? obj.edit : false;
+        this.messageEdit = obj && obj.messageEdit ? obj.messageEdit : false;
     }
 
     toJSON() {
@@ -31,7 +31,7 @@ export class Message {
             senderId: this.senderId,
             fileUrl: this.fileUrl,
             fileName: this.fileName,
-            edit: this.edit
+            messageEdit: this.messageEdit
         };
     }
 }

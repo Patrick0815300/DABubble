@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { OwnMessageComponent } from '../own-message/own-message.component';
@@ -10,17 +10,24 @@ import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { ChannelService } from '../../modules/channel.service';
+import { EmojiPickerComponent } from "../../shared/emoji-picker/emoji-picker.component";
+import { EmojiService } from '../../modules/emoji.service';
+import { Subscription, filter } from 'rxjs';
+import { ReactionService } from '../../firestore-service/reaction.service';
 
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [MatIconModule, CommonModule, OwnMessageComponent],
+  imports: [MatIconModule, CommonModule, OwnMessageComponent, EmojiPickerComponent],
   templateUrl: './message.component.html',
   styleUrl: './message.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageComponent {
   @Input() message: any;
   @Input() previousMessageDate: string | null = null;
+  @Input() close!: boolean;
+  @Output() notifyThreadOpen: EventEmitter<void> = new EventEmitter();
 
   uid: string | null = null;
   channelId: string = '';
@@ -33,10 +40,13 @@ export class MessageComponent {
   fileName: string | null = null;
   avatar: string | null = null;
   messageEdited: boolean = false;
-  emojiPath = 'assets/img/04_chats-message/';
   openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  toggleEmojiPicker: boolean = false;
 
   private sanitizer = inject(DomSanitizer);
+  private emojiSubscription: Subscription | null = null;
+  private messageSubscription: Subscription | null = null;
+  private channelSubscription: Subscription | null = null;
 
   constructor(
     private chatService: ChatServiceService,
@@ -44,7 +54,10 @@ export class MessageComponent {
     private fileUploadService: FileUploadService,
     private authService: AuthService,
     private chatAreaService: ChatareaServiceService,
-    private channelService: ChannelService
+    private channelService: ChannelService,
+    private emojiService: EmojiService,
+    private reactionService: ReactionService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit() {
@@ -53,24 +66,76 @@ export class MessageComponent {
     this.loadActiveChannelId();
     this.loadReactionNames();
     this.loadAvatar();
-
     this.channelService.openMessageMobile$.subscribe(state => {
       this.openNextWrapper = state;
     });
+    this.channelSubscription = this.chatAreaService.getActiveChannel().subscribe(channel => {
+      if (channel && channel.id) {
+        this.channelId = channel.id;
+        this.subscribeToMessageUpdates();
+      }
+    });
+    this.subscribeToMessageUpdates();
+  }
+
+  ngOnDestroy() {
+    if (this.emojiSubscription) {
+      this.emojiSubscription.unsubscribe();
+    }
+    if (this.channelSubscription) {
+      this.channelSubscription.unsubscribe();
+    }
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
+  }
+
+  private subscribeToMessageUpdates() {
+    if (!this.channelId || !this.message.id) return;
+
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
+
+    this.messageSubscription = this.chatAreaService.getMessageById(this.channelId, this.message.id)
+      .subscribe(updatedMessage => {
+        this.message = updatedMessage;
+        this.loadFileUpload();
+        this.cdr.markForCheck();
+      });
+  }
+
+  showEmojiPicker() {
+    this.toggleEmojiPicker = !this.toggleEmojiPicker;
+    if (this.toggleEmojiPicker) {
+      this.emojiSubscription = this.emojiService.emoji$
+        .pipe(filter((emoji: string) => emoji.trim() !== ''))
+        .subscribe((emoji: string) => {
+          this.reactToMessage(this.message.id, emoji);
+          this.toggleEmojiPicker = false;
+        });
+    } else {
+      if (this.emojiSubscription) {
+        this.emojiSubscription.unsubscribe();
+        this.emojiSubscription = null;
+      }
+    }
   }
 
   loadAvatar() {
     const docId = this.message.senderId;
     this.chatAreaService.getUserAvatar(docId).subscribe(avatar => {
       this.avatar = avatar;
+      this.cdr.markForCheck();
     });
   }
 
   async loadFileUpload() {
-    if (this.message.fileName) {
+    if (this.message.fileName && this.message.fileUrl) {
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName);
       this.fileName = this.message.fileName;
       this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl);
+      this.cdr.markForCheck();
     }
   }
 
@@ -114,6 +179,9 @@ export class MessageComponent {
 
   openThread(messageId: string) {
     this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
+    if (window.innerWidth < 1350 && !this.close) {
+      this.notifyThreadOpen.emit();
+    }
   }
 
   loadActiveChannelId() {
@@ -129,20 +197,25 @@ export class MessageComponent {
     this.allReactions = !this.allReactions;
   }
 
-  reactToMessage(messageId: string, reactionType: string, path: string) {
+  async reactToMessage(messageId: string, emoji: string) {
     if (!this.channelId) {
       return;
     }
-    this.chatService
-      .addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
-      .then(() => {
-        this.updateLocalReactions(reactionType);
-      });
+    await this.reactionService.addReactionToMessage(this.channelId, messageId, emoji, this.uid!);
+    this.updateLocalReactions(emoji);
+    if (await this.chatService.hasThreads(this.channelId, messageId)) {
+      const count = await this.chatService.getReactionCount(this.channelId, messageId);
+      await this.reactionService.updateReactionsInAllThreads(this.channelId, messageId, emoji, this.uid!, count);
+      if (await this.chatService.isThreadOpen(this.uid!)) {
+        this.openThread(messageId);
+      }
+    }
   }
 
-  updateLocalReactions(reactionType: string) {
+
+  updateLocalReactions(emoji: string) {
     if (this.message.reactions) {
-      const reaction = this.message.reactions.find((r: { type: string }) => r.type === reactionType);
+      const reaction = this.message.reactions.find((r: { emoji: string }) => r.emoji === emoji);
       if (reaction) {
         if (!reaction.userId.includes(this.uid!)) {
           reaction.userId.push(this.uid!);
@@ -150,19 +223,17 @@ export class MessageComponent {
         }
       } else {
         this.message.reactions.push({
-          type: reactionType,
+          emoji: emoji,
           userId: [this.uid!],
           count: 1,
-          path: `assets/img/04_chats-message/${reactionType}.svg`,
         });
       }
     } else {
       this.message.reactions = [
         {
-          type: reactionType,
+          emoji: emoji,
           userId: [this.uid!],
           count: 1,
-          path: `assets/img/04_chats-message/${reactionType}.svg`,
         },
       ];
     }
@@ -179,6 +250,5 @@ export class MessageComponent {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
-    console.log(val);
   }
 }

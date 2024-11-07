@@ -16,6 +16,7 @@ import { EmojiService } from '../../modules/emoji.service';
 import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { ReactionService } from '../../firestore-service/reaction.service';
 
 @Component({
   selector: 'app-own-message',
@@ -63,7 +64,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
   private destroy$ = new Subject<void>();
 
-  constructor(private emojiRef: ElementRef, private cdr: ChangeDetectorRef, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
+  constructor(private emojiRef: ElementRef, private cdr: ChangeDetectorRef, private reactionService: ReactionService, private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService) {
     this.fireService.loadReactions();
   }
 
@@ -204,11 +205,11 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-  async reactToMessage(messageId: string, reactionType: string, path: string) {
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+  async reactToMessage(messageId: string, emoji: string, path: string) {
+    this.reactionService.addReactionToMessage(this.channelId, messageId, emoji, this.uid!)
     if (await this.chatService.hasThreads(this.channelId, messageId)) {
       const count = await this.chatService.getReactionCount(this.channelId, messageId);
-      this.chatService.updateReactionsInAllThreads(this.channelId, messageId, reactionType, this.uid!, path, count)
+      //this.reactionService.updateReactionsInAllThreads(this.channelId, messageId, emoji, this.uid!, path)
       if (await this.chatService.isThreadOpen(this.channelId)) {
         this.openThread(messageId);
       }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference, Firestore, addDoc, arrayUnion, collection, collectionData, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, addDoc, arrayUnion, collection, collectionData, doc, docData, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { Observable, Subscription, catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { AuthService } from './auth.service';
@@ -210,5 +210,10 @@ export class ChatareaServiceService {
   getAllChannels(): Observable<any[]> {
     const channelsRef = collection(this.firestore, 'channels');
     return collectionData(channelsRef, { idField: 'id' });
+  }
+
+  getMessageById(channelId: string, messageId: string): Observable<any> {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
+    return docData(messageDocRef, { idField: 'id' });
   }
 }

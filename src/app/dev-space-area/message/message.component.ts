@@ -9,6 +9,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
+import { ReactionService } from '../../firestore-service/reaction.service';
 
 @Component({
   selector: 'app-message',
@@ -35,7 +36,7 @@ export class MessageComponent {
 
   private sanitizer = inject(DomSanitizer);
 
-  constructor(private chatService: ChatServiceService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
+  constructor(private chatService: ChatServiceService, private reactionService: ReactionService, private mainService: MainServiceService, private fileUploadService: FileUploadService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
 
   ngOnInit() {
     this.uid = this.authService.getUID();
@@ -117,13 +118,13 @@ export class MessageComponent {
     this.allReactions = !this.allReactions;
   }
 
-  reactToMessage(messageId: string, reactionType: string, path: string) {
+  reactToMessage(messageId: string, emoji: string, path: string) {
     this.openReactions();
     if (!this.channelId) {
       console.error('Keine Channel-ID vorhanden.');
       return;
     }
-    this.chatService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, path)
+    this.reactionService.addReactionToMessage(this.channelId, messageId, emoji, this.uid!)
   }
 
   formatTime(timeString: string): string {

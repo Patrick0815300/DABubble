@@ -133,6 +133,7 @@ mat-icon {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 6px;
 
                 mat-icon {
                     font-size: 24px;
@@ -256,18 +257,14 @@ mat-icon {
             display: flex;
         }
 
-        mat-icon {
+        mat-icon,
+        span {
             width: 20px;
             height: 20px;
             font-size: 20px;
             padding: 10px;
             border-radius: 20px;
             transition: ease-in 80ms;
-
-            img {
-                width: 20px;
-                height: 20px;
-            }
 
             &:hover {
                 background-color: #eceefe;

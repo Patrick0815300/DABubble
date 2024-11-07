@@ -54,7 +54,7 @@ export class MessageBoxThreadComponent {
   @ViewChild('fileUploadThread') fileInputThreadElement!: ElementRef;
   @ViewChild('inputBox') inputBox!: ElementRef;
 
-  constructor(private chatService: ChatServiceService, private cdr: ChangeDetectorRef, private fireService: ChatareaServiceService, private authService: AuthService) {}
+  constructor(private chatService: ChatServiceService, private cdr: ChangeDetectorRef, private fireService: ChatareaServiceService, private authService: AuthService) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -159,7 +159,7 @@ export class MessageBoxThreadComponent {
         this.selectedFile = input.files[0];
         const reader = new FileReader();
         reader.onload = () => {
-          this.fileURL = this.sanitizer.bypassSecurityTrustUrl(reader.result as string);
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(reader.result as string);
           this.fileName = this.selectedFile!.name;
           this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
         };
@@ -256,7 +256,7 @@ export class MessageBoxThreadComponent {
   }
 
   addChannelToMessage(channelName: string) {
-    this.content += `#${channelName} `;
+    this.content += `${channelName} `;
     this.linkDialog = false;
     this.cdr.detectChanges();
     setTimeout(() => {
@@ -267,7 +267,7 @@ export class MessageBoxThreadComponent {
   }
 
   addMemberToMessage(name: string) {
-    this.content += `@${name} `;
+    this.content += `${name} `;
     this.linkDialog = false;
     this.cdr.detectChanges();
     setTimeout(() => {

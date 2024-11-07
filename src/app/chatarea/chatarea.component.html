@@ -15,7 +15,8 @@
     <div class="member-container">
       <div class="member" (click)="openMemberDialog()">
         <div>
-          <img *ngFor="let member of members" class="member-img" [src]="member.avatar" />
+          <img *ngFor="let member of members.slice(0, 4)" class="member-img" [src]="member.avatar" />
+          <span class="member-img more" *ngIf="members.length > 4">+{{ members.length - 4 }}</span>
         </div>
         <span>{{ members.length }}</span>
       </div>
@@ -37,15 +38,15 @@
       (toggleAddMemberDialog)="openAddMemberDialog()"
     ></app-add-member-dialog>
   </mat-card-header>
-  <mat-card-content #messageContainer>
-    <ng-container *ngFor="let message of messages; let i = index">
+  <mat-card-content #messageContainer *ngIf="isCurrentUserMember()">
+    <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
       <div *ngIf="shouldShowDivider(message.time, i)" class="date-divider">
         <div class="devider"></div>
         <span>{{ formatDate(message.time) }}</span>
         <div class="devider"></div>
       </div>
-      <app-message @flyInRight *ngIf="message.senderId !== uid" [message]="message"></app-message>
-      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message" (notifyThreadOpen)="onNotifyThreadOpen()"></app-own-message>
+      <app-message @flyInRight *ngIf="message.senderId !== uid" [message]="message" [close]="close"  (notifyThreadOpen)="onNotifyThreadOpen()"></app-message>
+      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message"  [close]="close" (notifyThreadOpen)="onNotifyThreadOpen()"></app-own-message>
     </ng-container>
   </mat-card-content>
   <app-message-box class="message-box"></app-message-box>

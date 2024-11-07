@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
-import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, where } from '@angular/fire/firestore';
+import { Firestore, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, addDoc, DocumentReference, where, docData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { MainServiceService } from './main-service.service';
 import { Message } from '../models/messages/channel-message.model';
@@ -7,6 +7,7 @@ import { Channel } from '../models/channels/entwickler-team.model';
 import { AuthService } from './auth.service';
 import { arrayRemove, arrayUnion, limit, writeBatch } from 'firebase/firestore';
 import { ChatareaServiceService } from './chatarea-service.service';
+import { ReactionService } from './reaction.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,7 @@ export class ChatServiceService implements OnInit, OnDestroy {
   private currentChannelSubject = new BehaviorSubject<Channel | null>(null);
   currentChannel$: Observable<Channel | null> = this.currentChannelSubject.asObservable();
 
-  constructor(private firestore: Firestore, private mainService: MainServiceService, private authService: AuthService, private chatAreaService: ChatareaServiceService) {}
+  constructor(private firestore: Firestore, private reactionService: ReactionService, private mainService: MainServiceService, private authService: AuthService, private chatAreaService: ChatareaServiceService) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -33,6 +34,11 @@ export class ChatServiceService implements OnInit, OnDestroy {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  getThreadMessageById(channelId: string, messageId: string, threadId: string, threadMessageId: string): Observable<any> {
+    const threadMessageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${threadMessageId}`);
+    return docData(threadMessageDocRef, { idField: 'id' });
   }
 
   async updateMessageFileUrl(channelId: string, messageId: string, threadId: string, docId: string, fileUrl: string, fileName: string): Promise<void> {
@@ -103,17 +109,6 @@ export class ChatServiceService implements OnInit, OnDestroy {
     }
   }
 
-  async updateReactionsInAllThreads(channelId: string, messageId: string, reactionType: string, uid: string, path: string, count: number): Promise<void> {
-    const threadsSnapshot = await getDocs(collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`)),
-      batch = writeBatch(this.firestore),
-      reaction = { type: reactionType, userId: [uid], path, count: count };
-    threadsSnapshot.forEach(doc => {
-      const reactions = doc.data()['reactions'] || [],
-        hasReacted = reactions.some((r: any) => r.type === reactionType && r.uid === uid);
-      batch.update(doc.ref, { reactions: hasReacted ? arrayRemove(reaction) : arrayUnion(reaction) });
-    });
-    await batch.commit();
-  }
 
   async isThreadOpen(uid: string): Promise<boolean> {
     return (await getDoc(doc(this.firestore, `users/${uid}`))).data()?.['thread_open'];
@@ -136,36 +131,6 @@ export class ChatServiceService implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Fehler beim Überprüfen der Threads:', error);
       return false;
-    }
-  }
-
-  /**
-   * Adds a reaction to a thread message.
-   * @param {string} channelId - The ID of the channel.
-   * @param {string} messageId - The ID of the message.
-   * @param {string} threadId - The ID of the thread.
-   * @param {string} reactionType - The type of reaction to add.
-   * @param {string} reactionPath - The path to the reaction image.
-   * @param {string} messageIdThread - The ID of the message in the thread.
-   * @returns {Promise<void>} A promise that resolves when the reaction is added.
-   */
-  async addReactionToThreadMessage(
-    channelId: string,
-    messageId: string,
-    threadId: string,
-    reactionType: string,
-    reactionPath: string,
-    messageIdThread: string,
-    uid: string
-  ): Promise<void> {
-    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${messageIdThread}`);
-    const snapshot = await getDoc(messageDocRef);
-    const messageData = snapshot.data();
-    const reactions = messageData?.['reactions'] || [];
-    const hasReacted = await this.hasUserReacted(reactions, reactionType, uid);
-    if (!hasReacted) {
-      const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, uid, reactionPath);
-      await updateDoc(messageDocRef, { reactions: updatedReactions });
     }
   }
 
@@ -469,67 +434,4 @@ export class ChatServiceService implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Loads all available reactions from the Firestore 'reactions' collection.
-   * @returns {Promise<any[]>} A promise that resolves with an array of reaction objects.
-   */
-  async loadReactions(): Promise<any[]> {
-    const reactionsRef = this.mainService.getChannelRef('reactions');
-    const snapshot = await getDocs(reactionsRef);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      name: doc.data()['name'],
-      path: doc.data()['path'],
-    }));
-  }
-
-  /**
-   * Adds or updates a reaction for a message.
-   * @param {any[]} reactions - The existing reactions array.
-   * @param {string} reactionType - The type of reaction.
-   * @param {string} userId - The ID of the user adding the reaction.
-   * @param {string} reactionPath - The path to the reaction image or asset.
-   * @returns {Promise<any[]>} A promise that resolves with the updated reactions array.
-   */
-  async addOrUpdateReaction(reactions: any[], reactionType: string, userId: string, reactionPath: string): Promise<any[]> {
-    const existingReaction = reactions.find(reaction => reaction.type === reactionType);
-    if (existingReaction) {
-      if (!existingReaction.userId.includes(userId)) {
-        existingReaction.userId.push(userId);
-        existingReaction.count += 1;
-      }
-    } else {
-      reactions.push({ type: reactionType, userId: [userId], count: 1, path: reactionPath });
-    }
-    return reactions;
-  }
-
-  /**
-   * Adds or updates a reaction for a specific message in a channel.
-   * @param {string} channelId - The ID of the channel.
-   * @param {string} messageId - The ID of the message.
-   * @param {string} reactionType - The type of reaction.
-   * @param {string} userId - The ID of the user adding the reaction.
-   * @param {string} reactionPath - The path to the reaction image or asset.
-   * @returns {Promise<void>} A promise that resolves when the reaction is added or updated.
-   */
-  async addReactionToMessage(channelId: string, messageId: string, reactionType: string, userId: string, reactionPath: string): Promise<void> {
-    const messageDocRef = this.mainService.getSingleChannelRef(`channels/${channelId}/messages`, messageId);
-    const snapshot = await getDoc(messageDocRef);
-    const messageData = snapshot.data();
-    const reactions = messageData?.['reactions'] || [];
-    const updatedReactions = await this.addOrUpdateReaction(reactions, reactionType, userId, reactionPath);
-    await updateDoc(messageDocRef, { reactions: updatedReactions });
-  }
-
-  /**
-   * Checks if a user has already reacted to a message with a specific reaction type.
-   * @param {any[]} reactions - The array of reactions.
-   * @param {string} reactionType - The type of reaction to check.
-   * @param {string} userId - The ID of the user.
-   * @returns {Promise<boolean>} A promise that resolves with a boolean indicating whether the user has reacted.
-   */
-  async hasUserReacted(reactions: any[], reactionType: string, userId: string): Promise<boolean> {
-    return reactions.some(reaction => reaction.type === reactionType && reaction.userId === userId);
-  }
 }
