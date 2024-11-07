@@ -69,9 +69,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private userService: UserService,
-    private mainService: MainServiceService,
     private authService: AuthService,
-    private emojiRef: ElementRef,
     private channelService: ChannelService,
     private currentGuest: CurrentUserService
   ) { }

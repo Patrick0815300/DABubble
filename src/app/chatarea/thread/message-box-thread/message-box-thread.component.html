@@ -38,8 +38,8 @@
           </div>
         </div>
         <div class="fl-d" *ngIf="showChannels">
-          <div class="user" *ngFor="let channel of channels" (click)="addChannelToMessage(channel.name)" #addMember>
-            <span>{{ channel.name }}</span>
+          <div class="user" *ngFor="let channel of channels" (click)="addChannelToMessage(channel.channel_name)" #addMember>
+            <span>{{ channel.channel_name }}</span>
           </div>
         </div>
       </div>

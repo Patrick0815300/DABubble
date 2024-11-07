@@ -41,12 +41,14 @@ mat-icon {
   margin-bottom: 1rem;
   z-index: 1;
   border-radius: 30px;
-  > .input-form {
+
+  >.input-form {
     display: flex;
     flex-direction: column;
     border: 1px solid #adb0d9;
     border-radius: 20px;
-    > .send-line {
+
+    >.send-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -54,7 +56,8 @@ mat-icon {
 
       padding-inline: 1rem;
       padding-bottom: 1rem;
-      > .alternate-line {
+
+      >.alternate-line {
         display: flex;
         align-items: center;
         gap: 1rem;
@@ -75,6 +78,7 @@ textarea {
   border-top-right-radius: 30px;
   margin-bottom: 21px;
 }
+
 .uplodImageDirectMessages {
   display: flex;
   align-items: flex-end;
@@ -98,14 +102,17 @@ input::placeholder {
   font-size: 16px;
   text-transform: capitalize;
 }
+
 .message {
   position: relative;
   height: 100%;
 }
+
 button {
   background-color: transparent;
   border: transparent;
 }
+
 .sender {
   height: 35px;
   width: 35px;
@@ -139,9 +146,12 @@ button {
   height: 395px;
   overflow-y: auto;
   padding-block: 10px;
+  padding-left: 16px;
+  padding-right: 16px;
   border: transparent;
   scrollbar-width: none;
-  > div {
+
+  >div {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -168,15 +178,19 @@ button {
   padding-inline: 1.5rem;
   position: relative;
   transition: all 250ms ease-in-out;
+
   &:hover {
     background-color: #eceefe;
-    > .name-date-line p {
+
+    >.name-date-line p {
       background-color: white;
     }
-    > .name-date-line .response_msg p {
+
+    >.name-date-line .response_msg p {
       background-color: white;
     }
-    > .emoji-container div {
+
+    >.emoji-container div {
       display: flex;
     }
   }
@@ -188,12 +202,14 @@ button {
   border: 1px solid #adb0d9;
   border-radius: 10px;
 }
+
 .search {
   outline: none !important;
   border: 1px solid #adb0d9 !important;
 }
+
 .emoji-container {
-  > div {
+  >div {
     position: absolute;
     background-color: white;
     left: 1.5rem;
@@ -207,7 +223,8 @@ button {
     gap: 0.5rem;
     align-items: center;
     display: none;
-    > img {
+
+    >img {
       cursor: pointer;
     }
   }
@@ -225,7 +242,8 @@ button {
 
 .img-group {
   position: relative;
-  > button:not(.emoji-icon) {
+
+  >button:not(.emoji-icon) {
     width: 35px;
     height: 35px;
     background-color: transparent;
@@ -234,14 +252,17 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
+
     &:hover {
       background-color: #eceefe;
-      > img {
+
+      >img {
         filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
       }
     }
   }
 }
+
 .btn-group {
   position: absolute;
   border: 1px solid #adb0d9;
@@ -258,13 +279,15 @@ button {
   justify-content: center;
   align-items: baseline;
   gap: 0.25rem;
-  > .btn {
+
+  >.btn {
     font-family: 'Nunito';
     font-weight: 700;
     padding: 0.35rem 0.5rem;
     border-radius: 25px;
     border: transparent;
     transition: all 250ms ease-in-out;
+
     &:hover {
       background-color: #eceefe;
       color: #535af1;
@@ -276,23 +299,27 @@ button {
   align-self: end;
   display: flex;
   gap: 1rem;
-  > .btn {
+
+  >.btn {
     font-family: 'Nunito';
     padding: 0.5rem 1rem;
     border-radius: 25px;
     border: transparent;
     transition: all 250ms ease-in-out;
+
     &:hover {
       opacity: 0.8;
     }
   }
-  > .btn-white {
+
+  >.btn-white {
     background-color: white;
     color: #444df2;
     border: 1px solid #adb0d9;
     font-weight: 700;
   }
-  > .btn-info {
+
+  >.btn-info {
     background-color: #444df2;
     color: white;
   }
@@ -326,18 +353,22 @@ button {
 .name-date-line {
   display: flex;
   flex-direction: column;
-  > div {
+
+  >div {
     display: flex;
     gap: 1rem;
-    > span:first-child {
+
+    >span:first-child {
       text-transform: capitalize;
       font-weight: 700;
     }
-    > span:nth-child(2) {
+
+    >span:nth-child(2) {
       color: #686868;
     }
   }
-  > p {
+
+  >p {
     display: inline-block;
     background-color: #eceefe;
     padding: 0.75rem;
@@ -352,8 +383,9 @@ button {
 .align-right {
   justify-content: end;
   flex-direction: row-reverse;
-  > .name-date-line {
-    > p {
+
+  >.name-date-line {
+    >p {
       border-top-left-radius: 30px;
       border-top-right-radius: unset;
       background-color: #797ef3 !important;
@@ -361,11 +393,13 @@ button {
       cursor: default;
       align-self: end;
     }
-    > div {
+
+    >div {
       flex-direction: row-reverse;
     }
   }
 }
+
 .updated_msg {
   font-size: 14px;
 }
@@ -378,11 +412,13 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  > span,
+
+  >span,
   .line {
     position: absolute;
   }
-  > span {
+
+  >span {
     margin: 0 auto;
     padding: 5px 15px;
     border: 1px solid #adb0d9;
@@ -391,7 +427,8 @@ button {
     z-index: 1;
     background-color: white;
   }
-  > .line {
+
+  >.line {
     width: 100%;
     border: 1px solid #adb0d9;
   }
@@ -408,6 +445,7 @@ button {
   object-fit: cover;
   cursor: pointer;
 }
+
 .icons-send {
   width: 24px;
   height: 24px;
@@ -423,9 +461,11 @@ button {
   border-radius: 50%;
   background-color: transparent;
   border: transparent;
+
   &:hover {
     background-color: #eceefe;
-    > img {
+
+    >img {
       filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
     }
   }
@@ -442,16 +482,20 @@ button {
   border-top-right-radius: 30px;
   gap: 1rem;
   height: 40px;
-  > span {
+  margin-bottom: auto;
+
+  >span {
     text-transform: capitalize;
     font-weight: 700;
   }
-  > button {
+
+  >button {
     position: relative;
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    > .online-marker {
+
+    >.online-marker {
       height: 10px;
       width: 10px;
       background-color: #92c83e;
@@ -468,7 +512,8 @@ button {
   display: flex;
   padding-bottom: 0.5rem;
   gap: 1rem;
-  > .username {
+
+  >.username {
     font-weight: 700;
     align-self: flex-end;
   }
@@ -482,7 +527,8 @@ button {
   color: #686868;
   font-size: 14px;
   margin-bottom: 1rem;
-  > span {
+
+  >span {
     font-weight: 700;
   }
 }
@@ -492,19 +538,22 @@ button {
   align-items: center;
   gap: 0.4rem !important;
   margin-bottom: 0.5rem;
-  > p {
+
+  >p {
     background-color: #eceefe;
     padding: 0.75rem;
     padding-inline: 0.75rem;
     padding-block: 0.1rem;
     border: 1px solid #adb0d9;
     font-weight: 200;
+
     &:not(.response-p) {
       border-bottom-right-radius: 30px;
       border-top-left-radius: 30px;
     }
   }
-  > .response-p {
+
+  >.response-p {
     border-bottom-left-radius: 30px;
     border-top-right-radius: 30px;
   }
@@ -531,6 +580,7 @@ button {
 }
 
 @media (width<630px) {
+
   .message,
   .input-wrapper,
   .chat-message {
