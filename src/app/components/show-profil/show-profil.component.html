@@ -5,9 +5,9 @@
   </div>
 
   @if(authenticatedUser){
-  <img class="user-profile-img" src="{{ isNavBar === true ? authenticatedUser.avatar : selectedUser.avatar }}" alt="" />
+  <img class="user-profile-img" src="{{ isNavBar === true ? authenticatedUser.avatar : selectedUser ? selectedUser.avatar : authenticatedUser.avatar }}" alt="" />
   <div class="user-name-update">
-    <span>{{ isNavBar === true ? authenticatedUser.name : selectedUser.name }}</span>
+    <span>{{ isNavBar === true ? authenticatedUser.name : selectedUser ? selectedUser.name : authenticatedUser.name }}</span>
     <button *ngIf="isNavBar" (click)="onOpenUpdateProfil()">bearbeiten</button>
   </div>
   <div class="single-user-info">
@@ -20,14 +20,15 @@
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <span class="mail-address">{{ isNavBar === true ? authenticatedUser.email : selectedUser.email }}</span>
-  <div *ngIf="selectedUser?.id !== authenticatedUser?.id" class="btn-container">
+  <span class="mail-address">{{ isNavBar === true ? authenticatedUser.email : selectedUser ? selectedUser.email : authenticatedUser.email }}</span>
+  @if(!isNavBar && (!selectedUser || selectedUser?.id !== authenticatedUser?.id)){
+  <div class="btn-container">
     <button class="btn" (click)="onAutoFocus()">
       <img src="assets/img/icons/mode_comment.svg" alt="" />
       <span>Nachrichten</span>
     </button>
   </div>
-  }@else{
+  } }@else{
   <img
     class="user-profile-img"
     src="{{ isNavBar === true ? 'assets/img/profiles/male_avatar.svg' : selectedUser ? selectedUser.avatar : 'assets/img/profiles/male_avatar.svg' }}"

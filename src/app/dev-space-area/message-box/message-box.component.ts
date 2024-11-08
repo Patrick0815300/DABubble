@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { CommonModule } from '@angular/common';
@@ -20,11 +20,12 @@ import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
   standalone: true,
   imports: [MatIconModule, CommonModule, FormsModule, MatProgressBarModule, EmojiPickerComponent, PickerComponent, EmojiComponent],
   templateUrl: './message-box.component.html',
-  styleUrl: './message-box.component.scss'
+  styleUrl: './message-box.component.scss',
 })
 export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('addMember') addMember!: ElementRef;
   @ViewChild('emojiPicker', { read: ElementRef }) emojiPicker!: ElementRef;
+
   uid: string | null = null;
   messageContent: string = '';
   channelName: string = '';
@@ -53,7 +54,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('messageTextArea') messageTextArea!: ElementRef;
 
-  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService, private emojiRef: ElementRef) { }
+  constructor(private cdr: ChangeDetectorRef, private mainService: MainServiceService, private authService: AuthService, private emojiRef: ElementRef) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -99,13 +100,9 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
-      this.emojiSubscription = this.emojiService.emoji$
-        .pipe(
-          filter((emoji: string) => emoji.trim() !== '')
-        )
-        .subscribe((emoji: string) => {
-          this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
-        });
+      this.emojiSubscription = this.emojiService.emoji$.pipe(filter((emoji: string) => emoji.trim() !== '')).subscribe((emoji: string) => {
+        this.messageContent = this.messageContent ? this.messageContent + emoji : emoji;
+      });
     } else {
       if (this.emojiSubscription) {
         this.emojiSubscription.unsubscribe();
@@ -149,7 +146,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
 
   loadUsers() {
     this.users = [];
-    this.memberIds.forEach((memberId) => {
+    this.memberIds.forEach(memberId => {
       this.fireService.loadDocument('users', memberId).subscribe((user: any) => {
         const userInstance = new User({ ...user });
         this.users.push(userInstance);
@@ -169,6 +166,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.messageTextArea.nativeElement.focus();
     this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
@@ -189,32 +187,32 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-
-
   uploadFile(messageId: string, channelId: string) {
     if (this.selectedFile) {
       this.isUploading = true;
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
-      this.fileUploadService.uploadFile(this.selectedFile, messageId, (progress) => {
-        this.uploadProgress = progress;
-      }).then((result: { url: string, fileName: string }) => {
-        this.cleanUrl = result.url;
-        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
-        this.fileName = result.fileName;
-        this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
-          this.messageContent = '';
-          this.fileURL = null;
-          this.fileName = null;
+      this.fileUploadService
+        .uploadFile(this.selectedFile, messageId, progress => {
+          this.uploadProgress = progress;
+        })
+        .then((result: { url: string; fileName: string }) => {
+          this.cleanUrl = result.url;
+          this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+          this.fileName = result.fileName;
+          this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName).then(() => {
+            this.messageContent = '';
+            this.fileURL = null;
+            this.fileName = null;
+            this.isUploading = false;
+          });
+        })
+        .catch(error => {
+          console.error('Fehler beim Hochladen der Datei:', error);
           this.isUploading = false;
         });
-      }).catch((error) => {
-        console.error('Fehler beim Hochladen der Datei:', error);
-        this.isUploading = false;
-      });
       this.selectedFile = null;
     }
   }
-
 
   sendMessage() {
     if (this.messageContent.trim() === '' && !this.selectedFile) return;
@@ -233,16 +231,16 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
               fileName: null,
               messageEdit: false,
             };
-            this.fireService.addMessage(channel.id, messageData).then((docRef) => {
+            this.fireService.addMessage(channel.id, messageData).then(docRef => {
               const messageId = docRef!.id;
               this.messageContent = '';
               if (this.selectedFile) {
                 this.uploadFile(messageId, channel.id);
               }
             });
-          }
+          },
         });
-      }
+      },
     });
   }
 

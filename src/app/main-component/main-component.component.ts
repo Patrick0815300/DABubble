@@ -98,10 +98,10 @@ export class MainComponentComponent implements OnInit {
   private uidSubscription: Subscription | null = null;
   constructor(
     private navService: NavService,
+    private updateProfilService: UpdateProfilService,
     private channelService: ChannelService,
     private logOutService: LogOutService,
     private showProfileService: ShowProfilService,
-    private updateProfilService: UpdateProfilService,
     private databaseService: DatabaseServiceService,
     private authService: AuthService,
     private userService: UserService,
@@ -111,6 +111,9 @@ export class MainComponentComponent implements OnInit {
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
+    });
+    this.updateProfilService.open_update_profil$.subscribe(state => {
+      this.open_update_profil = state;
     });
 
     this.logOutService.open_logout$.subscribe(state => {
@@ -123,10 +126,6 @@ export class MainComponentComponent implements OnInit {
 
     this.showProfileService.open_show_profile_nav$.subscribe(state => {
       this.open_show_profile_nav = state;
-    });
-
-    this.updateProfilService.open_update_profil$.subscribe(state => {
-      this.open_update_profil = state;
     });
 
     this.channelService.open_update_channel$.subscribe(state => {

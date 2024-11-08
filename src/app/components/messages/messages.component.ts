@@ -1,5 +1,5 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, AfterViewInit, ElementRef, inject, OnInit, ViewChild, SimpleChanges, Renderer2 } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, OnInit, ViewChild, DoCheck, Renderer2 } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
 import { FirestoreModule, Firestore } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
@@ -21,6 +21,9 @@ import { map, Subscription } from 'rxjs';
 import { AuthService } from '../../firestore-service/auth.service';
 import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { Storage } from '@angular/fire/storage';
+import { NavService } from '../../modules/nav.service';
+import { UpdateProfilService } from '../../modules/update-profil.service';
+import { MessageThreadComponent } from '../../chatarea/thread/message-thread/message-thread.component';
 
 @Component({
   selector: 'app-messages',
@@ -41,7 +44,7 @@ import { Storage } from '@angular/fire/storage';
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit, AfterViewInit {
+export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
   message_content = '';
   chatMessages: Message[] = [];
   toUserId: string = '';
@@ -56,6 +59,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   selectedUser: User = new User();
   show_delete_msg!: number;
   update_message: string = '';
+  clearFile: boolean = false;
+  update_FileUrl: string | null = '';
+  update_FileName: string | null = '';
   is_update_msg: boolean = false;
   update_group!: number;
   update_chat!: number;
@@ -80,12 +86,19 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   uploadProgress: number = 0;
   authenticatedUser: User | undefined;
   cleanUrl: string | null = null;
+  open_update_profil: boolean = false;
+  state: boolean = false;
+  memoFileUploader: boolean = false;
 
   private uidSubscription: Subscription | null = null;
   private fileUploadService = inject(FileUploadService);
   private sanitizer = inject(DomSanitizer);
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
+  @ViewChild('focusMsg') myTextarea!: ElementRef;
+  @ViewChild('updateArea') updateArea!: ElementRef;
   constructor(
+    private navService: NavService,
+    private updateProfilService: UpdateProfilService,
     private channelService: ChannelService,
     private elementRef: ElementRef,
     private showProfileService: ShowProfilService,
@@ -113,6 +126,13 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         .subscribe(user => {
           this.authenticatedUser = user;
         });
+    });
+
+    this.navService.state$.subscribe(state => {
+      this.state = state;
+    });
+    this.updateProfilService.open_update_profil$.subscribe(state => {
+      this.open_update_profil = state;
     });
 
     this.userService.userIds$.subscribe(userId => {
@@ -250,6 +270,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       let msgObject = this.messageSender(to_user_id);
       this.databaseService.addMessage(msgObject).then(id => {
         if (this.selectedFile) {
+          this.memoFileUploader = false;
           this.uploadFile(id!);
         }
       });
@@ -318,25 +339,40 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.show_delete_msg = -1;
   }
 
-  onUpdateMessage(msgContent: string, index_chat: number, index_group: number) {
+  onUpdateMessage(msgContent: string, fileUrl: any, fileName: any, index_chat: number, index_group: number) {
     this.update_chat = index_chat;
     this.update_group = index_group;
     this.update_message = msgContent;
+    this.update_FileUrl = fileUrl;
+    this.update_FileName = fileName;
     this.show_delete_msg = -1;
   }
 
   handleUpdateMsg(currentMsgId: string) {
-    this.channelService
-      .updateChannelData('messages', 'message_id', currentMsgId, { message_content: this.update_message })
-      .then(() => this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { is_updated: true }));
+    if (this.selectedFile) {
+      this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { message_content: this.update_message }).then(() => {
+        this.channelService.getDocumentIdById('messages', 'message_id', currentMsgId).then(id => {
+          this.memoFileUploader = true;
+          this.uploadFile(id!);
+        });
+        this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { is_updated: true });
+      });
+    } else {
+      this.channelService
+        .updateChannelData('messages', 'message_id', currentMsgId, { message_content: this.update_message, fileUrl: this.update_FileUrl, fileName: this.update_FileName })
+        .then(() => {
+          this.channelService.updateChannelData('messages', 'message_id', currentMsgId, { is_updated: true });
+        });
+    }
+
     this.update_message = '';
     this.onCancelUpdateMsg();
+
+    this.clearFile = false;
   }
 
   loadFileUpload(msg: Message) {
     if (msg.fileName) {
-      // msg.fileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
-      // msg.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl as string);
       this.messageFileType = this.fileUploadService.getFileTypeFromFileName(msg.fileName);
       this.messageFileName = msg.fileName;
       this.messageFileURL = this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl);
@@ -346,10 +382,19 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateFile(msg: Message) {
+    if (msg.fileName) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(msg.fileUrl);
+    } else {
+      return;
+    }
+  }
+
   onCancelUpdateMsg() {
     this.update_group = -1;
     this.update_chat = -1;
     this.is_response = false;
+    this.fileURL = null;
   }
 
   onRespond(index_chat: number, index_group: number) {
@@ -420,12 +465,42 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.fileType = null;
     this.selectedFile = null;
   }
+  clearUpdateFile() {
+    this.update_FileUrl = null;
+    this.update_FileName = null;
+    this.clearFile = true;
+    this.messageFileURL = null;
+    this.fileName = null;
+    this.messageFileType = null;
+  }
 
   openFileDialog() {
-    this.fileInputElement.nativeElement.click();
+    this.fileInputElement?.nativeElement.click();
+  }
+
+  ngDoCheck() {
+    if (this.update_chat === -1 || this.update_group === -1) {
+      if (!this.open_update_profil || this.state) {
+        this.keepFocus();
+      }
+    } else {
+      this.keepUpdateFocus();
+    }
+  }
+
+  private keepFocus() {
+    setTimeout(() => {
+      this.myTextarea?.nativeElement.focus();
+    });
+  }
+  private keepUpdateFocus() {
+    setTimeout(() => {
+      this.updateArea?.nativeElement.focus();
+    });
   }
 
   ngAfterViewInit() {
+    this.renderer.selectRootElement(this.myTextarea?.nativeElement).focus();
     this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {

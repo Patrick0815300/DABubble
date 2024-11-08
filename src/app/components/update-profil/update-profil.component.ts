@@ -21,6 +21,9 @@ export class UpdateProfilComponent implements OnInit {
   authenticatedUser: User | undefined;
   username: string = '';
   user_email: string | undefined = '';
+  disable_btn: boolean = false;
+  isFormEmpty!: boolean;
+  isFormFieldNull!: boolean;
 
   private uidSubscription: Subscription | null = null;
   constructor(

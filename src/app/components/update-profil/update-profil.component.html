@@ -11,19 +11,35 @@
   </div>
   <input
     class="capitalize"
+    #usernameModel="ngModel"
     [(ngModel)]="username"
     type="text"
     [disabled]="!authenticatedUser?.online"
     [placeholder]="authenticatedUser?.online ? 'Vorname Nachname' : 'Bubble Guest'"
+    required=""
+    pattern="^[A-Za-z]{1,}(?: [A-Za-z]+)*$"
   />
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />
     <span class="address">E-Mail Adresse</span>
   </div>
-  <input [(ngModel)]="user_email" type="text" [disabled]="!authenticatedUser?.online" [placeholder]="authenticatedUser?.online ? 'max-mustermann@gmail.com' : 'guest@mail.com'" />
+  <input
+    [(ngModel)]="user_email"
+    #user_emailModel="ngModel"
+    type="email"
+    pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+    [disabled]="!authenticatedUser?.online"
+    [placeholder]="authenticatedUser?.online ? 'max-mustermann@gmail.com' : 'guest@mail.com'"
+    required
+  />
   <div class="btn-container">
     <button class="btn" (click)="onCloseUpdateProfile()">Abbrechen</button>
-    <button class="btn" (click)="save('users', authenticatedUser?.id!)" [disabled]="!authenticatedUser?.online" [style.opacity]="!authenticatedUser?.online ? '0.5' : '1'">
+    <button
+      class="btn"
+      (click)="save('users', authenticatedUser?.id!)"
+      [disabled]="!user_emailModel.valid || !usernameModel.valid"
+      [style.opacity]="!user_emailModel.valid || !usernameModel.valid ? '0.5' : '1'"
+    >
       Speichern
     </button>
   </div>

@@ -121,13 +121,14 @@ export class LeftSideMenuComponent implements OnInit {
       this.channelLoad(currentState);
     }
 
-    this.authService.userID$.subscribe(userId => {
-      this.auth_user_id = userId;
-      this.databaseService.authUser(userId!).then(user => {
-        if (user && user !== null) {
+    this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.auth_user_id = user?.id;
           this.authenticatedUser = user;
-        }
-      });
+        });
     });
 
     this.authService.getGuestUser();

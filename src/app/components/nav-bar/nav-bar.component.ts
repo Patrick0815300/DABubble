@@ -11,6 +11,7 @@ import { NavService } from '../../modules/nav.service';
 import { getAuth } from 'firebase/auth';
 import { AuthService } from '../../firestore-service/auth.service';
 import { CurrentUserService } from '../../modules/current-user.service';
+import { map, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-nav-bar',
@@ -34,10 +35,12 @@ export class NavBarComponent implements OnInit {
   input_value: string = '';
   currentUserId!: any;
   openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  private uidSubscription: Subscription | null = null;
 
   constructor(
     private logOutService: LogOutService,
     public databaseService: DatabaseServiceService,
+    private authenticatedService: AuthService,
     private authService: CurrentUserService,
     private channelService: ChannelService,
     private navService: NavService
@@ -48,12 +51,13 @@ export class NavBarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.userID$.subscribe(userId => {
-      this.databaseService.authUser(userId!).then(user => {
-        if (user && user != null) {
+    this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
           this.authenticatedUser = user;
-        }
-      });
+        });
     });
 
     this.databaseService.users$.subscribe(users => {
@@ -87,8 +91,7 @@ export class NavBarComponent implements OnInit {
         this.filtered_users = this.all_users;
         this.channelService.emitFilteredUsers(this.filtered_users);
       } else if (this.search_input.length > 1 && this.search_input[0] === '@') {
-        this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
-
+        this.filtered_users = this.all_users.filter(u => this.onFilterUser(u, 1));
         this.channelService.emitFilteredUsers(this.filtered_users);
       }
     } else if (this.search_input && this.search_input[0] !== '@') {
@@ -98,16 +101,32 @@ export class NavBarComponent implements OnInit {
         this.channelService.emitFilteredChannels(this.filteredChannels);
       } else if (this.search_input[0] === '#' && this.search_input.length > 1) {
         this.showSearchUserName = true;
-        this.filteredChannels = this.all_channels.filter(u => u.channel_name.toLowerCase().includes(this.search_input.slice(1).toLowerCase()));
+        this.filteredChannels = this.all_channels.filter(u => this.onFilterChannel(u, 1));
         this.channelService.emitFilteredChannels(this.filteredChannels);
       } else {
         this.showSearchUserName = true;
-        this.filtered_users = this.all_users.filter(u => u.email.toLowerCase().includes(this.search_input.toLowerCase()));
-        this.channelService.emitFilteredUsers(this.filtered_users);
+        this.filtered_users = this.all_users.filter(u => this.onFilterUser(u, 0));
+        this.filteredChannels = this.all_channels.filter(u => this.onFilterChannel(u, 0));
+
+        if (this.filtered_users.length === 0) {
+          this.channelService.emitFilteredChannels(this.filteredChannels);
+        } else {
+          this.channelService.emitFilteredUsers(this.filtered_users);
+        }
       }
     } else {
       this.showSearchUserName = false;
+      this.channelService.emitFilteredUsers([]);
+      this.channelService.emitFilteredChannels([]);
     }
+  }
+
+  onFilterChannel(array: Channel, index: number) {
+    return array.channel_name.toLowerCase().substring(0, this.search_input.length - index) === this.search_input.slice(index).toLowerCase();
+  }
+
+  onFilterUser(array: User, index: number) {
+    return array.name.toLowerCase().substring(0, this.search_input.length - index) === this.search_input.slice(index).toLowerCase();
   }
 
   closeDevSpace() {
