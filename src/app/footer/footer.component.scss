@@ -27,6 +27,12 @@ footer {
     }
 }
 
+@media(min-height:1200px){
+    footer {
+        font-size:30px;
+    }
+}
+
 @media(max-width:610px) or (max-height: 1015px) {
     footer {
         display: none;

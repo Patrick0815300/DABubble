@@ -32,6 +32,7 @@ section {
     align-items: center;
     gap: 40px;
     box-sizing: border-box;
+    height:100%;
 }
 
 mat-card {
@@ -70,6 +71,7 @@ mat-card-content {
     gap: 40px;
     margin-bottom: 40px;
     position: relative;
+    height:100%;
 
     .headline {
         img {
@@ -96,7 +98,11 @@ mat-card-content {
             border-radius: 30px;
             padding: 7px 10px;
         }
+    }
 
+    .buttonContainer{
+        position:absolute;
+        bottom:0;
     }
 }
 
@@ -241,7 +247,8 @@ mat-card-content {
 
 @media(max-width:450px) {
     .descriptionContainer {
-        gap: 32px;
+        // gap: 32px;
+        height:100%;
     }
 }
 
@@ -318,7 +325,12 @@ mat-card-content {
 
 @media(max-height:695px) {
     mat-card {
-        transform: scale(0.6);
-        top: -40px;
+        // transform: scale(0.6);
+        // top: -40px;
+        height:100%;
+    }
+
+    .loginInputsContainer{
+        gap:20px;
     }
 }

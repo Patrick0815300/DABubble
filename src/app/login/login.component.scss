@@ -275,7 +275,7 @@
     align-items: center;
     gap: 40px;
     margin-bottom: 40px;
-    position:relative;
+    position: relative;
 
     .link {
         color: #797EF3;
@@ -305,10 +305,13 @@ section {
     min-width: 80%;
 
     main {
+        width: 80%;
+
         mat-card {
             // min-height:692px;
             height: 100%;
-            max-height: 1000px;
+            // max-height: 1000px;
+            width: 80%;
         }
     }
 
@@ -480,8 +483,64 @@ form {
 .error {
     color: red;
     height: 20px;
-    position:absolute;
-    top:170px;
+    position: absolute;
+    top: 170px;
+}
+
+@media(min-height:1400px) {
+    section {
+        main {
+            mat-card {
+                .info {
+                    font-size: 50px;
+
+                    .title {
+                        font-size: 80px;
+                    }
+
+                    .description {
+                        font-size: 40px;
+                        line-height: 70px;
+                    }
+                }
+            }
+        }
+    }
+
+    form{
+        .inputField{
+            height: 100px;
+
+            input{
+                font-size:38px;
+            }
+        }
+    }
+
+    .googleLogin{
+        height:100px;
+        font-size:38px;
+    }
+
+    .link{
+        font-size:38px;
+    }
+
+    .seperator{
+        font-size:28px
+    }
+
+    .button{
+        width:200px;
+        padding:20px;
+        font-size:20px;
+    }
+}
+
+@media(min-height:1950px){
+    form{
+        gap:80px;
+    }
 }
 
 @media(max-width:670px) {
