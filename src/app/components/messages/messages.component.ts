@@ -261,7 +261,9 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
 
   onAddMessage(to_user_id: string) {
     if (this.pickedUserArray.length != 0) {
-      this.pickedUserArray.push(to_user_id);
+      if (!this.pickedUserArray.includes(to_user_id)) {
+        this.pickedUserArray.push(to_user_id);
+      }
       this.pickedUserArray.forEach(userId => {
         let msgVal = this.messageSender(userId);
         this.databaseService.addMessage(msgVal);
@@ -500,6 +502,7 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
   }
 
   ngAfterViewInit() {
+    this.myTextarea?.nativeElement.focus();
     this.renderer.selectRootElement(this.myTextarea?.nativeElement).focus();
     this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;

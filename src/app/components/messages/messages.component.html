@@ -73,7 +73,7 @@
               <ng-container>
                 {{ loadFileUpload(message) }}
               </ng-container>
-              <ng-container *ngIf="messageFileURL && !clearFile">
+              <ng-container *ngIf="messageFileURL && !clearFile && message.fileName">
                 <div class="uplodImageDirectMessages">
                   <img *ngIf="messageFileType === 'image'" [src]="messageFileURL" alt="Image" class="uploaded-image" width="150px" />
                   <iframe *ngIf="messageFileType === 'pdf'" [src]="messageFileURL" class="pdf-viewer" width="100px" height="100px"></iframe>
@@ -176,7 +176,14 @@
     <app-search-user [componentType]="'search-input'" />
     <div class="input-wrapper">
       <div class="input-form">
-        <textarea #focusMsg [(ngModel)]="message_content" name="msg-area" id="msg-area" autofocus placeholder="Nachrichten an {{ getCachedUser(toUserId)?.name }}"></textarea>
+        <textarea
+          #focusMsg
+          [(ngModel)]="message_content"
+          name="msg-area"
+          id="msg-area"
+          autofocus
+          placeholder="Nachrichten an {{ getCachedUser(toUserId) ? getCachedUser(toUserId)?.name : authenticatedUser?.name }}"
+        ></textarea>
         <ng-container *ngIf="fileURL && (this.update_chat === -1 || this.update_group === -1)">
           <div class="uplodImageDirectMessages">
             <img *ngIf="fileType === 'image'" [src]="fileURL" alt="Image" class="uploaded-image" width="150px" />
