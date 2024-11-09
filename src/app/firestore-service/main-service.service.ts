@@ -69,10 +69,10 @@ export class MainServiceService {
   }
 
   /**
-   * Formats a time string into HH:MM format.
-   * @param {string} timeString - The time string to format.
-   * @returns {string} The formatted time string.
-   */
+ * Formats a time string into HH:MM format.
+ * @param {string} timeString - The time string to format.
+ * @returns {string} The formatted time string.
+ */
   formatTime(timeString: string): string {
     const date = new Date(timeString);
     const hours = date.getHours().toString().padStart(2, '0');
@@ -83,7 +83,7 @@ export class MainServiceService {
   /**
    * Formats a date string into 'heute' if the date is today, otherwise returns a localized date string.
    * @param {string} dateString - The date string to format.
-   * @returns {string} The formatted date string.
+   * @returns {string} The formatted date string in the format 'Freitag, 08. November 2024'.
    */
   formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -95,8 +95,15 @@ export class MainServiceService {
     ) {
       return 'heute';
     }
-    return date.toLocaleDateString('de-DE');
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    };
+    return date.toLocaleDateString('de-DE', options);
   }
+
 
   async setThreadOpenFalse(): Promise<void> {
     const userDocRef = doc(this.firestore, `users/${this.uid}`);

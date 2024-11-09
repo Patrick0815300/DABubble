@@ -101,7 +101,7 @@ export class MessageComponent {
       .subscribe(updatedMessage => {
         this.message = updatedMessage;
         this.loadFileUpload();
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       });
   }
 
@@ -126,7 +126,7 @@ export class MessageComponent {
     const docId = this.message.senderId;
     this.chatAreaService.getUserAvatar(docId).subscribe(avatar => {
       this.avatar = avatar;
-      this.cdr.markForCheck();
+      this.cdr.detectChanges();
     });
   }
 
@@ -135,7 +135,7 @@ export class MessageComponent {
       this.fileType = this.fileUploadService.getFileTypeFromFileName(this.message.fileName);
       this.fileName = this.message.fileName;
       this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(this.message.fileUrl);
-      this.cdr.markForCheck();
+      this.cdr.detectChanges();
     }
   }
 
@@ -198,46 +198,62 @@ export class MessageComponent {
   }
 
   async reactToMessage(messageId: string, emoji: string) {
-    if (!this.channelId) {
-      return;
+    if (!this.channelId) return;
+    const hasReacted = this.hasUserReacted(emoji);
+    await this.toggleReaction(messageId, emoji, hasReacted);
+    await this.updateThreadsIfNecessary(messageId, emoji);
+  }
+
+  private async toggleReaction(messageId: string, emoji: string, hasReacted: boolean) {
+    if (hasReacted) {
+      await this.reactionService.removeReactionFromMessage(this.channelId!, messageId, emoji, this.uid!);
+      this.updateLocalReactions(emoji, false);
+    } else {
+      await this.reactionService.addReactionToMessage(this.channelId!, messageId, emoji, this.uid!);
+      this.updateLocalReactions(emoji, true);
     }
-    await this.reactionService.addReactionToMessage(this.channelId, messageId, emoji, this.uid!);
-    this.updateLocalReactions(emoji);
-    if (await this.chatService.hasThreads(this.channelId, messageId)) {
-      const count = await this.chatService.getReactionCount(this.channelId, messageId);
-      await this.reactionService.updateReactionsInAllThreads(this.channelId, messageId, emoji, this.uid!, count);
+  }
+
+  private hasUserReacted(emoji: string): boolean {
+    return this.message.reactions?.some((reaction: any) =>
+      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
+    );
+  }
+
+  private async updateThreadsIfNecessary(messageId: string, emoji: string) {
+    if (await this.chatService.hasThreads(this.channelId!, messageId)) {
+      const count = await this.chatService.getReactionCount(this.channelId!, messageId);
+      await this.reactionService.updateReactionsInAllThreads(this.channelId!, messageId, emoji, this.uid!, count);
       if (await this.chatService.isThreadOpen(this.uid!)) {
         this.openThread(messageId);
       }
     }
   }
 
+  updateLocalReactions(emoji: string, isAdding: boolean) {
+    const reactions = this.message.reactions || [];
+    const reactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
 
-  updateLocalReactions(emoji: string) {
-    if (this.message.reactions) {
-      const reaction = this.message.reactions.find((r: { emoji: string }) => r.emoji === emoji);
-      if (reaction) {
-        if (!reaction.userId.includes(this.uid!)) {
-          reaction.userId.push(this.uid!);
-          reaction.count += 1;
-        }
-      } else {
-        this.message.reactions.push({
-          emoji: emoji,
-          userId: [this.uid!],
-          count: 1,
-        });
-      }
-    } else {
-      this.message.reactions = [
-        {
-          emoji: emoji,
-          userId: [this.uid!],
-          count: 1,
-        },
-      ];
+    if (reactionIndex !== -1) {
+      this.modifyReactionUsers(reactions[reactionIndex], isAdding);
+      if (reactions[reactionIndex].count === 0) reactions.splice(reactionIndex, 1);
+    } else if (isAdding) {
+      reactions.push({ emoji, userId: [this.uid!], count: 1 });
     }
+    this.message.reactions = reactions;
     this.loadReactionNames();
+    this.cdr.detectChanges();
+  }
+
+  private modifyReactionUsers(reaction: any, isAdding: boolean) {
+    const userIndex = reaction.userId.indexOf(this.uid!);
+    if (isAdding && userIndex === -1) {
+      reaction.userId.push(this.uid!);
+      reaction.count += 1;
+    } else if (!isAdding && userIndex !== -1) {
+      reaction.userId.splice(userIndex, 1);
+      reaction.count -= 1;
+    }
   }
 
   formatTime(timeString: string): string {

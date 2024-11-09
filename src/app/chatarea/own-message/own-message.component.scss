@@ -5,6 +5,10 @@ mat-icon {
     cursor: pointer;
 }
 
+.btn-unset {
+    all: unset;
+}
+
 .date-divider {
     display: flex;
     align-items: center;
@@ -138,6 +142,13 @@ mat-icon {
                 mat-icon {
                     font-size: 24px;
                     color: #686868;
+                    padding: 8px;
+                    border-radius: 20px;
+
+                    &:hover {
+                        color: #535AF1;
+                        background-color: #ECEEFE;
+                    }
                 }
 
                 .btns {

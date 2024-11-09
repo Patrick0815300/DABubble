@@ -60,12 +60,14 @@ export class OwnMessageThreadComponent {
       this.uid = uid;
     });
     this.threadDataSubscription = this.chatService.pickedThread$.subscribe((data) => {
-      if (data) {
+      if (data && data.channelId && data.messageId && data.id) {
         this.threadData = data;
-        this.subscribeToThreadMessageUpdates();
-        this.loadReactionNames();
-        this.loadThreadMessages();
-        this.loadUserAvatar();
+        if (this.threadData.channelId && this.threadData.messageId && this.threadData.id) {
+          this.subscribeToThreadMessageUpdates();
+          this.loadReactionNames();
+          this.loadThreadMessages();
+          this.loadUserAvatar();
+        }
       }
     });
   }
@@ -89,13 +91,13 @@ export class OwnMessageThreadComponent {
   }
 
   private subscribeToThreadMessageUpdates() {
+    console.log(this.threadData);
+
     const { channelId, messageId, id: threadId } = this.threadData;
     if (!channelId || !messageId || !threadId || !this.thread) return;
-
     if (this.threadSubscription) {
       this.threadSubscription.unsubscribe();
     }
-
     this.threadSubscription = this.chatService.getThreadMessageById(
       channelId, messageId, threadId, this.thread.id
     ).subscribe(updatedThread => {
@@ -103,7 +105,6 @@ export class OwnMessageThreadComponent {
         this.thread = updatedThread;
         this.loadFileUpload();
         this.cdr.markForCheck();
-      } else {
       }
     });
   }
@@ -187,10 +188,55 @@ export class OwnMessageThreadComponent {
     });
   }
 
-  reactToThreadMessage(id: string, emoji: string): void {
+  async reactToThreadMessage(id: string, emoji: string): Promise<void> {
     const { channelId, messageId, id: threadId } = this.threadData;
     if (channelId && messageId && threadId && id) {
-      this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, id, this.uid!)
+      this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, id, this.uid!);
+      const hasReacted = this.hasUserReacted(emoji);
+      await this.toggleReaction(id, emoji, hasReacted);
+    }
+  }
+
+  private async toggleReaction(threadMessageId: string, emoji: string, hasReacted: boolean) {
+    const { channelId, messageId, id: threadId } = this.threadData;
+    if (hasReacted) {
+      await this.reactionService.removeReactionFromThreadMessage(channelId, messageId, threadId, emoji, threadMessageId, this.uid!);
+      this.updateLocalReactions(emoji, false);
+    } else {
+      await this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, threadMessageId, this.uid!);
+      this.updateLocalReactions(emoji, true);
+    }
+  }
+
+  private hasUserReacted(emoji: string): boolean {
+    return this.thread.reactions?.some((reaction: any) =>
+      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
+    );
+  }
+
+  updateLocalReactions(emoji: string, isAdding: boolean) {
+    const reactions = this.thread.reactions || [];
+    const reactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
+
+    if (reactionIndex !== -1) {
+      this.modifyReactionUsers(reactions[reactionIndex], isAdding);
+      if (reactions[reactionIndex].count === 0) reactions.splice(reactionIndex, 1);
+    } else if (isAdding) {
+      reactions.push({ emoji, userId: [this.uid!], count: 1 });
+    }
+    this.thread.reactions = reactions;
+    this.loadReactionNames();
+    this.cdr.markForCheck();
+  }
+
+  private modifyReactionUsers(reaction: any, isAdding: boolean) {
+    const userIndex = reaction.userId.indexOf(this.uid!);
+    if (isAdding && userIndex === -1) {
+      reaction.userId.push(this.uid!);
+      reaction.count += 1;
+    } else if (!isAdding && userIndex !== -1) {
+      reaction.userId.splice(userIndex, 1);
+      reaction.count -= 1;
     }
   }
 

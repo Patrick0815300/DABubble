@@ -50,6 +50,10 @@ div.mat-mdc-select-panel {
 
 button {
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed !important;
+  }
 }
 
 $click-color: #444df2;

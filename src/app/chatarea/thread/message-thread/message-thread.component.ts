@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatServiceService } from '../../../firestore-service/chat-service.service';
 import { MatMenu } from '@angular/material/menu';
@@ -52,6 +52,7 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     private channelService: ChannelService,
     private reactionService: ReactionService,
     private emojiService: EmojiService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.chatService.pickedThread$.subscribe(data => {
       if (data) {
@@ -165,10 +166,55 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     });
   }
 
-  reactToThreadMessage(id: string, emoji: string): void {
+  async reactToThreadMessage(id: string, emoji: string): Promise<void> {
     const { channelId, messageId, id: threadId } = this.threadData;
     if (channelId && messageId && threadId && id) {
       this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, id, this.uid!);
+      const hasReacted = this.hasUserReacted(emoji);
+      await this.toggleReaction(id, emoji, hasReacted);
+    }
+  }
+
+  private async toggleReaction(threadMessageId: string, emoji: string, hasReacted: boolean) {
+    const { channelId, messageId, id: threadId } = this.threadData;
+    if (hasReacted) {
+      await this.reactionService.removeReactionFromThreadMessage(channelId, messageId, threadId, emoji, threadMessageId, this.uid!);
+      this.updateLocalReactions(emoji, false);
+    } else {
+      await this.reactionService.addReactionToThreadMessage(channelId, messageId, threadId, emoji, threadMessageId, this.uid!);
+      this.updateLocalReactions(emoji, true);
+    }
+  }
+
+  private hasUserReacted(emoji: string): boolean {
+    return this.thread.reactions?.some((reaction: any) =>
+      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
+    );
+  }
+
+  updateLocalReactions(emoji: string, isAdding: boolean) {
+    const reactions = this.thread.reactions || [];
+    const reactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
+
+    if (reactionIndex !== -1) {
+      this.modifyReactionUsers(reactions[reactionIndex], isAdding);
+      if (reactions[reactionIndex].count === 0) reactions.splice(reactionIndex, 1);
+    } else if (isAdding) {
+      reactions.push({ emoji, userId: [this.uid!], count: 1 });
+    }
+    this.thread.reactions = reactions;
+    this.loadReactionNames();
+    this.cdr.markForCheck();
+  }
+
+  private modifyReactionUsers(reaction: any, isAdding: boolean) {
+    const userIndex = reaction.userId.indexOf(this.uid!);
+    if (isAdding && userIndex === -1) {
+      reaction.userId.push(this.uid!);
+      reaction.count += 1;
+    } else if (!isAdding && userIndex !== -1) {
+      reaction.userId.splice(userIndex, 1);
+      reaction.count -= 1;
     }
   }
 

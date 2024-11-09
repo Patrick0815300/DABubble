@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,7 +29,7 @@ import { ReactionService } from '../../firestore-service/reaction.service';
     FormsModule,
     EmojiPickerComponent,
     PickerComponent,
-    EmojiComponent
+    EmojiComponent,
   ],
   templateUrl: './own-message.component.html',
   styleUrl: './own-message.component.scss',
@@ -39,6 +39,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   @Input() message: any;
   @Input() close!: boolean;
   @Output() notifyThreadOpen: EventEmitter<void> = new EventEmitter();
+  @ViewChild('fileInputElement', { static: false }) fileInputElement!: ElementRef;
   isReactionBarVisible: { [messageId: string]: boolean } = {};
   private isMenuOpen: { [messageId: string]: boolean } = {};
 
@@ -62,6 +63,9 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   avatar: string | null = null;
   messageEdited: boolean = false;
   toggleEmojiPicker: boolean = false;
+  selectedFile: File | null = null;
+  cleanUrl: string | null = null;
+
 
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
@@ -74,7 +78,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor(
-    private emojiRef: ElementRef,
     private reactionService: ReactionService,
     private cdr: ChangeDetectorRef,
     private chatService: ChatServiceService,
@@ -120,6 +123,69 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.fileName = this.selectedFile!.name;
+        this.fileType = this.fileUploadService.getFileTypeFromFileName(this.fileName);
+        this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(reader.result as string);
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  openFileDialog() {
+    this.fileInputElement.nativeElement.click();
+  }
+
+  clearFileUpload() {
+    this.fileURL = null;
+    this.fileName = null;
+    this.fileType = null;
+    this.selectedFile = null;
+  }
+
+  uploadFile(messageId: string, channelId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.selectedFile) {
+        this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
+        this.fileUploadService
+          .uploadFile(this.selectedFile, messageId, progress => {
+          })
+          .then((result: { url: string; fileName: string }) => {
+            this.cleanUrl = result.url;
+            this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
+            this.fileName = result.fileName;
+            this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName)
+              .then(() => {
+                this.clearFileUploadData();
+                resolve();
+              })
+              .catch(reject);
+          })
+          .catch(reject);
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  clearFileUploadData() {
+    this.message.content = '';
+    this.fileURL = null;
+    //this.fileName = null;
+    this.selectedFile = null;
+    this.fileType = null;
+
+    if (this.fileInputElement && this.fileInputElement.nativeElement) {
+      this.fileInputElement.nativeElement.value = '';
+    }
+  }
+
   private subscribeToMessageUpdates() {
     if (!this.channelId || !this.message.id) return;
 
@@ -136,17 +202,12 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   deleteFileTemporarily() {
-    // Originalzustand speichern
     this.originalFileURL = this.fileURL;
     this.originalFileType = this.fileType;
     this.originalFileName = this.fileName;
-
-    // Datei nur lokal "löschen"
     this.fileURL = null;
     this.fileType = null;
     this.fileName = null;
-
-    // Änderungen anzeigen
     this.cdr.detectChanges();
   }
 
@@ -281,31 +342,15 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     const selectedReaction = reactionList.find(reaction => reaction.name === reactionName);
     if (selectedReaction) {
       this.selectedReactionPath = selectedReaction.path;
-    } else {
-      console.error('Keine passende Reaktion gefunden für:', reactionName);
     }
   }
 
   async renderReact() {
-    try {
-      this.reactions = await this.fireService.loadReactions();
-    } catch (error) {
-      console.error('Fehler beim Laden der Reaktionen:', error);
-    }
-  }
-
-  incrementReactionCount(reactionType: string, reactionPath: string) {
-    if (!this.channelId) { return; }
-    const messageId = this.message.id;
-    // this.reactionService.addReactionToMessage(this.channelId, messageId, reactionType, this.uid!, reactionPath)
-    //   .then(() => {
-    //     this.updateLocalReactions(reactionType);
-    //   })
+    this.reactions = await this.fireService.loadReactions();
   }
 
   async reactToMessage(messageId: string, emoji: string) {
     if (!this.channelId) return;
-
     const hasReacted = this.hasUserReacted(emoji);
     await this.toggleReaction(messageId, emoji, hasReacted);
     await this.updateThreadsIfNecessary(messageId, emoji);
@@ -337,7 +382,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-
   editMessage(messageId: string) {
     this.editMode[messageId] = true;
   }
@@ -354,11 +398,22 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   async saveEditMessage(message: any) {
-    console.log(message);
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
+    if (this.selectedFile && this.fileURL) {
+      await this.uploadFile(message.id, this.channelId);
+      this.updateMessageContent(message);
+    } else {
+      this.cleanUrl = null
+      this.updateMessageContent(message);
+    }
+  }
 
+  private updateMessageContent(message: any) {
     this.fireService.updateMessage(message.id, {
       content: message.content,
-      fileUrl: this.fileURL,
+      fileUrl: this.cleanUrl,
       fileName: this.fileName,
       messageEdit: true
     })
@@ -367,6 +422,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
           this.editMode[message.id] = false;
           this.messageEdited = true;
           this.cdr.detectChanges();
+          this.subscribeToMessageUpdates();
         }
       });
   }

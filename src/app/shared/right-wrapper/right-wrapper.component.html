@@ -9,7 +9,6 @@
     </mat-card-header>
 
     <mat-card-content #messageContainer>
-      <!-- Anzeige der geklickten Nachricht -->
       <ng-container *ngIf="threadData">
         <app-own-message-thread *ngIf="threadData.senderId === uid" [thread]="threadData"> </app-own-message-thread>
         <app-message-thread *ngIf="threadData.senderId !== uid" [thread]="threadData"> </app-message-thread>
@@ -22,15 +21,13 @@
         </div>
       </ng-container>
 
-      <!-- Antworten auf die geklickte Nachricht (Thread-Nachrichten) -->
       <ng-container *ngFor="let message of threadMessages">
         <app-own-message-thread *ngIf="message.senderId === uid" [thread]="message" [id]="message.docId" [showReactionIcon]="true"> </app-own-message-thread>
 
-        <app-message-thread *ngIf="message.senderId !== uid" [thread]="message" [id]="message.docId"> </app-message-thread>
+        <app-message-thread *ngIf="message.senderId !== uid" [thread]="message" [id]="message.docId" [showReactionIcon]="true"> </app-message-thread>
       </ng-container>
     </mat-card-content>
 
-    <!-- Nachrichtenbox zum Senden neuer Nachrichten -->
     <app-message-box-thread [channelId]="channelId" [messageId]="messageId" [threadId]="threadId" class="message-box"> </app-message-box-thread>
   </mat-card>
 </div>

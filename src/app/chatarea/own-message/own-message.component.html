@@ -66,6 +66,10 @@
                 <div class="edit-bottom">
                     <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()"/>
                     <mat-icon (click)="showEmojiPicker()">sentiment_satisfied</mat-icon>
+                    <input type="file" #fileInputElement hidden (change)="onFileSelected($event)">
+                    <label for="fileInputElement">
+                      <button class="btn-unset" (click)="openFileDialog()"><mat-icon >add</mat-icon></button>
+                    </label>
                     <div class="btns">
                         <button (click)="cancelEdit(message.id)">Abbrechen</button>
                         <button (click)="saveEditMessage(message)">Speichern</button>

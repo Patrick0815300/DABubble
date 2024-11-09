@@ -115,6 +115,19 @@ export class ReactionService {
     if (updatedReactions) await updateDoc(messageDocRef, { reactions: updatedReactions });
   }
 
+  async removeReactionFromThreadMessage(
+    channelId: string,
+    messageId: string,
+    threadId: string,
+    emoji: string,
+    messageIdThread: string,
+    uid: string) {
+    const messageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${messageIdThread}`);
+    const reactions = await this.getMessageReactions(messageDocRef);
+    const updatedReactions = this.removeUserFromReaction(reactions, emoji, uid);
+    if (updatedReactions) await updateDoc(messageDocRef, { reactions: updatedReactions });
+  }
+
   private getMessageDocRef(channelId: string, messageId: string) {
     return this.mainService.getSingleChannelRef(`channels/${channelId}/messages`, messageId);
   }

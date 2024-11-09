@@ -33,19 +33,21 @@
         </div>
 
         <div class="edit-menu" *ngIf="editMode">
-          <input type="text">
+          <input [(ngModel)]="thread.content" type="text">
           <div class="edit-bottom">
-            <app-emoji-picker *ngIf="toggleEmojiPicker"  (click)="$event.stopPropagation()"/>
-            <mat-icon (click)="showEmojiPicker()">sentiment_satisfied</mat-icon>
             <div class="btns">
               <button (click)="cancelEdit()">Abbrechen</button>
               <button (click)="saveEditMessage()">Speichern</button>
             </div>
           </div>
         </div>
+
+        <div class="edit-bubble">
+          <button *ngIf="editMessage()"><mat-icon>more_vert</mat-icon></button>
+        </div>
   
         <div class="reaction-container">
-          <div class="reaction" *ngFor="let reaction of thread.reactions let i = index">
+          <button [disabled]="!showReactionIcon" class="reaction" *ngFor="let reaction of thread.reactions let i = index" (click)="reactToThreadMessage(thread.id, reaction.emoji)">
             <span>{{ reaction.emoji }}</span>
             <span>{{ reaction.count }}</span>
             <div class="bubble">
@@ -53,14 +55,11 @@
               <h3>{{ reactionNames[i] }}</h3>
               <span>hat reagiert</span>
           </div>
-          </div>
-  
+          </button>
+          <app-emoji-picker *ngIf="toggleEmojiPicker" (click)="$event.stopPropagation()" #emojiPicker></app-emoji-picker>
           <mat-icon (click)="showEmojiPicker()" *ngIf="showReactionIcon">add_reaction</mat-icon>
-          <div class="chose-reaction" *ngIf="showReactions" #reactionContainer>
-          </div>
         </div>
       </div>
-      <app-emoji-picker *ngIf="toggleEmojiPicker" (click)="$event.stopPropagation()" #emojiPicker></app-emoji-picker>
 
       <div class="img-container">
         <img [src]="avatar">
