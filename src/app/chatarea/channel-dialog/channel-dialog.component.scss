@@ -1,3 +1,7 @@
+button {
+    all: unset;
+}
+
 h2 {
     display: flex;
     align-items: center;
@@ -40,6 +44,13 @@ h2 {
     border: 1px solid #ADB0D9;
     border-radius: 20px;
     margin-bottom: 20px;
+
+    .warn {
+        color: red;
+        font-size: 12px;
+        margin: 6px;
+        margin-bottom: 0;
+    }
 
     div {
         display: flex;

@@ -3,7 +3,7 @@
     <mat-icon (click)="closeDialog()" class="close">close</mat-icon>
 </h2>
 <div class="container">
-    <div><mat-icon>tag</mat-icon> Entwickler Team</div>
+    <div><mat-icon>tag</mat-icon>{{ channelName }}</div>
    
     <mat-form-field appearance="outline" class="hide-scrollbar">
         <mat-label>Name</mat-label>
@@ -25,6 +25,7 @@
             </mat-option>
           </mat-select>
     </mat-form-field>
+    <span *ngIf="filteredUsers.length < 1">Es sind alle User Member im Channel.</span>
   </div>
 <div class="btn-container">
     <button (click)="addUser()">Hinzufügen</button>

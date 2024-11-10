@@ -381,7 +381,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
       const channelId = channel.id;
       this.fireService.loadDocument('channels', channelId).subscribe((channelDoc: any) => {
         const channelData = channelDoc;
-        this.channelName = channelData.name;
+        this.channelName = channelData.channel_name;
       });
     });
   }

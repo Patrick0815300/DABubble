@@ -5,7 +5,7 @@ import { MainServiceService } from './main-service.service';
 import { Message } from '../models/messages/channel-message.model';
 import { Channel } from '../models/channels/entwickler-team.model';
 import { AuthService } from './auth.service';
-import { arrayRemove, arrayUnion, limit, writeBatch } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, deleteDoc, limit, writeBatch } from 'firebase/firestore';
 import { ChatareaServiceService } from './chatarea-service.service';
 import { ReactionService } from './reaction.service';
 
@@ -34,6 +34,16 @@ export class ChatServiceService implements OnInit, OnDestroy {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  deleteThreadMessage(channelId: string, messageId: string, threadId: string, threadMessageId: string): Promise<void> {
+    const threadMessageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${threadMessageId}`);
+    return deleteDoc(threadMessageDocRef);
+  }
+
+  async updateThreadMessage(channelId: string, messageId: string, threadId: string, threadMessageId: string, content: string) {
+    const threadMessageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${threadMessageId}`);
+    await updateDoc(threadMessageDocRef, { content: content })
   }
 
   getThreadMessageById(channelId: string, messageId: string, threadId: string, threadMessageId: string): Observable<any> {

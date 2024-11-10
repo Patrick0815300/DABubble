@@ -15,6 +15,10 @@ mat-icon {
 
   &:hover {
     background-color: #eceefe;
+
+    .message .edit-bubble {
+      display: flex;
+    }
   }
 
   &:hover .text {
@@ -35,6 +39,29 @@ mat-icon {
     gap: 8px;
     font-size: 18px;
     font-weight: 400;
+
+    .edit-bubble {
+      padding: 3px 13px;
+      border-radius: 25px 25px 25px 0;
+      border: 1px solid #adb0d9;
+      background-color: white;
+      width: fit-content;
+      margin-top: -28px;
+      display: none;
+      align-items: center;
+      position: absolute;
+      right: 0;
+
+      button {
+        all: unset;
+        border-radius: 20px;
+        padding: 8px;
+
+        &:hover {
+          background-color: #ECEEFE;
+        }
+      }
+    }
 
     mat-icon {
       cursor: pointer;

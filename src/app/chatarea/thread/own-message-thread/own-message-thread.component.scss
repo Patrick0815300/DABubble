@@ -37,6 +37,10 @@ mat-icon {
 
     &:hover {
         background-color: #eceefe;
+
+        .message .edit-bubble {
+            display: flex;
+        }
     }
 
     &:hover .text {
@@ -61,6 +65,29 @@ mat-icon {
         box-sizing: border-box;
         width: 100%;
 
+        .edit-bubble {
+            padding: 3px 13px;
+            border-radius: 25px 25px 0 25px;
+            border: 1px solid #adb0d9;
+            background-color: white;
+            width: fit-content;
+            margin-top: -28px;
+            display: none;
+            align-items: center;
+            position: absolute;
+            left: 0;
+
+            button {
+                all: unset;
+                border-radius: 20px;
+                padding: 8px;
+
+                &:hover {
+                    background-color: #ECEEFE;
+                }
+            }
+        }
+
         .name-time {
             display: flex;
             justify-content: flex-end;
@@ -69,6 +96,24 @@ mat-icon {
             .name {
                 font-weight: 700;
                 color: black;
+            }
+
+            .edit-btns {
+                padding: 6px;
+                position: absolute;
+                width: fit-content;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                background-color: white;
+                border: 1px solid #adb0d9;
+                border-radius: 0 20px 20px 20px;
+                top: 35px;
+                left: 73px;
+
+                button {
+                    padding: 12px;
+                }
             }
         }
 
@@ -119,18 +164,18 @@ mat-icon {
 
                 .btns {
                     display: flex;
-                    gap: 32px;
+                    gap: 6px;
 
                     button {
                         all: unset;
-                        font-size: 18px;
-                        font-weight: 700;
+                        font-size: 16px;
+                        font-weight: 600;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         border: 1px solid #797ef3;
                         border-radius: 50px;
-                        padding: 12px 25px;
+                        padding: 6px 12px;
                         color: #444DF2;
                         cursor: pointer;
 

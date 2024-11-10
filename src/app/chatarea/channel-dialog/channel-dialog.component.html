@@ -10,9 +10,9 @@
     <div class="channel" [ngClass]="{ 'none-border': channelNameEdit }">
       <div class="channel-headline">
         <span>Channel-Name</span>
-        <span class="edit" (click)="editChannelName()" *ngIf="isAdmin">
+        <button class="edit" (click)="editChannelName()" *ngIf="isAdmin"  [disabled]="name.length < 3">
           {{ channelNameEdit ? 'Speichern' : 'Bearbeiten' }}
-        </span>
+        </button>
         <mat-icon class="edit-icon" *ngIf="isAdmin && !channelNameEdit" (click)="editChannelName()">edit</mat-icon>
         <mat-icon class="edit-icon" *ngIf="channelNameEdit" (click)="editChannelName()">check_circle</mat-icon>
       </div>
@@ -21,6 +21,7 @@
         <span *ngIf="!channelNameEdit">{{ name }}</span>
         <input *ngIf="channelNameEdit" type="text" [(ngModel)]="name">
       </div>
+      <span class="warn" *ngIf="name.length < 3">Der Channel-Name muss mind. aus 3 Zeichen bestehen.</span>
     </div>
 
     <div class="description channel" [ngClass]="{ 'none-border': channelDescEdit }">

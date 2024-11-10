@@ -40,6 +40,7 @@ export class OwnMessageThreadComponent {
   fileName: string | null = null;
   avatar: string | null = null;
   toggleEmojiPicker: boolean = false;
+  showEditBtns: boolean = false;
   private sanitizer = inject(DomSanitizer);
   private uidSubscription: Subscription | null = null;
   private destroy$ = new Subject<void>();
@@ -62,7 +63,7 @@ export class OwnMessageThreadComponent {
     this.threadDataSubscription = this.chatService.pickedThread$.subscribe((data) => {
       if (data && data.channelId && data.messageId && data.id) {
         this.threadData = data;
-        if (this.threadData.channelId && this.threadData.messageId && this.threadData.id) {
+        if (this.thread && this.thread.id && this.threadData.channelId && this.threadData.messageId && this.threadData.id) {
           this.subscribeToThreadMessageUpdates();
           this.loadReactionNames();
           this.loadThreadMessages();
@@ -91,8 +92,6 @@ export class OwnMessageThreadComponent {
   }
 
   private subscribeToThreadMessageUpdates() {
-    console.log(this.threadData);
-
     const { channelId, messageId, id: threadId } = this.threadData;
     if (!channelId || !messageId || !threadId || !this.thread) return;
     if (this.threadSubscription) {
@@ -254,18 +253,32 @@ export class OwnMessageThreadComponent {
 
 
   editMessage() {
+    this.editMode = true;
+    this.showEditBtns = false;
+  }
 
+  openEditBtns() {
+    if (!this.editMode) {
+      this.showEditBtns = !this.showEditBtns
+    }
   }
 
   cancelEdit() {
-
+    this.editMode = false;
+    this.showEditBtns = false;
   }
 
-  saveEditMessage() {
-
+  saveEditMessage(threadMessageId: string, content: string) {
+    const { channelId, messageId, id: threadId } = this.threadData;
+    if (content.length > 1) {
+      this.chatService.updateThreadMessage(channelId, messageId, threadId, threadMessageId, content)
+    } else {
+      this.deleteMessage(threadMessageId);
+    }
   }
 
-  isEditingMessage() {
-
+  deleteMessage(threadMessageId: string) {
+    const { channelId, messageId, id: threadId } = this.threadData;
+    this.chatService.deleteThreadMessage(channelId, messageId, threadId, threadMessageId);
   }
 }

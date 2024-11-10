@@ -136,7 +136,6 @@ export class NavBarComponent implements OnInit {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
-    console.log(val);
   }
 
   openLogoutMobile() {

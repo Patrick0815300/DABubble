@@ -20,10 +20,6 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { FormsModule } from '@angular/forms';
 import { SearchDevspaceComponent } from '../components/search-devspace/search-devspace.component';
-import { Channel } from '../modules/database.model';
-import { ChannelService } from '../modules/channel.service';
-import { DatabaseServiceService } from '../database-service.service';
-import { NavService } from '../modules/nav.service';
 
 @Component({
   selector: 'app-chatarea',
@@ -141,8 +137,6 @@ export class ChatareaComponent implements AfterViewInit {
 
   }
 
-
-
   loadActiveChannelData() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
@@ -192,11 +186,13 @@ export class ChatareaComponent implements AfterViewInit {
 
   scrollToBottom(): void {
     if (this.isCurrentUserMember()) {
-      this.messageContainer.nativeElement.scroll({
-        top: this.messageContainer.nativeElement.scrollHeight,
-        behavior: 'smooth',
-      });
-      this.messageBoxComponent.focusTextArea();
+      if (this.messageContainer.nativeElement) {
+        this.messageContainer.nativeElement.scroll({
+          top: this.messageContainer.nativeElement.scrollHeight,
+          behavior: 'smooth',
+        });
+        this.messageBoxComponent.focusTextArea();
+      }
     }
   }
 

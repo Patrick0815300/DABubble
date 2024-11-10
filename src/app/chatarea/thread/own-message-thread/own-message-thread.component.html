@@ -11,6 +11,14 @@
       </div>
       <div class="message">
         <div class="name-time">
+          <div class="edit-bubble">
+            <button (click)="showEmojiPicker()" *ngIf="showReactionIcon"><mat-icon >add_reaction</mat-icon></button>
+            <button (click)="openEditBtns()"><mat-icon>more_vert</mat-icon></button>
+            <div class="edit-btns" *ngIf="showEditBtns">
+              <button (click)="editMessage()">Nachricht bearbeiten</button>
+              <button (click)="deleteMessage(thread.id)">Nachricht löschen</button>
+            </div>
+          </div>
           <span class="time">{{ formatTime(thread.time) }}</span>
           <span class="name">{{ thread.name }}</span>
         </div>
@@ -37,13 +45,9 @@
           <div class="edit-bottom">
             <div class="btns">
               <button (click)="cancelEdit()">Abbrechen</button>
-              <button (click)="saveEditMessage()">Speichern</button>
+              <button (click)="saveEditMessage(thread.id, thread.content)">Speichern</button>
             </div>
           </div>
-        </div>
-
-        <div class="edit-bubble">
-          <button *ngIf="editMessage()"><mat-icon>more_vert</mat-icon></button>
         </div>
   
         <div class="reaction-container">
@@ -57,7 +61,6 @@
           </div>
           </button>
           <app-emoji-picker *ngIf="toggleEmojiPicker" (click)="$event.stopPropagation()" #emojiPicker></app-emoji-picker>
-          <mat-icon (click)="showEmojiPicker()" *ngIf="showReactionIcon">add_reaction</mat-icon>
         </div>
       </div>
 

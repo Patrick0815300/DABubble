@@ -36,6 +36,7 @@ export class AddMemberDialogComponent {
   filteredUsers: User[] = [];
   selectedUser: string[] = [];
   memberIds: string[] = [];
+  channelName: string = '';
 
   constructor(private fireService: ChatareaServiceService) {
     this.loadChannelMembers();
@@ -45,6 +46,7 @@ export class AddMemberDialogComponent {
   loadChannelMembers() {
     this.fireService.getActiveChannel().subscribe({
       next: (channel: any) => {
+        this.channelName = channel.channel_name;
         this.memberIds = channel.member || [];
         this.filterUsers();
       },
