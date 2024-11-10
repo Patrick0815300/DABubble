@@ -42,7 +42,7 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
   reactions: any[] = [];
   toggleEmojiPicker: boolean = false;
   private emojiSubscription: Subscription | null = null;
-  openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | 'wrapper_4' = 'wrapper_1';
   constructor(
     private chatService: ChatServiceService,
     private mainService: MainServiceService,

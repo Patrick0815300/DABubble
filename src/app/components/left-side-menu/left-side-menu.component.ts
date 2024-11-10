@@ -223,7 +223,7 @@ export class LeftSideMenuComponent implements OnInit {
     this.channelService.updateChannelData('users', 'id', this.auth_user_id, { activeChannelId: currentChannelId });
   }
 
-  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
