@@ -1,5 +1,5 @@
 import { Message, User } from './../../modules/database.model';
-import { Component, AfterViewInit, ElementRef, inject, OnInit, ViewChild, DoCheck, Renderer2 } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, OnInit, ViewChild, DoCheck, Renderer2, AfterViewChecked, SimpleChanges, Input } from '@angular/core';
 import { MiddleWrapperComponent } from '../../shared/middle-wrapper/middle-wrapper.component';
 import { FirestoreModule, Firestore } from '@angular/fire/firestore';
 import { FirebaseAppModule } from '@angular/fire/app';
@@ -23,7 +23,6 @@ import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { Storage } from '@angular/fire/storage';
 import { NavService } from '../../modules/nav.service';
 import { UpdateProfilService } from '../../modules/update-profil.service';
-import { MessageThreadComponent } from '../../chatarea/thread/message-thread/message-thread.component';
 
 @Component({
   selector: 'app-messages',
@@ -44,7 +43,7 @@ import { MessageThreadComponent } from '../../chatarea/thread/message-thread/mes
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
+export class MessagesComponent implements OnInit, AfterViewInit {
   message_content = '';
   chatMessages: Message[] = [];
   toUserId: string = '';
@@ -93,6 +92,7 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
   private uidSubscription: Subscription | null = null;
   private fileUploadService = inject(FileUploadService);
   private sanitizer = inject(DomSanitizer);
+  @Input() changeDetect!: any;
   @ViewChild('fileUpload') fileInputElement!: ElementRef;
   @ViewChild('focusMsg') myTextarea!: ElementRef;
   @ViewChild('updateArea') updateArea!: ElementRef;
@@ -137,6 +137,11 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
 
     this.userService.userIds$.subscribe(userId => {
       this.toUserId = userId;
+
+      if (this.toUserId !== this.changeDetect) {
+        this.changeDetect = this.toUserId;
+        this.myTextarea?.nativeElement.focus();
+      }
     });
 
     this.userService.chatMessages$.subscribe(msg => {
@@ -480,30 +485,15 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
     this.fileInputElement?.nativeElement.click();
   }
 
-  ngDoCheck() {
-    if (this.update_chat === -1 || this.update_group === -1) {
-      if (!this.open_update_profil || this.state) {
-        this.keepFocus();
-      }
-    } else {
-      this.keepUpdateFocus();
-    }
+  keepFocus() {
+    this.myTextarea?.nativeElement.focus();
   }
 
-  private keepFocus() {
-    setTimeout(() => {
-      this.myTextarea?.nativeElement.focus();
-    });
-  }
-  private keepUpdateFocus() {
-    setTimeout(() => {
-      this.updateArea?.nativeElement.focus();
-    });
+  keepUpdateFocus() {
+    this.updateArea?.nativeElement.focus();
   }
 
   ngAfterViewInit() {
-    this.myTextarea?.nativeElement.focus();
-    this.renderer.selectRootElement(this.myTextarea?.nativeElement).focus();
     this.fileInputElement.nativeElement.addEventListener('change', (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
@@ -517,6 +507,7 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
         reader.readAsDataURL(this.selectedFile);
       }
     });
+    this.myTextarea?.nativeElement.focus();
   }
 
   uploadFile(msg_id: string) {
@@ -546,5 +537,9 @@ export class MessagesComponent implements OnInit, AfterViewInit, DoCheck {
     } else {
       console.log('Error');
     }
+  }
+
+  onDeleteEmoji(message_id: string) {
+    this.channelService.updateChannelData('messages', 'message_id', message_id, { reaction: '' });
   }
 }

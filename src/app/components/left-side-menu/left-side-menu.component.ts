@@ -1,7 +1,7 @@
 import { ShowProfilService } from './../../modules/show-profil.service';
 import { CurrentUserService } from './../../modules/current-user.service';
 import { AuthService } from './../../firestore-service/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ProfileComponent } from '../../shared/profile/profile.component';
 import { WrapperComponent } from '../../shared/wrapper/wrapper.component';
 import { CommonModule } from '@angular/common';
@@ -14,15 +14,16 @@ import { ChannelService } from '../../modules/channel.service';
 import { ScrollToTopComponent } from '../scroll-to-top/scroll-to-top.component';
 import { MainServiceService } from '../../firestore-service/main-service.service';
 import { GuestService } from '../../modules/guest.service';
+import { MessagesComponent } from '../messages/messages.component';
 
 @Component({
   selector: 'app-left-side-menu',
   standalone: true,
-  imports: [WrapperComponent, ProfileComponent, CommonModule, ScrollToTopComponent],
+  imports: [WrapperComponent, ProfileComponent, CommonModule, ScrollToTopComponent, MessagesComponent],
   templateUrl: './left-side-menu.component.html',
   styleUrl: './left-side-menu.component.scss',
 })
-export class LeftSideMenuComponent implements OnInit {
+export class LeftSideMenuComponent implements OnInit, AfterViewInit {
   avatar = 'Elise_Roth.svg';
   is_authenticated = true;
   state: boolean = false;
@@ -57,6 +58,7 @@ export class LeftSideMenuComponent implements OnInit {
   auth_user_id!: any;
   observeUser!: Observable<User>;
   private uidSubscription: Subscription | null = null;
+  @ViewChild(MessagesComponent) messageTextArea!: MessagesComponent;
 
   /**
    * @constructor
@@ -65,6 +67,7 @@ export class LeftSideMenuComponent implements OnInit {
    */
   constructor(
     private userService: UserService,
+    private cdr: ChangeDetectorRef,
     private channelService: ChannelService,
     private navService: NavService,
     private databaseService: DatabaseServiceService,
@@ -79,6 +82,10 @@ export class LeftSideMenuComponent implements OnInit {
     });
 
     this.showChannelMessages(false);
+  }
+
+  ngAfterViewInit(): void {
+    this.onFocus();
   }
 
   ngOnInit(): void {
@@ -213,6 +220,12 @@ export class LeftSideMenuComponent implements OnInit {
     this.userService.chatMessages$.subscribe(msg => {
       this.chat = msg;
     });
+  }
+
+  onFocus() {
+    this.cdr.detectChanges();
+    this.messageTextArea?.keepFocus();
+    setTimeout(() => this.messageTextArea?.keepFocus(), 0);
   }
 
   closeThread() {

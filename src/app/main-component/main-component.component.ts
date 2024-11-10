@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { WrapperComponent } from '../shared/wrapper/wrapper.component';
 import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
@@ -96,6 +96,7 @@ export class MainComponentComponent implements OnInit {
   dev_message_search: boolean = false;
   officeTeamChannel!: Channel;
   private uidSubscription: Subscription | null = null;
+  @ViewChild(MessagesComponent) messageTextArea!: MessagesComponent;
   constructor(
     private navService: NavService,
     private updateProfilService: UpdateProfilService,
@@ -165,6 +166,11 @@ export class MainComponentComponent implements OnInit {
     this.channelService.channelMembers$.subscribe(members => {
       this.ChannelMembers = members;
     });
+  }
+
+  onFocus() {
+    // this.cdr.detectChanges();
+    setTimeout(() => this.messageTextArea.keepFocus(), 0);
   }
 
   ngOnInit(): void {

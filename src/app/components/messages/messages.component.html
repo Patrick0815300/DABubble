@@ -60,7 +60,7 @@
                 </div>
               </ng-container>
               <span title="{{ update_title }}" *ngIf="message?.is_updated" class="updated_msg">(Bearbeitet)</span>
-              <button class="single-reaction" *ngIf="message?.reaction">
+              <button class="single-reaction" (click)="onDeleteEmoji(message?.message_id)" *ngIf="message?.reaction">
                 @if (message?.reaction.slice(-3)==="svg") {
                 <img src="assets/img/icons/{{ message?.reaction }}" alt="" />
                 }@else {
@@ -152,8 +152,16 @@
     <div id="message" class="message">
       <div>
         <div class="user-ref">
-          <img *ngIf="getCachedUser(toUserId)?.avatar" class="sender" src="{{ getCachedUser(toUserId)?.avatar }}" alt="" />
-          <span class="username text-capitalize">{{ getCachedUser(toUserId)?.name }} </span>
+          <img
+            *ngIf="authenticatedUser || getCachedUser(toUserId)?.avatar"
+            class="sender"
+            src="{{ getCachedUser(toUserId) ? getCachedUser(toUserId)?.avatar : authenticatedUser?.avatar }}"
+            alt=""
+          />
+          <span class="username text-capitalize"
+            >{{ getCachedUser(toUserId) ? getCachedUser(toUserId)?.name : authenticatedUser?.name }}
+            <span *ngIf="!selectedUser || selectedUser.id === authenticatedUser?.id"> (Du)</span></span
+          >
         </div>
         @if(!selectedUser || selectedUser.id===authenticatedUser?.id){
         <div class="self-room">
@@ -179,10 +187,10 @@
         <textarea
           #focusMsg
           [(ngModel)]="message_content"
+          autofocus="authenticatedUser"
           name="msg-area"
           id="msg-area"
-          autofocus
-          placeholder="Nachrichten an {{ getCachedUser(toUserId) ? getCachedUser(toUserId)?.name : authenticatedUser?.name }}"
+          placeholder="Nachricht an {{ getCachedUser(toUserId) ? getCachedUser(toUserId)?.name : authenticatedUser?.name }}"
         ></textarea>
         <ng-container *ngIf="fileURL && (this.update_chat === -1 || this.update_group === -1)">
           <div class="uplodImageDirectMessages">

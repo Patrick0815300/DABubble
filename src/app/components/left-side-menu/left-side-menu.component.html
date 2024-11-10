@@ -103,6 +103,7 @@
             onAutoFocus();
             sendSelectedUser(onlineUser!);
             handleMobileView('wrapper_2');
+            onFocus();
             showChannelMessages(false);
             sendUserId(onlineUser?.id!);
             loadMessages(onlineUser?.id!, onlineUser?.id!);
@@ -123,6 +124,7 @@
               selectUser(i + 1);
               sendSelectedUser(user);
               handleMobileView('wrapper_2');
+              onFocus();
               onAutoFocus();
               onToggleDevSearch(false);
               showChannelMessages(false);

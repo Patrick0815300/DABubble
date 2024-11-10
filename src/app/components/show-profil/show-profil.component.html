@@ -21,7 +21,7 @@
     <span class="address">E-Mail Adresse</span>
   </div>
   <span class="mail-address">{{ isNavBar === true ? authenticatedUser.email : selectedUser ? selectedUser.email : authenticatedUser.email }}</span>
-  @if(!isNavBar && (!selectedUser || selectedUser?.id !== authenticatedUser?.id)){
+  @if(!isNavBar && (!selectedUser || selectedUser.id !== authenticatedUser.id)){
   <div class="btn-container">
     <button class="btn" (click)="onAutoFocus()">
       <img src="assets/img/icons/mode_comment.svg" alt="" />

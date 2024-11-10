@@ -75,7 +75,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     private authService: AuthService,
     private channelService: ChannelService,
     private currentGuest: CurrentUserService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -118,7 +118,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   focusTextArea() {
-    this.messageTextArea.nativeElement.focus();
+    this.messageTextArea?.nativeElement.focus();
   }
 
   @HostListener('document:click', ['$event'])
@@ -165,20 +165,23 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     const currentWord = words[words.length - 1];
 
     if (currentWord.startsWith('@')) {
-      this.linkDialog = true; this.showUsers = true; this.showChannels = false;
+      this.linkDialog = true;
+      this.showUsers = true;
+      this.showChannels = false;
       this.searchTerm = currentWord.substring(1);
-      this.filteredUsers = this.users.filter(u =>
-        u.name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
+      this.filteredUsers = this.users.filter(u => u.name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
     } else if (currentWord.startsWith('#')) {
-      this.linkDialog = true; this.showUsers = false; this.showChannels = true;
+      this.linkDialog = true;
+      this.showUsers = false;
+      this.showChannels = true;
       this.searchTerm = currentWord.substring(1);
-      this.filteredChannels = this.channels.filter(c =>
-        c.channel_name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
+      this.filteredChannels = this.channels.filter(c => c.channel_name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
     } else {
-      this.linkDialog = false; this.filteredUsers = []; this.filteredChannels = [];
+      this.linkDialog = false;
+      this.filteredUsers = [];
+      this.filteredChannels = [];
     }
   }
-
 
   toggleLinkDialog() {
     if (this.linkDialog && this.showUsers) {
