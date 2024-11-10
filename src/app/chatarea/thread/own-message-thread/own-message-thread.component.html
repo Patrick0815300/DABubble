@@ -11,7 +11,7 @@
       </div>
       <div class="message">
         <div class="name-time">
-          <div class="edit-bubble">
+          <div class="edit-bubble" *ngIf="showReactionIcon">
             <button (click)="showEmojiPicker()" *ngIf="showReactionIcon"><mat-icon >add_reaction</mat-icon></button>
             <button (click)="openEditBtns()"><mat-icon>more_vert</mat-icon></button>
             <div class="edit-btns" *ngIf="showEditBtns">

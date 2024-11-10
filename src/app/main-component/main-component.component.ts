@@ -87,7 +87,7 @@ export class MainComponentComponent implements OnInit {
   open_edit_channel: boolean = false;
   openLogoutMobile: boolean = false;
   isThreadVisible: boolean = true;
-  openWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  openWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | 'wrapper_4' | null = null;
   all_users: User[] = [];
   filtered_users: User[] = [];
   searchUser: User[] = [];
@@ -288,14 +288,37 @@ export class MainComponentComponent implements OnInit {
   }
 
   handleToggle() {
+    // Umschalten zwischen geöffnet und geschlossen
     this.close = !this.close;
     this.hide_navigation = !this.hide_navigation;
     this.toggleNavigation();
 
     this.state_icon = this.iconPath();
-    if (innerWidth < 1350 && !this.close) {
+
+    if (window.innerWidth < 1350 && !this.close) {
       this.mainService.setThreadOpenFalse();
     }
+
+    // Beispiel: Öffne oder schließe das Left-side-menu
+    if (this.openWrapper === 'wrapper_1') {
+      this.openWrapper = null;
+    } else {
+      this.openWrapper = 'wrapper_1';
+    }
+  }
+
+  handleOpenWrapper(wrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | 'wrapper_4') {
+    this.openWrapper = wrapper;
+  }
+
+  // Beispiel-Methode zum Öffnen des Right-wrapper
+  openRightWrapper() {
+    this.handleOpenWrapper('wrapper_3');
+  }
+
+  // Beispiel-Methode zum Öffnen der Chatarea
+  openChatarea() {
+    this.handleOpenWrapper('wrapper_2');
   }
 
   onCloseDialog() {

@@ -63,6 +63,7 @@ export class OwnMessageThreadComponent {
     this.threadDataSubscription = this.chatService.pickedThread$.subscribe((data) => {
       if (data && data.channelId && data.messageId && data.id) {
         this.threadData = data;
+        this.loadFileUpload();
         if (this.thread && this.thread.id && this.threadData.channelId && this.threadData.messageId && this.threadData.id) {
           this.subscribeToThreadMessageUpdates();
           this.loadReactionNames();
