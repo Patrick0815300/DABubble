@@ -29,7 +29,7 @@ export class LeftSideMenuComponent implements OnInit, AfterViewInit {
   state: boolean = false;
   active: boolean = false;
   show_channel_msg!: boolean;
-  selectedIndex!: number;
+  selectedIndex: number = 0;
   selectedChannelIndex!: number;
   collapse: boolean = false;
   expand: boolean = false;
@@ -236,7 +236,7 @@ export class LeftSideMenuComponent implements OnInit, AfterViewInit {
     this.channelService.updateChannelData('users', 'id', this.auth_user_id, { activeChannelId: currentChannelId });
   }
 
-  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') { }
+  onOpenSearchSelection(selectionData: Channel | User, flag: 'channel' | 'user') {}
 
   loadMessages(currentUserId: string | undefined, targetUserId: string) {
     this.databaseService.getMessages(currentUserId, targetUserId, messages => {
