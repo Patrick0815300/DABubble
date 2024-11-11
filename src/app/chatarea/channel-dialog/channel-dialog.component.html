@@ -1,8 +1,6 @@
 <h2>
-  <div>
-    <mat-icon>tag</mat-icon> {{ name }}
-  </div>
-  <mat-icon (click)="closeDialog()" class="close">close</mat-icon>
+  <div><mat-icon>tag</mat-icon> {{ name }}</div>
+  <mat-icon (click)="closeDialog(); onOpenChannelInfo(false)" class="close">close</mat-icon>
 </h2>
 
 <div>
@@ -10,7 +8,7 @@
     <div class="channel" [ngClass]="{ 'none-border': channelNameEdit }">
       <div class="channel-headline">
         <span>Channel-Name</span>
-        <button class="edit" (click)="editChannelName()" *ngIf="isAdmin"  [disabled]="name.length < 3">
+        <button class="edit" (click)="editChannelName()" *ngIf="isAdmin" [disabled]="name.length < 3">
           {{ channelNameEdit ? 'Speichern' : 'Bearbeiten' }}
         </button>
         <mat-icon class="edit-icon" *ngIf="isAdmin && !channelNameEdit" (click)="editChannelName()">edit</mat-icon>
@@ -19,7 +17,7 @@
       <div [ngClass]="{ 'editing-border': channelNameEdit }">
         <mat-icon>tag</mat-icon>
         <span *ngIf="!channelNameEdit">{{ name }}</span>
-        <input *ngIf="channelNameEdit" type="text" [(ngModel)]="name">
+        <input *ngIf="channelNameEdit" type="text" [(ngModel)]="name" />
       </div>
       <span class="warn" *ngIf="name.length < 3">Der Channel-Name muss mind. aus 3 Zeichen bestehen.</span>
     </div>
@@ -34,7 +32,7 @@
         <mat-icon class="edit-icon" *ngIf="channelDescEdit" (click)="editChannelDescription()">check_circle</mat-icon>
       </div>
       <span *ngIf="!channelDescEdit">{{ description }}</span>
-      <input class="editing-border" *ngIf="channelDescEdit" type="text" [(ngModel)]="description">
+      <input class="editing-border" *ngIf="channelDescEdit" type="text" [(ngModel)]="description" />
       <div class="admin">
         <span>Erstellt von</span>
         <span class="name">{{ admin }}</span>

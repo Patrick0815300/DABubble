@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100vh;
 
-  >main {
+  > main {
     display: flex;
     flex-grow: 1;
     gap: 1rem;
@@ -12,11 +12,11 @@
     height: calc(100vh - 111.63px);
     padding-bottom: 1rem;
 
-    >.app-middle-wrapper {
+    > .app-middle-wrapper {
       flex-grow: 1;
     }
 
-    >.toggle-side-menu {
+    > .toggle-side-menu {
       font-family: 'Nunito';
       display: flex;
       align-items: center;
@@ -39,21 +39,21 @@
       border: transparent;
       transition: all 250ms ease-in-out;
 
-      >span {
+      > span {
         transition: all 250ms ease-in-out;
       }
 
-      >img {
+      > img {
         transition: all 250ms ease-in-out;
         transform: rotate(90deg);
       }
 
       &:hover {
-        >span {
+        > span {
           color: #535af1;
         }
 
-        >img {
+        > img {
           filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
         }
       }
@@ -100,17 +100,17 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
 
-  >.ch-creation {
+  > .ch-creation {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    >span {
+    > span {
       font-weight: 700;
       font-size: 18px;
     }
 
-    >span::first-letter {
+    > span::first-letter {
       text-transform: capitalize;
     }
   }
@@ -121,7 +121,7 @@ form {
   display: flex;
   align-items: center;
 
-  >img {
+  > img {
     position: absolute;
     left: 0.75rem;
     width: 18px;
@@ -151,7 +151,7 @@ form {
 .btn-container {
   align-self: end;
 
-  >.btn {
+  > .btn {
     font-family: 'Nunito';
     padding: 0.75rem 1rem;
     background-color: #444df2;
@@ -177,13 +177,13 @@ form {
 }
 
 .title-container {
-  >span:first-child {
+  > span:first-child {
     font-weight: 700;
     font-size: 16px;
     text-transform: capitalize;
   }
 
-  >.optional {
+  > .optional {
     color: gray;
   }
 }
@@ -204,21 +204,21 @@ form {
   transform: translate(-50%, -50%);
   z-index: 5;
 
-  >.input-user {
+  > .input-user {
     padding-left: 1rem;
   }
 
-  >.ch-creation-user {
+  > .ch-creation-user {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    >span {
+    > span {
       font-weight: 700;
       font-size: 18px;
     }
 
-    >span::first-letter {
+    > span::first-letter {
       text-transform: capitalize;
     }
   }
@@ -241,7 +241,7 @@ form {
 .btn-container-user {
   align-self: end;
 
-  >.btn {
+  > .btn {
     padding: 0.75rem 1rem;
     background-color: #444df2;
     color: white;
@@ -278,11 +278,11 @@ a {
   justify-content: center;
   position: relative;
 
-  >input {
+  > input {
     width: 100%;
   }
 
-  >.app-search-user {
+  > .app-search-user {
     position: absolute;
     transform: translateY(145px);
   }
@@ -292,7 +292,27 @@ a {
   font-weight: 700;
 }
 
-@media (width<970px) {
+@media screen and (width<1260px) {
+  .hideWrapper {
+    display: none;
+  }
+}
+
+@media screen and (width<950px) {
+  .OpenWrapperChat {
+    display: none;
+  }
+  .app-right-wrapper {
+    width: 100% !important;
+  }
+}
+@media screen and (width<880px) {
+  .hideWrapperWrap2 {
+    display: none;
+  }
+}
+
+@media (width<630px) {
   .OpenWrapper {
     display: none;
   }
@@ -302,23 +322,23 @@ a {
   }
 
   .main-section {
-    >main {
+    > main {
       width: unset;
       background-color: white;
       gap: unset;
 
-      >.toggle-side-menu {
+      > .toggle-side-menu {
         display: none;
       }
     }
   }
 
-  .toggle-display {
+  .openRight {
     width: 100%;
   }
 
   .main-section {
-    >main {
+    > main {
       padding-inline: 0;
       padding-bottom: 0;
     }
@@ -326,5 +346,9 @@ a {
 
   form {
     width: 80vw;
+  }
+
+  .toggle-display {
+    width: 100%;
   }
 }

@@ -58,7 +58,7 @@ mat-icon {
         padding: 8px;
 
         &:hover {
-          background-color: #ECEEFE;
+          background-color: #eceefe;
         }
       }
     }
@@ -193,7 +193,7 @@ button {
   all: unset;
 }
 
-@media screen and (width<970px) {
+@media screen and (width<630px) {
   .message-container {
     padding-inline: 0 !important;
   }

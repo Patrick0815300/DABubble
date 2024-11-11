@@ -101,9 +101,27 @@ mat-card-content {
   margin-bottom: 40px;
 }
 
-@media screen and (width<=970px) {
+.showRightWrapper {
+  display: none;
+}
+
+@media (width<1300px) {
+  .container {
+    max-width: 355px;
+  }
+}
+@media (width<950px) {
+  .container {
+    max-width: unset;
+  }
+}
+
+@media screen and (width<=630px) {
   mat-card-header {
     border-radius: 0;
+  }
+  .container {
+    max-width: unset;
   }
 
   .card {

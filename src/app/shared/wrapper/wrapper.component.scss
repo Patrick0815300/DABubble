@@ -1,5 +1,7 @@
 div {
-  width: 366px;
+  max-width: 366px;
+  min-width: 312px;
+  width: 50vw;
   background-color: #ffffff;
   border-radius: 30px;
   padding: 1.5rem;
@@ -7,18 +9,18 @@ div {
   box-sizing: border-box;
 }
 
-@media (width<700px) {
+@media (width<1300px) {
   div {
-    width: 280px;
+    max-width: 320px;
   }
 }
 
-@media (width<970px) {
-
+@media (width<630px) {
   // :host {
   //   display: none;
   // }
   div {
+    max-width: unset;
     width: 100%;
     padding: 16px;
   }

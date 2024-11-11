@@ -1,4 +1,4 @@
-<header>
+<header [class.closeHeader]="closeNavBar">
   <nav>
     <img [class.ShowLogo]="openNextWrapper === 'wrapper_2' || openNextWrapper === 'wrapper_3'" src="assets/img/icons/logo.svg" alt="Logo" />
     <div class="return" [class.d-flex]="openNextWrapper === 'wrapper_2' || openNextWrapper === 'wrapper_3'">

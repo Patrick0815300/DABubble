@@ -1,6 +1,6 @@
 <mat-card class="card">
   <mat-card-header>
-    <mat-card-title (click)="openChannelDialog()">
+    <mat-card-title (click)="openChannelDialog(); onOpenChannelInfo(true)">
       <mat-icon>tag</mat-icon>
       {{ channelName }}
       <mat-icon>keyboard_arrow_down</mat-icon>
@@ -45,8 +45,8 @@
         <span>{{ formatDate(message.time) }}</span>
         <div class="devider"></div>
       </div>
-      <app-message @flyInRight *ngIf="message.senderId !== uid" [message]="message" [close]="close"  (notifyThreadOpen)="onNotifyThreadOpen()"></app-message>
-      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message"  [close]="close" (notifyThreadOpen)="onNotifyThreadOpen()"></app-own-message>
+      <app-message @flyInRight *ngIf="message.senderId !== uid" [message]="message" [close]="close" (notifyThreadOpen)="onNotifyThreadOpen()"></app-message>
+      <app-own-message @flyInRight *ngIf="message.senderId === uid" [message]="message" [close]="close" (notifyThreadOpen)="onNotifyThreadOpen()"></app-own-message>
     </ng-container>
   </mat-card-content>
   <app-message-box class="message-box"></app-message-box>

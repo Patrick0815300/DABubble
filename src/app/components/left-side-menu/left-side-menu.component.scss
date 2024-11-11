@@ -55,6 +55,7 @@
 }
 
 .add-channel {
+  padding-bottom: 1rem !important;
   padding-inline: 1rem;
 
   &:hover span {
@@ -200,7 +201,9 @@ li {
   width: 30px;
   height: 30px;
 }
-
+.channel-section-header {
+  padding-top: 1rem;
+}
 .closeDialDev {
   background-color: transparent;
   border: transparent;
@@ -240,7 +243,7 @@ li {
   }
 
   .channel-section-header {
-    padding-top: 2rem;
+    // padding-top: 2rem;
     padding-inline: 1rem;
   }
   .message-section-header {

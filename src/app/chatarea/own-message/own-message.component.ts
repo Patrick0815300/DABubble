@@ -17,20 +17,12 @@ import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.com
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { EmojiComponent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { ReactionService } from '../../firestore-service/reaction.service';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-own-message',
   standalone: true,
-  imports: [
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    CommonModule,
-    FormsModule,
-    EmojiPickerComponent,
-    PickerComponent,
-    EmojiComponent,
-  ],
+  imports: [MatIconModule, MatButtonModule, MatMenuModule, CommonModule, FormsModule, EmojiPickerComponent, PickerComponent, EmojiComponent],
   templateUrl: './own-message.component.html',
   styleUrl: './own-message.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,11 +58,11 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   selectedFile: File | null = null;
   cleanUrl: string | null = null;
 
-
   private uidSubscription: Subscription | null = null;
   private emojiSubscription: Subscription | null = null;
   private messageSubscription: Subscription | null = null;
   private channelSubscription: Subscription | null = null;
+  private channelService = inject(ChannelService);
 
   private fireService = inject(ChatareaServiceService);
   private emojiService = inject(EmojiService);
@@ -83,7 +75,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     private chatService: ChatServiceService,
     private mainService: MainServiceService,
     private fileUploadService: FileUploadService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     this.fireService.loadReactions();
   }
@@ -154,13 +146,13 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       if (this.selectedFile) {
         this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
         this.fileUploadService
-          .uploadFile(this.selectedFile, messageId, progress => {
-          })
+          .uploadFile(this.selectedFile, messageId, progress => {})
           .then((result: { url: string; fileName: string }) => {
             this.cleanUrl = result.url;
             this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
             this.fileName = result.fileName;
-            this.fileUploadService.updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName)
+            this.fileUploadService
+              .updateMessageFileUrl(channelId, messageId, this.cleanUrl, this.fileName)
               .then(() => {
                 this.clearFileUploadData();
                 resolve();
@@ -193,12 +185,11 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       this.messageSubscription.unsubscribe();
     }
 
-    this.messageSubscription = this.fireService.getMessageById(this.channelId, this.message.id)
-      .subscribe(updatedMessage => {
-        this.message = updatedMessage;
-        this.loadFileUpload();
-        this.cdr.markForCheck();
-      });
+    this.messageSubscription = this.fireService.getMessageById(this.channelId, this.message.id).subscribe(updatedMessage => {
+      this.message = updatedMessage;
+      this.loadFileUpload();
+      this.cdr.markForCheck();
+    });
   }
 
   deleteFileTemporarily() {
@@ -214,12 +205,10 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
-      this.emojiSubscription = this.emojiService.emoji$
-        .pipe(filter((emoji: string) => emoji.trim() !== ''))
-        .subscribe((emoji: string) => {
-          this.reactToMessage(this.message.id, emoji);
-          this.toggleEmojiPicker = false;
-        });
+      this.emojiSubscription = this.emojiService.emoji$.pipe(filter((emoji: string) => emoji.trim() !== '')).subscribe((emoji: string) => {
+        this.reactToMessage(this.message.id, emoji);
+        this.toggleEmojiPicker = false;
+      });
     } else {
       if (this.emojiSubscription) {
         this.emojiSubscription.unsubscribe();
@@ -229,15 +218,15 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   deleteMessage(messageId: string) {
-    this.fireService.getActiveChannel().subscribe((channelData) => {
+    this.fireService.getActiveChannel().subscribe(channelData => {
       const channelId = channelData.id;
-      this.fireService.deleteMessageWithSubcollections(channelId, messageId)
+      this.fireService.deleteMessageWithSubcollections(channelId, messageId);
     });
   }
 
   loadAvatar() {
     const docId = this.message.senderId;
-    this.fireService.getUserAvatar(docId).subscribe((avatar) => {
+    this.fireService.getUserAvatar(docId).subscribe(avatar => {
       this.avatar = avatar;
     });
   }
@@ -306,7 +295,6 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-
   loadThreadDetails() {
     this.lastAnswerTime = '';
     if (this.message && this.channelId) {
@@ -319,9 +307,13 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   openThread(messageId: string) {
     this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
-    if (window.innerWidth > 970 && window.innerWidth < 1350 && !this.close) {
-      this.notifyThreadOpen.emit();
-    }
+    // if (window.innerWidth > 970 && window.innerWidth < 1350 && !this.close) {
+    //   this.notifyThreadOpen.emit();
+    // }
+  }
+
+  handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
+    this.channelService.emitOpenMessageMobile(val);
   }
 
   loadActiveChannelId() {
@@ -329,7 +321,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
-      }
+      },
     });
   }
 
@@ -357,9 +349,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
   }
 
   private hasUserReacted(emoji: string): boolean {
-    return this.message.reactions?.some((reaction: any) =>
-      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
-    );
+    return this.message.reactions?.some((reaction: any) => reaction.emoji === emoji && reaction.userId.includes(this.uid!));
   }
 
   private async toggleReaction(messageId: string, emoji: string, hasReacted: boolean) {
@@ -405,25 +395,26 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       await this.uploadFile(message.id, this.channelId);
       this.updateMessageContent(message);
     } else {
-      this.cleanUrl = null
+      this.cleanUrl = null;
       this.updateMessageContent(message);
     }
   }
 
   private updateMessageContent(message: any) {
-    this.fireService.updateMessage(message.id, {
-      content: message.content,
-      fileUrl: this.cleanUrl,
-      fileName: this.fileName,
-      messageEdit: true
-    })
+    this.fireService
+      .updateMessage(message.id, {
+        content: message.content,
+        fileUrl: this.cleanUrl,
+        fileName: this.fileName,
+        messageEdit: true,
+      })
       .subscribe({
         next: () => {
           this.editMode[message.id] = false;
           this.messageEdited = true;
           this.cdr.detectChanges();
           this.subscribeToMessageUpdates();
-        }
+        },
       });
   }
 
@@ -432,16 +423,14 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       next: (channel: any) => {
         const channelId = channel.id;
         this.loadMessages(channelId);
-      }
+      },
     });
   }
 
   loadMessages(channelId: string) {
     this.previousMessageDate = null;
-    this.fireService.loadMessages(channelId).subscribe((messages) => {
-      this.messages = messages
-        .filter(message => message.isOwnMessage)
-        .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    this.fireService.loadMessages(channelId).subscribe(messages => {
+      this.messages = messages.filter(message => message.isOwnMessage).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
       this.cdr.detectChanges();
     });
   }

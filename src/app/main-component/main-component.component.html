@@ -1,21 +1,28 @@
 <section class="main-section">
   <app-nav-bar />
   <main>
-    <button class="toggle-side-menu" (click)="handleToggle()">
+    <button class="toggle-side-menu" (click)="handleToggle(); handleDialogMobile('wrapper_1')">
       <span>
         Workspace-Menü <span class="left-pad">{{ this.state_text }}</span>
       </span>
       <img class="cursor-effect" src="{{ state_icon }}" alt="" />
     </button>
-    <app-left-side-menu *ngIf="!hide_navigation" class="toggle-display" [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'" />
+    <app-left-side-menu
+      *ngIf="hide_navigation == false"
+      class="toggle-display"
+      [class.hideWrapper]="openWrapper === 'wrapper_3'"
+      [class.hideWrapperWrap2]="openWrapper === 'wrapper_2'"
+      [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'"
+    />
     <app-messages
       *ngIf="isChannelView === false"
       class="app-middle-wrapper"
       [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'"
+      [class.closeMessages]="openWrapper === 'wrapper_3'"
       [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
     />
     <app-chatarea
-      [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'"
+      [class.OpenWrapperChat]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'"
       *ngIf="isChannelView === true"
       class="app-middle-wrapper"
       [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
@@ -24,7 +31,7 @@
     />
 
     <app-dev-space-area [class.OpenWrapper]="openWrapper === 'wrapper_1' || openWrapper === 'wrapper_3'" *ngIf="dev_message_search === true" class="app-middle-wrapper" />
-    <app-right-wrapper class="app-right-wrapper" *ngIf="isThreadVisible" />
+    <app-right-wrapper [class.app-right-wrapper]="openWrapper === 'wrapper_3'" *ngIf="isThreadVisible" [class.openRight]="openWrapper === 'wrapper_3'" />
   </main>
   @if(state){
   <form (submit)="onAddUser()" autocomplete="off">

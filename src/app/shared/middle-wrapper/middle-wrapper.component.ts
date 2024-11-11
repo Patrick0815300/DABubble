@@ -1,10 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { ChatareaComponent } from "../../chatarea/chatarea.component";
 
 @Component({
   selector: 'app-middle-wrapper',
   standalone: true,
-  imports: [ChatareaComponent],
+  imports: [],
   templateUrl: './middle-wrapper.component.html',
   styleUrl: './middle-wrapper.component.scss',
 })

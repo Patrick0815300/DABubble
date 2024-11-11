@@ -35,6 +35,7 @@ export class NavBarComponent implements OnInit {
   input_value: string = '';
   currentUserId!: any;
   openNextWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' = 'wrapper_1';
+  closeNavBar: boolean = false;
   private uidSubscription: Subscription | null = null;
 
   constructor(
@@ -58,6 +59,10 @@ export class NavBarComponent implements OnInit {
         .subscribe(user => {
           this.authenticatedUser = user;
         });
+    });
+
+    this.channelService.channelMobileInfo$.subscribe(state => {
+      this.closeNavBar = state;
     });
 
     this.databaseService.users$.subscribe(users => {

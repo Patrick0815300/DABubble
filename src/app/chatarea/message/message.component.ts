@@ -10,7 +10,7 @@ import { FileUploadService } from '../../firestore-service/file-upload.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
 import { ChannelService } from '../../modules/channel.service';
-import { EmojiPickerComponent } from "../../shared/emoji-picker/emoji-picker.component";
+import { EmojiPickerComponent } from '../../shared/emoji-picker/emoji-picker.component';
 import { EmojiService } from '../../modules/emoji.service';
 import { Subscription, filter } from 'rxjs';
 import { ReactionService } from '../../firestore-service/reaction.service';
@@ -57,8 +57,8 @@ export class MessageComponent {
     private channelService: ChannelService,
     private emojiService: EmojiService,
     private reactionService: ReactionService,
-    private cdr: ChangeDetectorRef,
-  ) { }
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.uid = this.authService.getUID();
@@ -97,23 +97,20 @@ export class MessageComponent {
       this.messageSubscription.unsubscribe();
     }
 
-    this.messageSubscription = this.chatAreaService.getMessageById(this.channelId, this.message.id)
-      .subscribe(updatedMessage => {
-        this.message = updatedMessage;
-        this.loadFileUpload();
-        this.cdr.detectChanges();
-      });
+    this.messageSubscription = this.chatAreaService.getMessageById(this.channelId, this.message.id).subscribe(updatedMessage => {
+      this.message = updatedMessage;
+      this.loadFileUpload();
+      this.cdr.detectChanges();
+    });
   }
 
   showEmojiPicker() {
     this.toggleEmojiPicker = !this.toggleEmojiPicker;
     if (this.toggleEmojiPicker) {
-      this.emojiSubscription = this.emojiService.emoji$
-        .pipe(filter((emoji: string) => emoji.trim() !== ''))
-        .subscribe((emoji: string) => {
-          this.reactToMessage(this.message.id, emoji);
-          this.toggleEmojiPicker = false;
-        });
+      this.emojiSubscription = this.emojiService.emoji$.pipe(filter((emoji: string) => emoji.trim() !== '')).subscribe((emoji: string) => {
+        this.reactToMessage(this.message.id, emoji);
+        this.toggleEmojiPicker = false;
+      });
     } else {
       if (this.emojiSubscription) {
         this.emojiSubscription.unsubscribe();
@@ -179,9 +176,9 @@ export class MessageComponent {
 
   openThread(messageId: string) {
     this.chatService.setThreadDataFromMessage(this.uid!, this.channelId, messageId);
-    if (window.innerWidth < 1350 && !this.close) {
-      this.notifyThreadOpen.emit();
-    }
+    // if (window. < 1350 && !this.close) {
+    //   this.notifyThreadOpen.emit();
+    // }
   }
 
   loadActiveChannelId() {
@@ -189,7 +186,7 @@ export class MessageComponent {
       next: (channel: any) => {
         this.channelId = channel.id;
         this.loadThreadDetails();
-      }
+      },
     });
   }
 
@@ -215,9 +212,7 @@ export class MessageComponent {
   }
 
   private hasUserReacted(emoji: string): boolean {
-    return this.message.reactions?.some((reaction: any) =>
-      reaction.emoji === emoji && reaction.userId.includes(this.uid!)
-    );
+    return this.message.reactions?.some((reaction: any) => reaction.emoji === emoji && reaction.userId.includes(this.uid!));
   }
 
   private async updateThreadsIfNecessary(messageId: string, emoji: string) {

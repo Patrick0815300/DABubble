@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,28 +9,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { Channel } from '../../models/channels/entwickler-team.model';
 import { ChatareaServiceService } from '../../firestore-service/chatarea-service.service';
-import { MemberDialogComponent } from "../member-dialog/member-dialog.component";
+import { MemberDialogComponent } from '../member-dialog/member-dialog.component';
 import { ChatServiceService } from '../../firestore-service/chat-service.service';
 import { AuthService } from '../../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
+import { ChannelService } from '../../modules/channel.service';
 
 @Component({
   selector: 'app-channel-dialog',
   standalone: true,
-  imports: [
-    MatDialogModule,
-    MatFormFieldModule,
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatInputModule,
-    MatDialogActions,
-    MatButtonModule,
-    FormsModule,
-    MemberDialogComponent
-  ],
+  imports: [MatDialogModule, MatFormFieldModule, CommonModule, MatCardModule, MatIconModule, MatInputModule, MatDialogActions, MatButtonModule, FormsModule, MemberDialogComponent],
   templateUrl: './channel-dialog.component.html',
-  styleUrls: ['./channel-dialog.component.scss']
+  styleUrls: ['./channel-dialog.component.scss'],
 })
 export class ChannelDialogComponent {
   @Input() isMember: boolean = false;
@@ -48,7 +38,9 @@ export class ChannelDialogComponent {
   isAdmin: boolean = false;
   channelAdminId: string = '';
 
-  constructor(private fireService: ChatareaServiceService, private chatService: ChatServiceService, private authService: AuthService) { }
+  private channelService = inject(ChannelService);
+
+  constructor(private fireService: ChatareaServiceService, private chatService: ChatServiceService, private authService: AuthService) {}
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -59,7 +51,7 @@ export class ChannelDialogComponent {
 
   checkAdmin(adminId: string) {
     if (this.uid && adminId) {
-      this.isAdmin = (this.uid === adminId);
+      this.isAdmin = this.uid === adminId;
     } else {
       this.isAdmin = false;
     }
@@ -69,6 +61,10 @@ export class ChannelDialogComponent {
     }
   }
 
+  onOpenChannelInfo(val: boolean) {
+    this.channelService.onDisplayMobileChannelInfo(val);
+  }
+
   loadActiveChannel() {
     this.fireService.getActiveChannel().subscribe({
       next: async (channel: any) => {
@@ -76,8 +72,8 @@ export class ChannelDialogComponent {
         this.name = channel.channel_name;
         this.description = channel.description;
         this.admin = await this.chatService.getUserNameByUid(channel.admin);
-        this.checkAdmin(channel.admin)
-      }
+        this.checkAdmin(channel.admin);
+      },
     });
   }
 
@@ -85,7 +81,7 @@ export class ChannelDialogComponent {
     this.fireService.leaveActiveChannel().subscribe({
       next: () => {
         this.closeDialog();
-      }
+      },
     });
   }
 
@@ -104,7 +100,7 @@ export class ChannelDialogComponent {
   }
 
   saveChanges(updatedData: any) {
-    this.fireService.updateChannel(this.selectedChannelId, updatedData)
+    this.fireService.updateChannel(this.selectedChannelId, updatedData);
   }
 
   closeDialog() {

@@ -17,9 +17,10 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../firestore-service/auth.service';
 import { Subscription } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 import { FormsModule } from '@angular/forms';
 import { SearchDevspaceComponent } from '../components/search-devspace/search-devspace.component';
+import { ChannelService } from '../modules/channel.service';
+import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
 
 @Component({
   selector: 'app-chatarea',
@@ -35,9 +36,9 @@ import { SearchDevspaceComponent } from '../components/search-devspace/search-de
     MessageBoxComponent,
     MemberDialogComponent,
     AddMemberDialogComponent,
-    MiddleWrapperComponent,
     FormsModule,
     SearchDevspaceComponent,
+    MiddleWrapperComponent,
   ],
   templateUrl: './chatarea.component.html',
   styleUrl: './chatarea.component.scss',
@@ -45,23 +46,16 @@ import { SearchDevspaceComponent } from '../components/search-devspace/search-de
     trigger('slideDown', [
       transition(':enter', [
         style({ maxHeight: '0px', opacity: 0, overflow: 'hidden', transform: 'translateY(-10px)' }),
-        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' }))
+        animate('250ms ease-out', style({ maxHeight: '500px', opacity: 1, transform: 'translateY(0)' })),
       ]),
-      transition(':leave', [
-        animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' }))
-      ])
+      transition(':leave', [animate('250ms ease-in', style({ maxHeight: '0px', opacity: 0, transform: 'translateY(-10px)' }))]),
     ]),
 
     trigger('flyInRight', [
-      transition(':enter', [
-        style({ transform: 'translateX(100%)', opacity: 0 }),
-        animate('600ms ease-out', style({ transform: 'translateX(0)' }))
-      ]),
-      transition(':leave', [
-        animate('600ms ease-in', style({ transform: 'translateX(100%)' }))
-      ])
-    ])
-  ]
+      transition(':enter', [style({ transform: 'translateX(100%)', opacity: 0 }), animate('600ms ease-out', style({ transform: 'translateX(0)' }))]),
+      transition(':leave', [animate('600ms ease-in', style({ transform: 'translateX(100%)' }))]),
+    ]),
+  ],
 })
 export class ChatareaComponent implements AfterViewInit {
   @ViewChild('messageContainer') messageContainer!: ElementRef;
@@ -87,8 +81,9 @@ export class ChatareaComponent implements AfterViewInit {
     private fireService: ChatareaServiceService,
     private mainService: MainServiceService,
     private cdRef: ChangeDetectorRef,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+    private channelService: ChannelService
+  ) {}
 
   ngAfterViewInit() {
     this.messageBoxComponent.focusTextArea();
@@ -106,6 +101,10 @@ export class ChatareaComponent implements AfterViewInit {
     if (this.uidSubscription) {
       this.uidSubscription.unsubscribe();
     }
+  }
+
+  onOpenChannelInfo(val: boolean) {
+    this.channelService.onDisplayMobileChannelInfo(val);
   }
 
   trackByMessageId(index: number, message: any): string {
@@ -134,7 +133,6 @@ export class ChatareaComponent implements AfterViewInit {
         this.scrollToBottom();
       }, 750);
     });
-
   }
 
   loadActiveChannelData() {
@@ -154,7 +152,7 @@ export class ChatareaComponent implements AfterViewInit {
       },
       error: () => {
         this.clearChannelData();
-      }
+      },
     });
   }
 
@@ -186,9 +184,9 @@ export class ChatareaComponent implements AfterViewInit {
 
   scrollToBottom(): void {
     if (this.isCurrentUserMember()) {
-      if (this.messageContainer.nativeElement) {
-        this.messageContainer.nativeElement.scroll({
-          top: this.messageContainer.nativeElement.scrollHeight,
+      if (this.messageContainer?.nativeElement) {
+        this.messageContainer?.nativeElement.scroll({
+          top: this.messageContainer?.nativeElement.scrollHeight,
           behavior: 'smooth',
         });
         this.messageBoxComponent.focusTextArea();

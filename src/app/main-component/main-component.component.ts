@@ -288,16 +288,15 @@ export class MainComponentComponent implements OnInit {
   }
 
   handleToggle() {
-    // Umschalten zwischen geöffnet und geschlossen
     this.close = !this.close;
     this.hide_navigation = !this.hide_navigation;
     this.toggleNavigation();
 
     this.state_icon = this.iconPath();
 
-    if (window.innerWidth < 1350 && !this.close) {
-      this.mainService.setThreadOpenFalse();
-    }
+    // if (window.innerWidth < 1350 && !this.close) {
+    //   this.mainService.setThreadOpenFalse();
+    // }
 
     // Beispiel: Öffne oder schließe das Left-side-menu
     if (this.openWrapper === 'wrapper_1') {

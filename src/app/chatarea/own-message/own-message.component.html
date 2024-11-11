@@ -76,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <div class="answer" *ngIf="answerCount > 0" (click)="openThread(message.id)">
+            <div class="answer" *ngIf="answerCount > 0" (click)="openThread(message.id);handleDialogMobile('wrapper_3')">
                 <span class="counted-answers">{{ answerCount }} {{ answerCount === 1 ? 'Antwort' : 'Antworten' }}</span>
                 <span class="time">Letzte Antwort {{ lastAnswerTime }}</span>
               </div>
