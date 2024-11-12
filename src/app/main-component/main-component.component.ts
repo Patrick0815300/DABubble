@@ -153,7 +153,6 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.openMessageMobile$.subscribe(state => {
       this.openWrapper = state;
-      console.log('Wrapper', state);
     });
 
     this.channelService.openLogoutMobile$.subscribe(state => {

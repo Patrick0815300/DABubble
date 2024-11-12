@@ -90,7 +90,6 @@ export class ChannelService {
   emitOpenLeftMenu() {
     this.isDialogOpen = !this.isDialogOpen;
     this.openLeftMenuSubject.next(this.isDialogOpen);
-    console.log(this.isDialogOpen);
   }
 
   onDisplayMobileChannelInfo(val: boolean) {

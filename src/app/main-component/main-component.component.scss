@@ -317,15 +317,23 @@ a {
     display: none;
   }
 }
+@media (width<950px) {
+  .closeMessages {
+    display: none;
+  }
+  .app-right-wrapper {
+    width: 100% !important;
+  }
+}
 
 @media (width<630px) {
   /////////////////////////////////////
   .OpenWrapperChat {
     display: none;
   }
-  .app-right-wrapper {
-    width: 100% !important;
-  }
+  // .app-right-wrapper {
+  //   width: 100% !important;
+  // }
 
   ///////////////////////////
   .OpenWrapper {
