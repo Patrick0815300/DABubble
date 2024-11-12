@@ -298,21 +298,36 @@ a {
   }
 }
 
-@media screen and (width<950px) {
-  .OpenWrapperChat {
-    display: none;
-  }
-  .app-right-wrapper {
-    width: 100% !important;
-  }
-}
+// @media screen and (width<950px) {
+//   .OpenWrapperChat {
+//     display: none;
+//   }
+//   .app-right-wrapper {
+//     width: 100% !important;
+//   }
+// }
 @media screen and (width<880px) {
   .hideWrapperWrap2 {
     display: none;
   }
 }
 
+@media (min-width: 630px) and (max-width: 1000px) {
+  .MiddleHide {
+    display: none;
+  }
+}
+
 @media (width<630px) {
+  /////////////////////////////////////
+  .OpenWrapperChat {
+    display: none;
+  }
+  .app-right-wrapper {
+    width: 100% !important;
+  }
+
+  ///////////////////////////
   .OpenWrapper {
     display: none;
   }

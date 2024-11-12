@@ -12,6 +12,7 @@
       class="toggle-display"
       [class.hideWrapper]="openWrapper === 'wrapper_3'"
       [class.hideWrapperWrap2]="openWrapper === 'wrapper_2'"
+      [class.MiddleHide]="openWrapper === 'wrapper_1'"
       [class.OpenWrapper]="openWrapper === 'wrapper_2' || openWrapper === 'wrapper_3'"
     />
     <app-messages
@@ -26,7 +27,6 @@
       *ngIf="isChannelView === true"
       class="app-middle-wrapper"
       [ngStyle]="{ display: dev_message_search === true ? 'none' : '' }"
-      (notifyThreadOpen)="handleToggle()"
       [close]="close"
     />
 

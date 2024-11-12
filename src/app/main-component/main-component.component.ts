@@ -116,6 +116,9 @@ export class MainComponentComponent implements OnInit {
     this.updateProfilService.open_update_profil$.subscribe(state => {
       this.open_update_profil = state;
     });
+    this.channelService.openLeftMenu$.subscribe(state => {
+      this.hide_navigation = state;
+    });
 
     this.logOutService.open_logout$.subscribe(state => {
       this.open_logout = state;
@@ -150,6 +153,7 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.openMessageMobile$.subscribe(state => {
       this.openWrapper = state;
+      console.log('Wrapper', state);
     });
 
     this.channelService.openLogoutMobile$.subscribe(state => {
@@ -289,7 +293,7 @@ export class MainComponentComponent implements OnInit {
 
   handleToggle() {
     this.close = !this.close;
-    this.hide_navigation = !this.hide_navigation;
+    this.channelService.emitOpenLeftMenu();
     this.toggleNavigation();
 
     this.state_icon = this.iconPath();

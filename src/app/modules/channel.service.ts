@@ -17,6 +17,7 @@ export class ChannelService {
   private openLogoutContainerSubject = new BehaviorSubject<boolean>(false);
   private logchosenSubject = new BehaviorSubject<boolean>(false);
   private mobileChannelSubject = new BehaviorSubject<boolean>(false);
+  private openLeftMenuSubject = new BehaviorSubject<boolean>(false);
   showChannelMsg$ = this.isChannelSource.asObservable();
   channelMembers$ = this.channelMemberSource.asObservable();
   userPicked$ = this.logUserSubject.asObservable();
@@ -27,6 +28,7 @@ export class ChannelService {
   openMessageMobile$ = this.openMessageContainerSubject.asObservable();
   openLogoutMobile$ = this.openLogoutContainerSubject.asObservable();
   channelMobileInfo$ = this.mobileChannelSubject.asObservable();
+  openLeftMenu$ = this.openLeftMenuSubject.asObservable();
   isDialogOpen = false;
 
   constructor(private firestore: Firestore) {}
@@ -84,6 +86,11 @@ export class ChannelService {
   emitLogoutMobile() {
     this.isDialogOpen = !this.isDialogOpen;
     this.openLogoutContainerSubject.next(this.isDialogOpen);
+  }
+  emitOpenLeftMenu() {
+    this.isDialogOpen = !this.isDialogOpen;
+    this.openLeftMenuSubject.next(this.isDialogOpen);
+    console.log(this.isDialogOpen);
   }
 
   onDisplayMobileChannelInfo(val: boolean) {
