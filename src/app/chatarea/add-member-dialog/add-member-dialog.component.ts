@@ -79,7 +79,6 @@ export class AddMemberDialogComponent {
   addUser() {
     this.fireService.addMembersToActiveChannel(this.selectedUser).subscribe({
       next: () => {
-        console.log('Benutzer erfolgreich hinzugefügt.');
         this.closeDialog();
       },
       error: err => {
