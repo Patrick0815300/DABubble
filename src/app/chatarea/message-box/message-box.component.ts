@@ -75,7 +75,7 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     private authService: AuthService,
     private channelService: ChannelService,
     private currentGuest: CurrentUserService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.uidSubscription = this.authService.getUIDObservable().subscribe((uid: string | null) => {
@@ -187,10 +187,13 @@ export class MessageBoxComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.linkDialog && this.showUsers) {
       this.linkDialog = false;
       this.showUsers = false;
+
     } else {
       this.linkDialog = true;
       this.showUsers = true;
       this.showChannels = false;
+      this.searchTerm = this.messageContent.split(' ').pop()?.substring(1) || '';
+      this.filteredUsers = this.users.filter(u => u.name.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
     }
   }
 
