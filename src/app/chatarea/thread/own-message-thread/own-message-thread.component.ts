@@ -104,7 +104,7 @@ export class OwnMessageThreadComponent {
       if (updatedThread) {
         this.thread = updatedThread;
         this.loadFileUpload();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
