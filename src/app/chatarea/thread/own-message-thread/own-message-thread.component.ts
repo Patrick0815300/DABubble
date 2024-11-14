@@ -104,11 +104,10 @@ export class OwnMessageThreadComponent {
       if (updatedThread) {
         this.thread = updatedThread;
         this.loadFileUpload();
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
-
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: Event) {

@@ -146,7 +146,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
       if (this.selectedFile) {
         this.fileType = this.fileUploadService.getFileTypeFromFileName(this.selectedFile.name);
         this.fileUploadService
-          .uploadFile(this.selectedFile, messageId, progress => {})
+          .uploadFile(this.selectedFile, messageId, progress => { })
           .then((result: { url: string; fileName: string }) => {
             this.cleanUrl = result.url;
             this.fileURL = this.sanitizer.bypassSecurityTrustResourceUrl(result.url);
@@ -180,11 +180,9 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   private subscribeToMessageUpdates() {
     if (!this.channelId || !this.message.id) return;
-
     if (this.messageSubscription) {
       this.messageSubscription.unsubscribe();
     }
-
     this.messageSubscription = this.fireService.getMessageById(this.channelId, this.message.id).subscribe(updatedMessage => {
       this.message = updatedMessage;
       this.loadFileUpload();
@@ -345,7 +343,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     if (!this.channelId) return;
     const hasReacted = this.hasUserReacted(emoji);
     await this.toggleReaction(messageId, emoji, hasReacted);
-    await this.updateThreadsIfNecessary(messageId, emoji);
+    await this.updateThreadsIfNecessary(messageId);
   }
 
   private hasUserReacted(emoji: string): boolean {
@@ -362,10 +360,11 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async updateThreadsIfNecessary(messageId: string, emoji: string) {
-    if (await this.chatService.hasThreads(this.channelId!, messageId)) {
-      const count = await this.chatService.getReactionCount(this.channelId!, messageId);
-      await this.reactionService.updateReactionsInAllThreads(this.channelId!, messageId, emoji, this.uid!, count);
+  private async updateThreadsIfNecessary(messageId: string) {
+    if (!this.channelId || !messageId) return;
+    if (await this.chatService.hasThreads(this.channelId, messageId)) {
+      const updatedMessage = await this.fireService.getMessageByIdOnce(this.channelId, messageId);
+      await this.chatService.updateMessageInAllThreads(this.channelId, messageId, updatedMessage);
       if (await this.chatService.isThreadOpen(this.uid!)) {
         this.openThread(messageId);
       }
@@ -393,12 +392,14 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
     }
     if (this.selectedFile && this.fileURL) {
       await this.uploadFile(message.id, this.channelId);
-      this.updateMessageContent(message);
+      await this.updateMessageContent(message);
     } else {
       this.cleanUrl = null;
-      this.updateMessageContent(message);
+      await this.updateMessageContent(message);
     }
+    await this.updateThreadsIfNecessary(message.id);
   }
+
 
   private updateMessageContent(message: any) {
     this.fireService

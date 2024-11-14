@@ -24,6 +24,12 @@ export class ChatareaServiceService {
     }
   }
 
+  async getMessageByIdOnce(channelId: string, messageId: string): Promise<any> {
+    const messageRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}`);
+    const messageSnap = await getDoc(messageRef);
+    return messageSnap.data();
+  }
+
   /**
    * Loads a Firestore document and returns an observable with its data.
    * @param {string} collection - The Firestore collection name.
