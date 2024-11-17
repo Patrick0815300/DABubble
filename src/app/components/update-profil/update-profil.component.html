@@ -17,7 +17,7 @@
     [disabled]="!authenticatedUser?.online"
     [placeholder]="authenticatedUser?.online ? 'Vorname Nachname' : 'Bubble Guest'"
     required=""
-    pattern="^[A-Za-z]{1,}(?: [A-Za-z]+)*$"
+    pattern="^[A-Za-zäöüßÄÖÜ]{1,}(?: [A-Za-zäöüßÄÖÜ]+)*$"
   />
   <div class="single-user-info">
     <img class="mail" src="assets/img/icons/mail.svg" alt="" />

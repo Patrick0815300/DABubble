@@ -1,11 +1,7 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core';
-import { WrapperComponent } from '../shared/wrapper/wrapper.component';
-import { MiddleWrapperComponent } from '../shared/middle-wrapper/middle-wrapper.component';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
 import { LeftSideMenuComponent } from '../components/left-side-menu/left-side-menu.component';
 import { NavBarComponent } from '../components/nav-bar/nav-bar.component';
-import { OverlayComponent } from '../shared/overlay/overlay.component';
-import { ChannelDescriptionComponent } from '../components/channel-description/channel-description.component';
 import { CommonModule } from '@angular/common';
 import { NavService } from '../modules/nav.service';
 import { LogoutComponent } from '../components/logout/logout.component';
@@ -18,45 +14,34 @@ import { ChatareaComponent } from '../chatarea/chatarea.component';
 import { MessagesComponent } from '../components/messages/messages.component';
 import { Channel, ChannelMember, Message, User } from '../modules/database.model';
 import { DatabaseServiceService } from '../database-service.service';
-import { AddUserNameComponent } from '../components/add-user-name/add-user-name.component';
 import { UserService } from '../modules/user.service';
-import { ChannelMessagesComponent } from '../components/channel-messages/channel-messages.component';
 import { ChannelService } from '../modules/channel.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { EditChannelComponent } from '../components/edit-channel/edit-channel.component';
-import { SearchUserComponent } from '../components/search-user/search-user.component';
-import { DevNewMessageComponent } from '../components/dev-new-message/dev-new-message.component';
 import { map, Subscription } from 'rxjs';
 import { AuthService } from '../firestore-service/auth.service';
 import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
 import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout.component';
-import { MainServiceService } from '../firestore-service/main-service.service';
 import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
+import { NewChannelSearchComponent } from '../components/new-channel-search/new-channel-search.component';
 
 @Component({
   selector: 'app-main-component',
   standalone: true,
   imports: [
     CommonModule,
-    NavBarComponent,
-    ChannelDescriptionComponent,
-    WrapperComponent,
-    MiddleWrapperComponent,
     RightWrapperComponent,
+    DevSpaceAreaComponent,
     LeftSideMenuComponent,
-    OverlayComponent,
+    ChatareaComponent,
+    NavBarComponent,
+    MessagesComponent,
+    NewChannelSearchComponent,
+    EditChannelComponent,
+    FormsModule,
     LogoutComponent,
     ShowProfilComponent,
     UpdateProfilComponent,
-    MessagesComponent,
-    AddUserNameComponent,
-    ChannelMessagesComponent,
-    FormsModule,
-    EditChannelComponent,
-    ChatareaComponent,
-    SearchUserComponent,
-    DevNewMessageComponent,
-    DevSpaceAreaComponent,
     MobileLogoutComponent,
   ],
   templateUrl: './main-component.component.html',
@@ -78,7 +63,7 @@ export class MainComponentComponent implements OnInit {
   selectedUser: User = new User();
   isChannelView: boolean = true;
   channel_description: string = '';
-  channel_name: string = '';
+  channelName: string = '';
   isChecked: string = 'officeTeam';
   Channel!: Channel;
   all_channel!: Channel[];
@@ -91,12 +76,17 @@ export class MainComponentComponent implements OnInit {
   all_users: User[] = [];
   filtered_users: User[] = [];
   searchUser: User[] = [];
+  pickedArrayObj: User[] = [];
   PickedArray: string[] = [];
-  showSearchUserName: boolean = false;
+  showSearchUser: boolean = false;
   dev_message_search: boolean = false;
   officeTeamChannel!: Channel;
+  nameError: boolean = false;
+  syntaxError: boolean = false;
+
   private uidSubscription: Subscription | null = null;
   @ViewChild(MessagesComponent) messageTextArea!: MessagesComponent;
+  @ViewChild('inputForm') channelInputForm!: NgForm;
   constructor(
     private navService: NavService,
     private updateProfilService: UpdateProfilService,
@@ -106,8 +96,6 @@ export class MainComponentComponent implements OnInit {
     private databaseService: DatabaseServiceService,
     private authService: AuthService,
     private userService: UserService,
-    private mainService: MainServiceService,
-    private cdr: ChangeDetectorRef,
     private firestore: Firestore
   ) {
     this.navService.state$.subscribe(state => {
@@ -157,6 +145,10 @@ export class MainComponentComponent implements OnInit {
 
     this.channelService.openLogoutMobile$.subscribe(state => {
       this.openLogoutMobile = state;
+    });
+
+    this.channelService.pickedUserObj$.subscribe(userObj => {
+      this.pickedArrayObj = userObj;
     });
 
     /**
@@ -226,13 +218,13 @@ export class MainComponentComponent implements OnInit {
   }
 
   alreadyExist(newChannelName: string) {
-    let channel_names = this.all_channel.map(channel => channel.channel_name);
-    return channel_names.includes(newChannelName);
+    let channel_names = this.all_channel.map(channel => channel.channel_name.toLowerCase());
+    return channel_names.includes(newChannelName.toLowerCase());
   }
 
   onCreateChannel() {
     let channelData = {
-      channel_name: this.channel_name,
+      channel_name: this.channelName,
       description: this.channel_description,
       admin: this.authenticatedUser ? this.authenticatedUser.id : 'Unknown',
     };
@@ -245,20 +237,23 @@ export class MainComponentComponent implements OnInit {
           this.onAddPeopleToChannel(memberArray, office);
         }
       } else {
-        console.log('No office members');
       }
       if (this.isChecked === 'singleUser') {
-        this.onAddPeopleToChannel(this.PickedArray, office);
+        const idArray = this.pickedArrayObj.map(user => user.id);
+
+        this.onAddPeopleToChannel(idArray, office);
       }
     });
   }
 
   async onAddPeopleToChannel(array: any[], office: any) {
     if (this.alreadyExist(office.channel_name)) {
-      console.log('This channel name is already used, please enter a different name.');
+      this.syntaxError = false;
+      this.nameError = true;
       this.open_dialog_add_user = false;
       this.navService.createChannel();
     } else {
+      this.nameError = false;
       if (!array.includes(this.authenticatedUser?.id)) {
         array.push(this.authenticatedUser?.id);
       }
@@ -271,9 +266,10 @@ export class MainComponentComponent implements OnInit {
         const newMember = new ChannelMember({ member_id: member, channel_id: office.channel_id }).toObject();
         this.databaseService.addMemberToChannel(newMember);
       });
-      this.onCancelAddUser();
-      this.channel_name = '';
+      this.channelName = '';
+      this.channel_description = '';
     }
+    this.onCancelAddUser();
   }
 
   async updateChannelIdOrMember(id: string | undefined, data: any) {
@@ -296,10 +292,6 @@ export class MainComponentComponent implements OnInit {
     this.toggleNavigation();
 
     this.state_icon = this.iconPath();
-
-    // if (window.innerWidth < 1350 && !this.close) {
-    //   this.mainService.setThreadOpenFalse();
-    // }
 
     // Beispiel: Öffne oder schließe das Left-side-menu
     if (this.openWrapper === 'wrapper_1') {
@@ -327,24 +319,37 @@ export class MainComponentComponent implements OnInit {
     this.navService.createChannel();
   }
 
+  onResetForm() {
+    this.channelInputForm?.resetForm();
+    this.syntaxError = false;
+    this.nameError = false;
+  }
+
   toggleCheckTeam() {
     this.isChecked = this.isChecked;
     return this.isChecked;
   }
 
   onAddUser() {
-    if (this.channel_name && this.channel_name[0] !== ' ') {
+    if (this.channelName && this.channelName[0] !== ' ') {
       this.onCloseDialog();
       this.open_dialog_add_user = true;
-    }
-    if (this.channel_name[0] === ' ') {
-      console.log('Der Name vom Channel kann nicht mit Leerzeichen starten oder leer sein!');
+      this.syntaxError = false;
+    } else {
+      this.nameError = false;
+      this.syntaxError = true;
     }
   }
 
   onCancelAddUser() {
     this.open_dialog_add_user = false;
+    this.showSearchUser = false;
     this.channelService.emitPickedUser([]);
+    this.channelService.emitPickedUsersObj([]);
+    this.new_person_name = '';
+    this.channelName = '';
+    this.channel_description = '';
+    this.isChecked = 'officeTeam';
   }
 
   onOpenEditChannel() {
@@ -370,17 +375,38 @@ export class MainComponentComponent implements OnInit {
   }
 
   onSearchUser() {
-    if (this.new_person_name) {
-      this.showSearchUserName = true;
-      this.filtered_users = this.all_users.filter(u => u.name.toLowerCase().includes(this.new_person_name.toLowerCase()));
+    if (this.new_person_name.length >= 1 && this.new_person_name[0] === '@') {
+      this.showSearchUser = true;
+      if (this.new_person_name.length == 1) {
+        this.filtered_users = this.all_users;
+        this.channelService.emitFilteredUsers(this.filtered_users);
+      } else if (this.new_person_name.length > 1 && this.new_person_name[0] === '@') {
+        this.filtered_users = this.all_users.filter(u => this.onFilterUser(u, 1));
+        this.channelService.emitFilteredUsers(this.filtered_users);
+      }
+    } else if (this.new_person_name.length >= 1 && this.new_person_name[0] !== '@') {
+      this.showSearchUser = true;
+      this.filtered_users = this.all_users.filter(u => this.onFilterUser(u, 0));
       this.channelService.emitFilteredUsers(this.filtered_users);
     } else {
-      this.showSearchUserName = false;
+      this.showSearchUser = false;
+      this.channelService.emitFilteredUsers([]);
     }
+  }
+
+  onFilterUser(array: User, index: number) {
+    return array.name.toLowerCase().substring(0, this.new_person_name.length - index) === this.new_person_name.slice(index).toLowerCase();
   }
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
+  }
+
+  onRemoveUser(id: string) {
+    this.pickedArrayObj = this.pickedArrayObj.filter(user => user.id !== id);
+    const idArray = this.pickedArrayObj.map(user => user.id);
+    this.channelService.emitPickedUser(idArray);
+    this.channelService.emitPickedUsersObj(this.pickedArrayObj);
   }
 
   onCloseMobileLogout() {

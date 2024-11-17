@@ -10,6 +10,7 @@ export class ChannelService {
   private isChannelSource = new Subject<boolean>();
   private channelMemberSource = new ReplaySubject<ChannelMember[]>(1);
   private logFilteredUserSubject = new ReplaySubject<User[]>(1);
+  private pickedUserObjSubject = new ReplaySubject<User[]>(1);
   private logFilteredChannelsSubject = new ReplaySubject<Channel[]>(1);
   private logUserSubject = new ReplaySubject<string[]>(1);
   private logSubject = new BehaviorSubject<boolean>(false);
@@ -22,6 +23,7 @@ export class ChannelService {
   channelMembers$ = this.channelMemberSource.asObservable();
   userPicked$ = this.logUserSubject.asObservable();
   filtered_users$ = this.logFilteredUserSubject.asObservable();
+  pickedUserObj$ = this.pickedUserObjSubject.asObservable();
   filtered_channels$ = this.logFilteredChannelsSubject.asObservable();
   open_update_channel$ = this.logSubject.asObservable();
   chosen$ = this.logchosenSubject.asObservable();
@@ -49,6 +51,10 @@ export class ChannelService {
   emitFilteredUsers(users: User[]) {
     this.logFilteredUserSubject.next(users);
   }
+  emitPickedUsersObj(users: User[]) {
+    this.pickedUserObjSubject.next(users);
+  }
+
   emitFilteredChannels(channels: Channel[]) {
     this.logFilteredChannelsSubject.next(channels);
   }

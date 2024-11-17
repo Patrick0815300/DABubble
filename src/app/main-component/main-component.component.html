@@ -34,10 +34,10 @@
     <app-right-wrapper [class.app-right-wrapper]="openWrapper === 'wrapper_3'" *ngIf="isThreadVisible" [class.openRight]="openWrapper === 'wrapper_3'" />
   </main>
   @if(state){
-  <form (submit)="onAddUser()" autocomplete="off">
+  <form (submit)="onAddUser()" autocomplete="off" #inputForm="ngForm">
     <div class="ch-creation">
       <span>channel erstellen</span>
-      <button class="closeDial" (click)="onCloseDialog()">
+      <button class="closeDial" (click)="onCloseDialog(); onResetForm()">
         <img class="cursor-effect" src="assets/img/icons/close.svg" alt="" />
       </button>
     </div>
@@ -46,8 +46,13 @@
       <span>channel-Name</span>
     </div>
     <div class="ch-info-input">
-      <input [(ngModel)]="channel_name" class="input" name="channel_name" type="text" placeholder="z.B. Kooperationsprojekte" />
+      <input [(ngModel)]="channelName" class="input" name="channel_name" type="text" placeholder="z.B. Kooperationsprojekte" />
       <img src="assets/img/icons/hash_tag.svg" alt="" />
+      @if (nameError) {
+      <span>This channel name is already used, please enter a different name.</span>
+      }@else if(syntaxError){
+      <span>Der Name vom Channel kann nicht mit Leerzeichen starten oder leer sein!</span>
+      }
     </div>
     <div class="title-container"><span>beschreibung</span><span class="optional"> (optional)</span></div>
     <div class="ch-info-input">
@@ -59,10 +64,10 @@
   </form>
   <div class="overlay"></div>
   } @if(open_dialog_add_user){
-  <section class="section-user">
+  <form class="section-user" autocomplete="off" (ngSubmit)="onCreateChannel()">
     <div class="ch-creation-user">
       <span>leute hinzufügen</span>
-      <button class="closeDial" (click)="onCancelAddUser()">
+      <button type="button" class="closeDial" (click)="onCancelAddUser(); onResetForm()">
         <img class="cursor-effect" src="assets/img/icons/close.svg" alt="" />
       </button>
     </div>
@@ -75,14 +80,29 @@
       <span>Bestimmte Leute hinzufügen</span>
     </div>
     <div class="search-section">
-      <input [(ngModel)]="new_person_name" (input)="onSearchUser()" class="add-person" *ngIf="isChecked === 'singleUser'" type="text" placeholder="Name eingeben" />
-      <app-search-user *ngIf="showSearchUserName === true" class="app-search-user" [componentType]="'user-list'" />
+      <input
+        [(ngModel)]="new_person_name"
+        name="add-person"
+        (input)="onSearchUser()"
+        class="add-person"
+        *ngIf="isChecked === 'singleUser'"
+        type="text"
+        placeholder="Name eingeben"
+      />
+      <app-new-channel-search *ngIf="showSearchUser === true" class="app-search-user" />
+      <ul class="list-chosen-user">
+        <li *ngFor="let user of pickedArrayObj; let i = index">
+          <img class="user-avatar" src="{{ user.avatar }}" alt="{{ user.name }}" />
+          <span>{{ user.name }}</span>
+          <button type="button" (click)="onRemoveUser(user.id)"><img src="assets/img/icons/close.svg" alt="" /></button>
+        </li>
+      </ul>
     </div>
 
     <div class="btn-container-user">
-      <button class="btn" (click)="onCreateChannel()">Erstellen</button>
+      <button type="submit" class="btn">Erstellen</button>
     </div>
-  </section>
+  </form>
 
   <div class="overlay"></div>
   } @if (open_logout) {

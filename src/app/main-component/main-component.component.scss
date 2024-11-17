@@ -127,6 +127,11 @@ form {
     width: 18px;
     height: 18px;
   }
+  > span {
+    position: absolute;
+    color: #e61c40;
+    bottom: -1.2rem;
+  }
 }
 
 .input {
@@ -274,9 +279,44 @@ a {
 
 .search-section {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   position: relative;
+  > .list-chosen-user {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    > li {
+      height: 39px;
+      background: #eceefe;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-inline: 0.75rem;
+      padding-inline: 0.25rem 0.5rem;
+      list-style-type: none;
+      > .user-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+      }
+      > span {
+        font-size: 12px;
+      }
+      > button {
+        background-color: transparent;
+        border: transparent;
+        width: 26px;
+        height: 26px;
+        > img {
+          width: 26px;
+          height: 26px;
+        }
+      }
+    }
+  }
 
   > input {
     width: 100%;

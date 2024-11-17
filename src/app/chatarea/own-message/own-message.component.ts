@@ -314,6 +314,9 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
+    if (window.innerWidth > 630) {
+      this.channelService.emitOpenLeftMenu();
+    }
   }
 
   loadActiveChannelId() {

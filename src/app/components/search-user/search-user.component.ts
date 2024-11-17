@@ -42,16 +42,6 @@ export class SearchUserComponent implements OnInit {
     private authService: CurrentUserService
   ) {}
 
-  // @HostListener('document:click', ['$event'])
-  // onDocumentClick(event: MouseEvent): void {
-  //   const clickedInsideDialog = this.dialogElement.nativeElement.contains(event.target);
-  //   const clickedInsideButton = this.closeButtonRef.nativeElement.contains(event.target);
-  //   if (!clickedInsideDialog && !clickedInsideButton) {
-  //     // this.onToggleSearchUser(false);
-  //     console.log('HI');
-  //   }
-  // }
-
   ngOnInit(): void {
     this.authService.userID$.subscribe(userId => {
       this.databaseService.authUser(userId!).then(user => {

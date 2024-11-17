@@ -243,7 +243,7 @@ export class DatabaseServiceService {
   }
 
   officeTeam(): Observable<Channel> {
-    return this.snapChannels().pipe(map(channels => channels.filter(channel => channel.channel_name.toLowerCase() === 'office-team')[0]));
+    return this.snapChannels().pipe(map(channels => channels.filter(channel => channel?.channel_name?.toLowerCase() === 'office-team')[0]));
   }
 
   async getDocumentIdByMemberId(collectionName: string, field: string, parameter: any) {
