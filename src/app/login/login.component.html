@@ -19,7 +19,7 @@
             <!-- [(ngModel)]="password" -->
           </div>
           <div class="error">
-            <div *ngIf="mailError || passwordError">*E-Mail-Adresse oder Password fehlerhaft.</div>
+            <div *ngIf="displayWrongMailOrPasswordError">*E-Mail-Adresse oder Password fehlerhaft.</div>
           </div>
           <div class="link" [routerLink]="['newPassword']">Passwort vergessen?</div>
         </div>

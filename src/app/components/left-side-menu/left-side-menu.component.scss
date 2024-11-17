@@ -3,12 +3,12 @@
   align-items: center;
   justify-content: space-between;
 
-  > div {
+  >div {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 
-    > img {
+    >img {
       width: 40px;
       object-fit: cover;
     }
@@ -41,11 +41,10 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  max-height: 117px;
   gap: 5px;
   margin-bottom: 4px;
 
-  > li {
+  >li {
     margin-left: 1.5rem;
 
     &:hover img {
@@ -73,11 +72,11 @@
   }
 
   &:hover .icon-group .capitilize {
-    > img {
+    >img {
       filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
     }
 
-    > span {
+    >span {
       color: #535af1;
     }
   }
@@ -133,7 +132,6 @@
 }
 
 .fold {
-  max-height: 150px;
   overflow-y: auto;
   scrollbar-width: none;
   display: flex;
@@ -154,6 +152,7 @@ li {
   border-radius: 30px;
   cursor: pointer;
   font-size: 18px;
+
   &:hover {
     background-color: #eceefe;
   }
@@ -170,7 +169,7 @@ li {
   color: #535af1;
   font-weight: 700;
 
-  > img {
+  >img {
     filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
   }
 }
@@ -201,9 +200,11 @@ li {
   width: 30px;
   height: 30px;
 }
+
 .channel-section-header {
   padding-top: 1rem;
 }
+
 .closeDialDev {
   background-color: transparent;
   border: transparent;
@@ -218,6 +219,7 @@ li {
     background-color: #eceefe;
   }
 }
+
 .section-content {
   height: 100%;
 }
@@ -237,6 +239,7 @@ li {
 }
 
 @media (width<630px) {
+
   .users,
   .list-channel {
     gap: 13px;
@@ -246,6 +249,7 @@ li {
     // padding-top: 2rem;
     padding-inline: 1rem;
   }
+
   .message-section-header {
     padding-inline: 1rem;
   }

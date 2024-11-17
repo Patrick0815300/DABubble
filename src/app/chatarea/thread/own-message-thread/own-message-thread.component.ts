@@ -109,7 +109,6 @@ export class OwnMessageThreadComponent {
     });
   }
 
-
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: Event) {
     if (this.showReactions && this.reactionContainer) {

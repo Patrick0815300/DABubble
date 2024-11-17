@@ -36,6 +36,25 @@ export class ChatServiceService implements OnInit, OnDestroy {
     }
   }
 
+  async updateMessageInAllThreads(channelId: string, messageId: string, updatedMessage: any): Promise<void> {
+    const threadsRef = collection(this.firestore, `channels/${channelId}/messages/${messageId}/threads`);
+    const threadDocs = await getDocs(threadsRef);
+
+    const batch = writeBatch(this.firestore);
+
+    threadDocs.forEach((doc) => {
+      const threadMessageRef = doc.ref;
+      batch.update(threadMessageRef, {
+        content: updatedMessage.content,
+        fileUrl: updatedMessage.fileUrl || null,
+        fileName: updatedMessage.fileName || null,
+        messageEdit: true,
+      });
+    });
+
+    await batch.commit();
+  }
+
   deleteThreadMessage(channelId: string, messageId: string, threadId: string, threadMessageId: string): Promise<void> {
     const threadMessageDocRef = doc(this.firestore, `channels/${channelId}/messages/${messageId}/threads/${threadId}/messages/${threadMessageId}`);
     return deleteDoc(threadMessageDocRef);

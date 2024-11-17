@@ -341,3 +341,39 @@ app-emoji-picker {
     left: 400px;
     bottom: 23px;
 }
+
+
+@media (max-width: 1040px) and (min-width: 950px) {
+    .message-container {
+        padding: 10px 10px;
+        gap: 10px;
+
+        .message {
+            align-items: flex-end;
+        }
+    }
+}
+
+@media (max-width: 630px) {
+    .message-container {
+        padding-inline: 16px;
+
+        .img-container {
+            img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        .message {
+            .text {
+                font-size: 17px;
+            }
+        }
+    }
+
+    app-emoji-picker {
+        left: 365px;
+        bottom: 0;
+    }
+}

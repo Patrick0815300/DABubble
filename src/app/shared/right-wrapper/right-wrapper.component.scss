@@ -105,11 +105,6 @@ mat-card-content {
   display: none;
 }
 
-@media (width<1300px) {
-  .container {
-    max-width: 355px;
-  }
-}
 @media (width<950px) {
   .container {
     max-width: unset;
@@ -120,6 +115,7 @@ mat-card-content {
   mat-card-header {
     border-radius: 0;
   }
+
   .container {
     max-width: unset;
   }
@@ -129,10 +125,19 @@ mat-card-content {
   }
 
   .mat-mdc-card-content {
-    padding: 1rem !important;
+    padding: 1rem;
+    padding-inline: 0;
   }
 
   mat-card-header {
-    padding-inline: 24px !important;
+    padding: 10px 16px;
+  }
+
+  .message-divider {
+    padding-inline: 16px;
+  }
+
+  .message-box {
+    margin-bottom: 16px;
   }
 }

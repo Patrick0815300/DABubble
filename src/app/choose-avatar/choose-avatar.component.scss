@@ -304,6 +304,32 @@ input[type="file"] {
     }
 }
 
+@media(max-width:330px){
+
+    .titleContainer{
+        justify-content: center;
+    }
+
+    .image{
+        width:100px;
+        height:100px;
+    }
+
+    .arrowBack{
+        position:absolute;
+        left:10px
+    }
+
+    mat-card-title{
+        text-align:center;
+        width:85%;
+    }
+
+    .descriptionContainer{
+        gap:30px;
+    }
+}
+
 @media(max-height:1020px){
     mat-card{
         transform:scale(0.9);

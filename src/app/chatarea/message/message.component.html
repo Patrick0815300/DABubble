@@ -46,7 +46,7 @@
         <span (click)="reactToMessage(message.id, '👍')">👍</span>
         <span (click)="reactToMessage(message.id, '❤️')">❤️</span>
         <mat-icon (click)="showEmojiPicker(); $event.stopPropagation()">add_reaction</mat-icon>
-        <mat-icon (click)="openThread(message.id)">comment</mat-icon>
+        <mat-icon (click)="openThread(message.id); handleDialogMobile('wrapper_3')">comment</mat-icon>
       </div>
     </div>
   </div>

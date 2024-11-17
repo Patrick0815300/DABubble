@@ -6,7 +6,7 @@
             <span (click)="reactToMessage(message.id, '👍')">👍</span>
             <span (click)="reactToMessage(message.id, '❤️')">❤️</span>
             <mat-icon (click)="showEmojiPicker(); $event.stopPropagation()">add_reaction</mat-icon>
-            <mat-icon *ngIf="!allReactions" (click)="openThread(message.id)">comment</mat-icon>
+            <mat-icon *ngIf="!allReactions" (click)="openThread(message.id);handleDialogMobile('wrapper_3')">comment</mat-icon>
             <mat-icon
               mat-icon-button
               [matMenuTriggerFor]="editMenu"

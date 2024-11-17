@@ -1,6 +1,6 @@
 input {
   font-family: 'Nunito';
-  font-size: 14px;
+  font-size: 18px;
   height: 50%;
   padding-inline: 1rem;
   outline: none;
@@ -37,31 +37,28 @@ mat-icon {
 
 .input-wrapper {
   background-color: white;
-  padding-inline: 1.5rem;
-  margin-bottom: 1rem;
+  padding-inline: 35px;
+  margin-bottom: 40px;
   z-index: 1;
   border-radius: 30px;
 
-  > .input-form {
+  >.input-form {
     display: flex;
     flex-direction: column;
     border: 1px solid #adb0d9;
     border-radius: 20px;
 
-    > .send-line {
+    >.send-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 36px;
+      padding-inline: 20px;
+      padding-bottom: 20px;
 
-      padding-inline: 1rem;
-      padding-bottom: 1rem;
-
-      > .alternate-line {
+      >.alternate-line {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        height: 21px;
+        gap: 10px;
       }
     }
   }
@@ -84,34 +81,35 @@ mat-icon {
 }
 
 textarea {
+  font-size: 18px;
   flex: 1;
   border: none;
   resize: none;
   outline: none;
   scrollbar-width: none;
   background: transparent;
-  padding: 1rem 1rem;
+  padding: 20px;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-  margin-bottom: 21px;
 }
 
 .uplodImageDirectMessages {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
+  padding-inline: 16px;
 }
 
 .single-reaction {
   position: absolute;
   border: 1px solid #adb0d9;
-  width: 47px;
-  height: 23px;
+  padding: 3px 20px;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   bottom: 0;
+  font-size: 18px;
 }
 
 input::placeholder {
@@ -131,8 +129,8 @@ button {
 }
 
 .sender {
-  height: 35px;
-  width: 35px;
+  height: 70px;
+  width: 70px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -160,15 +158,15 @@ button {
 .chat-container {
   display: flex;
   flex-direction: column-reverse;
-  height: 395px;
   overflow-y: auto;
   padding-block: 10px;
   padding-left: 16px;
   padding-right: 16px;
   border: transparent;
   scrollbar-width: none;
+  margin-top: auto;
 
-  > div {
+  >div {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -192,22 +190,22 @@ button {
   padding: 0px;
   border-radius: 5px;
   padding-block: 0.5rem;
-  padding-inline: 1.5rem;
+  padding-inline: 35px;
   position: relative;
   transition: all 250ms ease-in-out;
 
   &:hover {
     background-color: #eceefe;
 
-    > .name-date-line p {
+    >.name-date-line p {
       background-color: white;
     }
 
-    > .name-date-line .response_msg p {
+    >.name-date-line .response_msg p {
       background-color: white;
     }
 
-    > .emoji-container div {
+    >.emoji-container div {
       display: flex;
     }
   }
@@ -226,7 +224,7 @@ button {
 }
 
 .emoji-container {
-  > div {
+  >div {
     position: absolute;
     background-color: white;
     left: 1.5rem;
@@ -241,7 +239,7 @@ button {
     align-items: center;
     display: none;
 
-    > img {
+    >img {
       cursor: pointer;
     }
   }
@@ -260,7 +258,7 @@ button {
 .img-group {
   position: relative;
 
-  > button:not(.emoji-icon) {
+  >button:not(.emoji-icon) {
     width: 35px;
     height: 35px;
     background-color: transparent;
@@ -273,7 +271,7 @@ button {
     &:hover {
       background-color: #eceefe;
 
-      > img {
+      >img {
         filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
       }
     }
@@ -297,7 +295,7 @@ button {
   align-items: baseline;
   gap: 0.25rem;
 
-  > .btn {
+  >.btn {
     font-family: 'Nunito';
     font-weight: 700;
     padding: 0.35rem 0.5rem;
@@ -317,7 +315,7 @@ button {
   display: flex;
   gap: 1rem;
 
-  > .btn {
+  >.btn {
     font-family: 'Nunito';
     padding: 0.5rem 1rem;
     border-radius: 25px;
@@ -329,14 +327,14 @@ button {
     }
   }
 
-  > .btn-white {
+  >.btn-white {
     background-color: white;
     color: #444df2;
     border: 1px solid #adb0d9;
     font-weight: 700;
   }
 
-  > .btn-info {
+  >.btn-info {
     background-color: #444df2;
     color: white;
   }
@@ -372,21 +370,24 @@ button {
   flex-direction: column;
   padding-bottom: 1rem;
 
-  > div {
+  >div {
     display: flex;
     gap: 1rem;
+    margin-top: 8px;
+    margin-bottom: 8px;
 
-    > span:first-child {
+    >span:first-child {
       text-transform: capitalize;
       font-weight: 700;
+      font-size: 18px;
     }
 
-    > span:nth-child(2) {
+    >span:nth-child(2) {
       color: #686868;
     }
   }
 
-  > p {
+  >p {
     display: inline-block;
     background-color: #eceefe;
     padding: 0.75rem;
@@ -395,6 +396,7 @@ button {
     border-bottom-left-radius: 30px;
     cursor: default;
     align-self: flex-start;
+    font-size: 18px;
   }
 }
 
@@ -402,9 +404,10 @@ button {
   justify-content: end;
   flex-direction: row-reverse;
 
-  > .name-date-line {
+  >.name-date-line {
     width: 100%;
-    > p {
+
+    >p {
       border-top-left-radius: 30px;
       border-top-right-radius: unset;
       background-color: #797ef3 !important;
@@ -413,7 +416,7 @@ button {
       align-self: end;
     }
 
-    > div:not(.update-msg) {
+    >div:not(.update-msg) {
       flex-direction: row-reverse;
     }
   }
@@ -432,12 +435,12 @@ button {
   align-items: center;
   justify-content: center;
 
-  > span,
+  >span,
   .line {
     position: absolute;
   }
 
-  > span {
+  >span {
     margin: 0 auto;
     padding: 5px 15px;
     border: 1px solid #adb0d9;
@@ -447,20 +450,22 @@ button {
     background-color: white;
   }
 
-  > .line {
+  >.line {
     width: 100%;
-    border: 1px solid #adb0d9;
+    height: 1px;
+    background-color: #adb0d9;
   }
 }
 
 .sep-line {
-  border: 1px solid #adb0d9;
-  height: 100%;
+  height: 40px;
+  width: 1px;
+  background-color: #adb0d9;
 }
 
 .icons {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   object-fit: cover;
   cursor: pointer;
 }
@@ -475,16 +480,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
   border-radius: 50%;
   background-color: transparent;
   border: transparent;
+  padding: 8px;
 
   &:hover {
     background-color: #eceefe;
 
-    > img {
+    >img {
       filter: invert(33%) sepia(100%) saturate(2937%) hue-rotate(228deg) brightness(96%) contrast(96%);
     }
   }
@@ -500,29 +504,26 @@ button {
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
   gap: 1rem;
-  height: 40px;
   margin-bottom: auto;
 
-  > span {
+  >span {
     text-transform: capitalize;
     font-weight: 700;
+    font-size: 24px;
   }
 
-  > button {
+  >button {
     position: relative;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
+    display: flex;
+    align-items: baseline;
 
-    > .online-marker {
+    >.online-marker {
       height: 10px;
       width: 10px;
       background-color: #92c83e;
-      position: absolute;
-      bottom: -5px;
-      right: -9px;
       border-radius: 50%;
       border: 2px solid #eceefe;
+      margin-left: -15px;
     }
   }
 }
@@ -532,7 +533,7 @@ button {
   padding-bottom: 0.5rem;
   gap: 1rem;
 
-  > .username {
+  >.username {
     font-weight: 700;
     align-self: flex-end;
   }
@@ -547,7 +548,7 @@ button {
   font-size: 14px;
   margin-bottom: 1rem;
 
-  > span {
+  >span {
     font-weight: 700;
   }
 }
@@ -558,7 +559,7 @@ button {
   gap: 0.4rem !important;
   margin-bottom: 0.5rem;
 
-  > p {
+  >p {
     background-color: #eceefe;
     padding: 0.75rem;
     padding-inline: 0.75rem;
@@ -572,7 +573,7 @@ button {
     }
   }
 
-  > .response-p {
+  >.response-p {
     border-bottom-left-radius: 30px;
     border-top-right-radius: 30px;
   }
@@ -599,27 +600,32 @@ button {
 }
 
 @media (width<630px) {
-  .message,
-  .input-wrapper,
-  .chat-message {
+  app-emoji-picker {
+    left: 90%;
+  }
+
+  .message {
     padding-inline: unset;
   }
 
-  .chat-content {
-    padding-inline: 1.5rem;
+  .chat-message,
+  .input-wrapper,
+  .current-nav-user {
+    padding-inline: 16px;
   }
 
   .chat-container {
     flex: 1;
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  .current-nav-user {
-    padding-inline: unset;
-    border-left: unset;
-    border-right: unset;
-    border-top-left-radius: unset;
-    border-top-right-radius: unset;
-    margin-inline: -1.5rem;
-    padding-inline: 1rem;
+  .sender {
+    height: 50px;
+    width: 50px;
+  }
+
+  .name-date-line>p {
+    font-size: 17px;
   }
 }

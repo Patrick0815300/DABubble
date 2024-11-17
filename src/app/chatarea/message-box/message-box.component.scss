@@ -63,6 +63,12 @@
         color: #686868;
         position: relative;
 
+        .line {
+            height: 40px;
+            width: 1px;
+            background-color: #ADB0D9;
+        }
+
         .btn-unset {
             all: unset;
 
@@ -185,6 +191,11 @@
 // ----------------------------- MEDIA -----------------------------
 
 @media(max-width: 610px) {
+
+    .not-member-message {
+        margin-left: 0;
+    }
+
     .container {
         margin: 0 16px;
 

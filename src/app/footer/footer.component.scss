@@ -35,6 +35,18 @@ footer {
 
 @media(max-width:610px) or (max-height: 1015px) {
     footer {
-        display: none;
+        bottom:20px;
     }
+
+    mat-card{
+        height:90%;
+    }
+}
+
+@media(max-width:610px) and (max-height:670px) {
+    
+    footer{
+        bottom:6px;
+    }
+
 }

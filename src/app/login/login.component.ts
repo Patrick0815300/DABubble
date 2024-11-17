@@ -87,23 +87,23 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  get mailError() {
-    const control = this.loginForm.get('mail');
-    if (control?.invalid && (control.dirty || control.touched)) {
-      if (control?.hasError('required')) return 'E-Mail wird benötigt';
-      if (control?.hasError('email')) return 'Ungültige E-Mail-Adresse';
-    }
-    return null;
-  }
+  // get mailError() {
+  //   const control = this.loginForm.get('mail');
+  //   if (control?.invalid && (control.dirty || control.touched)) {
+  //     if (control?.hasError('required')) return 'E-Mail wird benötigt';
+  //     if (control?.hasError('email')) return 'Ungültige E-Mail-Adresse';
+  //   }
+  //   return null;
+  // }
 
-  get passwordError() {
-    const control = this.loginForm.get('password');
-    if (control?.invalid && (control.dirty || control.touched)) {
-      if (control?.hasError('required')) return 'Passwort wird benötigt';
-      if (control?.hasError('minlength')) return 'Passwort muss mindestens 6 Zeichen lang sein';
-    }
-    return null;
-  }
+  // get passwordError() {
+  //   const control = this.loginForm.get('password');
+  //   if (control?.invalid && (control.dirty || control.touched)) {
+  //     if (control?.hasError('required')) return 'Passwort wird benötigt';
+  //     if (control?.hasError('minlength')) return 'Passwort muss mindestens 6 Zeichen lang sein';
+  //   }
+  //   return null;
+  // }
 
   /**
    * This function sets a user in the userService for other components to get the data

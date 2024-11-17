@@ -118,3 +118,13 @@
         }
     }
 }
+
+@media (max-width: 630px) {
+    .container {
+        margin-inline: 16px;
+    }
+
+    app-emoji-picker {
+        left: 100%;
+    }
+}

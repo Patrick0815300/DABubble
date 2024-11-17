@@ -72,7 +72,7 @@ export class MainComponentComponent implements OnInit {
   open_edit_channel: boolean = false;
   openLogoutMobile: boolean = false;
   isThreadVisible: boolean = true;
-  openWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | 'wrapper_4' | null = null;
+  openWrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | null = null;
   all_users: User[] = [];
   filtered_users: User[] = [];
   searchUser: User[] = [];
@@ -84,6 +84,7 @@ export class MainComponentComponent implements OnInit {
   nameError: boolean = false;
   syntaxError: boolean = false;
 
+  screenWidth: number = window.innerWidth;
   private uidSubscription: Subscription | null = null;
   @ViewChild(MessagesComponent) messageTextArea!: MessagesComponent;
   @ViewChild('inputForm') channelInputForm!: NgForm;
@@ -164,7 +165,6 @@ export class MainComponentComponent implements OnInit {
   }
 
   onFocus() {
-    // this.cdr.detectChanges();
     setTimeout(() => this.messageTextArea.keepFocus(), 0);
   }
 
@@ -293,6 +293,10 @@ export class MainComponentComponent implements OnInit {
 
     this.state_icon = this.iconPath();
 
+    // if (window.innerWidth < 1350 && !this.close) {
+    //   this.mainService.setThreadOpenFalse();
+    // }
+
     // Beispiel: Öffne oder schließe das Left-side-menu
     if (this.openWrapper === 'wrapper_1') {
       this.openWrapper = null;
@@ -301,7 +305,7 @@ export class MainComponentComponent implements OnInit {
     }
   }
 
-  handleOpenWrapper(wrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | 'wrapper_4') {
+  handleOpenWrapper(wrapper: 'wrapper_1' | 'wrapper_2' | 'wrapper_3' | null) {
     this.openWrapper = wrapper;
   }
 
