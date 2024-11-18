@@ -9,11 +9,12 @@ import { NgClass } from '@angular/common';
 import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 import { Channel, ChannelMember } from '../modules/database.model';
 import { DatabaseServiceService } from '../database-service.service';
+import { PrivacypolicyComponent } from '../privacypolicy/privacypolicy.component';
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [FooterComponent, MatCardModule, MatIconModule, RouterModule, ChooseAvatarComponent, FormsModule, NgClass],
+  imports: [FooterComponent, MatCardModule, MatIconModule, RouterModule, ChooseAvatarComponent, FormsModule, NgClass, PrivacypolicyComponent],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
 })

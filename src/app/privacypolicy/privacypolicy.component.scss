@@ -51,7 +51,36 @@ section {
         overflow-y: auto;
         height: calc(80vh);
         box-sizing: border-box;
+        background-color: white;
+        width: auto;
+        border-radius: 30px;
+        padding: 48px 56px;
+
     }
+}
+
+.header{
+    display:flex;
+    gap:20px;
+}
+
+.headline{
+    color: #444DF2;
+    font-family: nunito, sans-serif;
+}
+
+h1{
+    font-weight: 700;
+    font-size: 46px;
+    margin-bottom: 30px;
+    word-break:break-all;
+    line-height: 50px;
+}
+
+h2{
+    font-weight: 500;
+    font-size: 26px;
+    margin: 20px 0;
 }
 
 .arrowBack {
@@ -60,5 +89,3 @@ section {
         filter: drop-shadow(2px 2px 1px gray);
     }
 }
-
-.info {}

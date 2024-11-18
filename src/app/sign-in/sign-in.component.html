@@ -65,7 +65,7 @@
                     <div class="checkPrivacyPolicyContainerUpperContainer">
                         <input name="privacyPolicy" type="checkbox" [(ngModel)]="privacyPolicy"
                             (ngModelChange)="checkInputs()" #PrivacyPolicyInput="ngModel">
-                        <div class="checkPrivacyPolicyText">Ich stimme der <a routerLink="">Datenschutzerklärung</a> zu.
+                        <div class="checkPrivacyPolicyText">Ich stimme der <a [routerLink]="['/privacyPolicy']">Datenschutzerklärung</a> zu.
                         </div>
                     </div>
                     <div class="errorContainer">
