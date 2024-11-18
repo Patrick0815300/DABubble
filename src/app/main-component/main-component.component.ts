@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { RightWrapperComponent } from '../shared/right-wrapper/right-wrapper.component';
 import { LeftSideMenuComponent } from '../components/left-side-menu/left-side-menu.component';
 import { NavBarComponent } from '../components/nav-bar/nav-bar.component';
@@ -24,6 +24,7 @@ import { DevSpaceAreaComponent } from '../dev-space-area/chatarea.component';
 import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout.component';
 import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
 import { NewChannelSearchComponent } from '../components/new-channel-search/new-channel-search.component';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-main-component',
@@ -97,7 +98,8 @@ export class MainComponentComponent implements OnInit {
     private databaseService: DatabaseServiceService,
     private authService: AuthService,
     private userService: UserService,
-    private firestore: Firestore
+    private firestore: Firestore,
+    private breakpointObserver: BreakpointObserver
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -197,7 +199,21 @@ export class MainComponentComponent implements OnInit {
     });
     this.navService.stateOpenDevSearch$.subscribe(state => {
       this.dev_message_search = state;
-    });
+    });;
+
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize', [])
+  onWindowResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    if (window.innerWidth < 630 && this.close) {
+      this.close = false;
+      this.channelService.emitOpenLeftMenu();
+    }
   }
 
   toggelThread() {
@@ -290,14 +306,8 @@ export class MainComponentComponent implements OnInit {
     this.close = !this.close;
     this.channelService.emitOpenLeftMenu();
     this.toggleNavigation();
-
     this.state_icon = this.iconPath();
 
-    // if (window.innerWidth < 1350 && !this.close) {
-    //   this.mainService.setThreadOpenFalse();
-    // }
-
-    // Beispiel: Öffne oder schließe das Left-side-menu
     if (this.openWrapper === 'wrapper_1') {
       this.openWrapper = null;
     } else {
@@ -309,12 +319,10 @@ export class MainComponentComponent implements OnInit {
     this.openWrapper = wrapper;
   }
 
-  // Beispiel-Methode zum Öffnen des Right-wrapper
   openRightWrapper() {
     this.handleOpenWrapper('wrapper_3');
   }
 
-  // Beispiel-Methode zum Öffnen der Chatarea
   openChatarea() {
     this.handleOpenWrapper('wrapper_2');
   }

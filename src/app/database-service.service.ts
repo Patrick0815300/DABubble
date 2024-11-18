@@ -1,9 +1,10 @@
 import { Injectable, OnInit } from '@angular/core';
 import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, getDoc, getDocs, onSnapshot, query, updateDoc, where } from '@angular/fire/firestore';
 import { User, Message, Channel, ChannelMember } from './modules/database.model';
-import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, map, Observable, Subject, Subscription } from 'rxjs';
 import { getAuth } from 'firebase/auth';
 import { CurrentUserService } from './modules/current-user.service';
+import { AuthService } from './firestore-service/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,7 @@ export class DatabaseServiceService {
   users: User[] = [new User()];
   messages: Message[] = [new Message()];
   currentUserRef!: any;
+  authenticatedUserId: string | null = null
 
   private logSubject = new BehaviorSubject<User>(new User());
   private usersSubject = new BehaviorSubject<User[]>([new User()]);
@@ -38,7 +40,7 @@ export class DatabaseServiceService {
   filteredMessages$ = this.filteredMessagesSource.asObservable();
   userById$ = this.userByIdSubject.asObservable();
 
-  constructor(private firestore: Firestore) {
+  constructor(private firestore: Firestore, private authService: AuthService) {
     this.unSubscribeUser = this.snapUsers();
     this.unSubscribeMsg = this.snapMessages();
     this.getOnlineUsers();
@@ -90,11 +92,17 @@ export class DatabaseServiceService {
   }
 
   snapChannels(): Observable<Channel[]> {
+    this.authService.getUIDObservable().subscribe((uid: string | null) => {
+      this.authenticatedUserId = uid;
+    });
     return new Observable(observer => {
       const unsubscribe = onSnapshot(this.getChannelsRef(), snapshot => {
         const channels: Channel[] = [];
         snapshot.forEach(element => {
-          channels.push(new Channel(element.data()));
+          const data = element.data();
+          if (data['member'] && data['member'].includes(this.authenticatedUserId)) {
+            channels.push(new Channel(data));
+          }
         });
         this.channelsSubject.next(channels);
         observer.next(channels);

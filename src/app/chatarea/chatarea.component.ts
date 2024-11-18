@@ -83,7 +83,7 @@ export class ChatareaComponent implements AfterViewInit {
     private cdRef: ChangeDetectorRef,
     private authService: AuthService,
     private channelService: ChannelService
-  ) {}
+  ) { }
 
   ngAfterViewInit() {
     this.messageBoxComponent.focusTextArea();

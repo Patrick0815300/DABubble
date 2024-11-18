@@ -41,7 +41,7 @@
   </div>
 </div>
 <app-member-dialog></app-member-dialog>
-
+<span style="font-style: italic;" *ngIf="isAdmin">Sie sind Admin und können den Channel nicht verlassen.</span>
 <div class="leave-channel">
-  <button *ngIf="isMember || isAdmin" (click)="leaveChannel()" [disabled]="isAdmin">Channel verlassen</button>
+  <button *ngIf="!isMember || isAdmin" (click)="leaveChannel()" [disabled]="isAdmin">Channel verlassen</button>
 </div>

@@ -127,7 +127,8 @@ form {
     width: 18px;
     height: 18px;
   }
-  > span {
+
+  >span {
     position: absolute;
     color: #e61c40;
     bottom: -1.2rem;
@@ -282,12 +283,14 @@ a {
   align-items: center;
   justify-content: center;
   position: relative;
-  > .list-chosen-user {
+
+  >.list-chosen-user {
     position: absolute;
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    > li {
+
+    >li {
       height: 39px;
       background: #eceefe;
       border-radius: 30px;
@@ -297,20 +300,24 @@ a {
       padding-inline: 0.75rem;
       padding-inline: 0.25rem 0.5rem;
       list-style-type: none;
-      > .user-avatar {
+
+      >.user-avatar {
         width: 26px;
         height: 26px;
         border-radius: 50%;
       }
-      > span {
+
+      >span {
         font-size: 12px;
       }
-      > button {
+
+      >button {
         background-color: transparent;
         border: transparent;
         width: 26px;
         height: 26px;
-        > img {
+
+        >img {
           width: 26px;
           height: 26px;
         }

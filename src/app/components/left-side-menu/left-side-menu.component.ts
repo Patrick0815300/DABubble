@@ -109,6 +109,16 @@ export class LeftSideMenuComponent implements OnInit, AfterViewInit {
       currentUserSelection = '';
     }
 
+    this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
+      this.databaseService
+        .snapUsers()
+        .pipe(map(users => users.filter(user => user.id === uid)[0]))
+        .subscribe(user => {
+          this.auth_user_id = user?.id;
+          this.authenticatedUser = user;
+        });
+    });
+
     this.userService.selectedUser$.subscribe(selected_user => {
       this.selectedUser = selected_user;
     });
@@ -127,16 +137,6 @@ export class LeftSideMenuComponent implements OnInit, AfterViewInit {
     } else if (currentName && currentName === 'channel') {
       this.channelLoad(currentState);
     }
-
-    this.uidSubscription = this.authenticatedService.getUIDObservable().subscribe((uid: string | null) => {
-      this.databaseService
-        .snapUsers()
-        .pipe(map(users => users.filter(user => user.id === uid)[0]))
-        .subscribe(user => {
-          this.auth_user_id = user?.id;
-          this.authenticatedUser = user;
-        });
-    });
 
     this.authService.getGuestUser();
 
