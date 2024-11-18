@@ -312,7 +312,7 @@ export class OwnMessageComponent implements OnInit, OnDestroy {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
-    if (window.innerWidth > 630) {
+    if (window.innerWidth > 950) {
       this.channelService.emitOpenLeftMenu();
     }
   }

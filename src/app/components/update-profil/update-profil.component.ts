@@ -24,6 +24,8 @@ export class UpdateProfilComponent implements OnInit {
   disable_btn: boolean = false;
   isFormEmpty!: boolean;
   isFormFieldNull!: boolean;
+  originalUsername: string = '';
+  originalUserEmail: string = '';
 
   private uidSubscription: Subscription | null = null;
   constructor(
@@ -50,6 +52,9 @@ export class UpdateProfilComponent implements OnInit {
           this.authenticatedUser = user;
           this.username = this.authenticatedUser?.name;
           this.user_email = this.authenticatedUser?.email;
+
+          this.originalUsername = this.username;
+          this.originalUserEmail = this.user_email;
         });
     });
   }

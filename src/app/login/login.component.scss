@@ -11,6 +11,7 @@
     .link {
         color: #797EF3;
         padding: 8px 10px;
+        font-size: 16px;
 
         &:hover {
             cursor: pointer;
@@ -34,6 +35,7 @@ section {
     bottom: 300px;
     min-height: 692px;
     min-width: 80%;
+    font-size: 16px;
 
     main {
         width: 80%;
@@ -189,6 +191,7 @@ form {
     color: white;
     background-color: rgb(68, 77, 242);
     border-color: rgb(121, 126, 243);
+    font-size: 16px;
 
     &:hover {
         background-color: rgba(121, 126, 243, 0.8);

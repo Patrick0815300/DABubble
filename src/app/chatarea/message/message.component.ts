@@ -58,7 +58,7 @@ export class MessageComponent {
     private emojiService: EmojiService,
     private reactionService: ReactionService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.uid = this.authService.getUID();
@@ -261,7 +261,7 @@ export class MessageComponent {
 
   handleDialogMobile(val: 'wrapper_1' | 'wrapper_2' | 'wrapper_3') {
     this.channelService.emitOpenMessageMobile(val);
-    if (window.innerWidth > 630) {
+    if (window.innerWidth > 950) {
       this.channelService.emitOpenLeftMenu();
     }
   }

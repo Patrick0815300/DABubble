@@ -1,19 +1,22 @@
 .header-container {
-    position: absolute;
-    top: 90px;
-    left: 90px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 16px;
     font-size: 24px;
     font-weight: 700;
-    transform: scale(1.2);
+    margin-inline: 16px;
+    padding-top: 36px;
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
 
     .name {
-        transform: scale(1.2);
         margin-left: 20px;
-        font-family:nunito, sans-serif;
     }
 
     &:hover {
@@ -24,24 +27,30 @@
         width: auto;
         height: 70px;
     }
+
+    .arrowBack {
+        width: 30px;
+        height: 30px;
+    }
 }
 
 section {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    overflow-y: auto;
+    margin-top: 70px;
+    margin-bottom: 16px;
+    margin-inline: 16px;
+    overflow-y: auto;
+    box-sizing: border-box;
 
-    mat-card {
-        background-color: white;
-        height: auto;
-        width: auto;
-        border-radius: 30px;
-        padding: 48px 56px;
-
-        mat-card-content {
-            width: 100%;
-        }
+    .info {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        height: calc(80vh);
+        box-sizing: border-box;
     }
 }
 
@@ -52,11 +61,4 @@ section {
     }
 }
 
-.info{
-    position:absolute;
-    bottom:100px;
-    left:80px;
-    font-family:nunito, sans-serif;
-    font-weight:700;
-    font-size:32px;
-}
+.info {}

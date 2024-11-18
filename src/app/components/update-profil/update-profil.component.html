@@ -37,8 +37,12 @@
     <button
       class="btn"
       (click)="save('users', authenticatedUser?.id!)"
-      [disabled]="!user_emailModel.valid || !usernameModel.valid"
-      [style.opacity]="!user_emailModel.valid || !usernameModel.valid ? '0.5' : '1'"
+      [disabled]="!user_emailModel.valid || 
+        !usernameModel.valid ||
+        (username === originalUsername && user_email === originalUserEmail)
+        "
+      [style.opacity]="!user_emailModel.valid || !usernameModel.valid ||
+      (username === originalUsername && user_email === originalUserEmail) ? '0.5' : '1'"
     >
       Speichern
     </button>
