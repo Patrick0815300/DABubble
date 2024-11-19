@@ -64,7 +64,7 @@
   </form>
   <div class="overlay"></div>
   } @if(open_dialog_add_user){
-  <form class="section-user" autocomplete="off" (ngSubmit)="onCreateChannel()">
+  <form class="section-user" autocomplete="off" (ngSubmit)="onCreateChannel()" (click)="closeShowSearchUser()">
     <div class="ch-creation-user">
       <span>leute hinzufügen</span>
       <button type="button" class="closeDial" (click)="onCancelAddUser(); onResetForm()">
@@ -72,11 +72,11 @@
       </button>
     </div>
     <div class="ch-info-input-user">
-      <input class="input-user" type="radio" name="toggleOptions" [(ngModel)]="isChecked" value="officeTeam" />
+      <input class="input-user" type="radio" name="toggleOptions" [(ngModel)]="isChecked" value="officeTeam" (click)="clearPickedUsers()"/>
       <span>Alle Mitglieder von <a href="#">OfficeTeam</a> hinzufügen</span>
     </div>
     <div class="ch-info-input-user">
-      <input class="input-user" name="toggleOptions" type="radio" [(ngModel)]="isChecked" value="singleUser" />
+      <input class="input-user" name="toggleOptions" type="radio" [(ngModel)]="isChecked" value="singleUser"/>
       <span>Bestimmte Leute hinzufügen</span>
     </div>
     <div class="search-section">
@@ -94,7 +94,7 @@
         <li *ngFor="let user of pickedArrayObj; let i = index">
           <img class="user-avatar" src="{{ user.avatar }}" alt="{{ user.name }}" />
           <span>{{ user.name }}</span>
-          <button type="button" (click)="onRemoveUser(user.id)"><img src="assets/img/icons/close.svg" alt="" /></button>
+          <button type="button" (click)="onRemoveUser(user.id)"><img src="assets/img/icons/close.svg"/></button>
         </li>
       </ul>
     </div>

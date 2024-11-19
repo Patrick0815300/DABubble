@@ -25,6 +25,7 @@ import { MobileLogoutComponent } from '../components/mobile-logout/mobile-logout
 import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
 import { NewChannelSearchComponent } from '../components/new-channel-search/new-channel-search.component';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { MainServiceService } from '../firestore-service/main-service.service';
 
 @Component({
   selector: 'app-main-component',
@@ -99,7 +100,7 @@ export class MainComponentComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService,
     private firestore: Firestore,
-    private breakpointObserver: BreakpointObserver
+    private mainService: MainServiceService
   ) {
     this.navService.state$.subscribe(state => {
       this.state = state;
@@ -202,6 +203,7 @@ export class MainComponentComponent implements OnInit {
     });;
 
     this.checkScreenSize();
+    this.mainService.checkAndUpdateChannelMembers();
   }
 
   @HostListener('window:resize', [])
@@ -406,6 +408,13 @@ export class MainComponentComponent implements OnInit {
     }
   }
 
+  closeShowSearchUser() {
+    if (this.showSearchUser) {
+      this.showSearchUser = false;
+      this.new_person_name = '';
+    }
+  }
+
   onFilterUser(array: User, index: number) {
     return array.name.toLowerCase().substring(0, this.new_person_name.length - index) === this.new_person_name.slice(index).toLowerCase();
   }
@@ -419,6 +428,14 @@ export class MainComponentComponent implements OnInit {
     const idArray = this.pickedArrayObj.map(user => user.id);
     this.channelService.emitPickedUser(idArray);
     this.channelService.emitPickedUsersObj(this.pickedArrayObj);
+  }
+
+  clearPickedUsers() {
+    if (this.pickedArrayObj.length != 0) {
+      this.pickedArrayObj = []
+      this.channelService.emitPickedUser([]);
+      this.channelService.emitPickedUsersObj([]);
+    }
   }
 
   onCloseMobileLogout() {

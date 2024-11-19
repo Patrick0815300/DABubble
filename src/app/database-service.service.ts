@@ -145,7 +145,6 @@ export class DatabaseServiceService {
   async addUser(newUser: object) {
     try {
       const docRef = await addDoc(this.getUsersRef(), newUser);
-      console.log('Document written with ID: ', docRef.id);
       return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -277,7 +276,6 @@ export class DatabaseServiceService {
       const userDocRef = doc(this.firestore, collectionName, `${docId}`);
       try {
         await deleteDoc(userDocRef);
-        console.log(parameter, 'Document deleted');
       } catch (e) {
         console.error('Document not deleted: ', e);
       }
@@ -348,7 +346,6 @@ export class DatabaseServiceService {
       const userDocRef = doc(this.firestore, `${collectionName}/${docId}`);
       try {
         await updateDoc(userDocRef, editedData);
-        console.log('Document successfully updated!');
       } catch (error) {
         console.error('Error updating document: ', error);
       }
