@@ -40,15 +40,14 @@ export class SignInComponent implements OnInit {
   passwordNotLongEnough: boolean = false;
   displayPasswordNotLongEnough: boolean = false;
   officeTeamChannel!: Channel;
-
   emptyInputs: boolean = true;
 
-  constructor(private router: Router, private firebase: FirebaseLoginService, private databaseService: DatabaseServiceService) {}
+  constructor(private router: Router, private firebase: FirebaseLoginService, private databaseService: DatabaseServiceService) { }
 
   ngOnInit(): void {
-    this.databaseService.officeTeam().subscribe(team => {
-      this.officeTeamChannel = team;
-    });
+    // this.databaseService.officeTeam().subscribe(team => {
+    //   this.officeTeamChannel = team;
+    // });
   }
 
   /**
@@ -140,7 +139,7 @@ export class SignInComponent implements OnInit {
       let id = await this.firebase.addUserInAuth(user.mail, user.password, user.name);
       this.router.navigate(['/chooseAvatar', id]);
       this.emptyAllInputs();
-      this.onAddChannel(id);
+      //this.onAddChannel(id);
     } else {
       this.displayMailErrorFor3Sec();
     }
@@ -157,25 +156,27 @@ export class SignInComponent implements OnInit {
   }
 
   async createDefaultChannel() {
-    let channelData = {
-      channel_name: 'office-team',
-      admin: 'unknown',
-    };
-    let defaultChannel = new Channel(channelData);
-    let channelObject = defaultChannel.toObject();
-    this.databaseService.addChannel(channelObject);
-    return channelObject.channel_id;
+    // let channelData = {
+    //   channel_name: 'office-team',
+    //   admin: 'unknown',
+    // };
+    // let defaultChannel = new Channel(channelData);
+    // let channelObject = defaultChannel.toObject();
+    // //this.databaseService.addChannel(channelObject);
+    // return channelObject.channel_id;
   }
 
   onAddChannel(currentUser: string) {
-    if (this.officeTeamChannel) {
-      const newMember = new ChannelMember({ member_id: currentUser, channel_id: this.officeTeamChannel.channel_id }).toObject();
-      this.databaseService.addMemberToChannel(newMember);
-    } else {
-      this.createDefaultChannel().then(ch_id => {
-        const newMember = new ChannelMember({ member_id: currentUser, channel_id: ch_id }).toObject();
-        this.databaseService.addMemberToChannel(newMember);
-      });
-    }
+    //   console.log('officTeam: ', this.officeTeamChannel);
+
+    //   if (this.officeTeamChannel) {
+    //     const newMember = new ChannelMember({ member_id: currentUser, channel_id: this.officeTeamChannel.channel_id }).toObject();
+    //     this.databaseService.addMemberToChannel(newMember);
+    //     // } else {
+    //     //   this.createDefaultChannel().then(ch_id => {
+    //     //     const newMember = new ChannelMember({ member_id: currentUser, channel_id: ch_id }).toObject();
+    //     //     this.databaseService.addMemberToChannel(newMember);
+    //     //   });
+    //   }
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore, getDoc } from '@angular/fire/firestore';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { BehaviorSubject } from 'rxjs';
@@ -20,12 +20,20 @@ export class AuthService {
       if (user) {
         this.uidSubject.next(user.uid);
         const userDocRef = doc(this.firestore, 'users', user.uid);
-        await updateDoc(userDocRef, { online: true });
+        const docSnapshot = await getDoc(userDocRef);
+        if (docSnapshot.exists()) {
+          try {
+            await updateDoc(userDocRef, { online: true });
+          } catch (error) {
+            console.error(error);
+          }
+        }
       } else {
         this.uidSubject.next(null);
       }
     });
   }
+
 
   getUIDObservable() {
     return this.uidSubject.asObservable();

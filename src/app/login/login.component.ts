@@ -21,6 +21,7 @@ import { nanoid } from 'nanoid';
 import { GuestService } from '../modules/guest.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -43,7 +44,8 @@ export class LoginComponent implements OnInit {
     private userService: UserService,
     private firestore: Firestore,
     private auth: Auth,
-    private currentUserService: CurrentUserService
+    private currentUserService: CurrentUserService,
+    private sanitizer: DomSanitizer,
   ) { }
 
   loginForm!: FormGroup;
@@ -173,13 +175,15 @@ export class LoginComponent implements OnInit {
    */
   async saveUserData(user: any) {
     const userRef = doc(this.firestore, 'users', user.uid);
+    const sanitizedAvatar = this.sanitizer.bypassSecurityTrustUrl(user.photoURL);
     await setDoc(
       userRef,
       {
         name: user.displayName,
         email: user.email,
-        avatar: user.photoURL,
+        avatar: './assets/img/00_general-buttons/characters/Noah_Braun.png',
         online: false,
+        id: user.uid
       },
       { merge: true }
     );

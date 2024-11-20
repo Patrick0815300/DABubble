@@ -17,7 +17,7 @@ import { FirebaseLoginService } from '../firebase_LogIn/firebase-login.service';
 export class ChooseAvatarComponent {
   userId: any = '';
 
-  constructor(private router: Router, private route: ActivatedRoute, private firebase: FirebaseLoginService) {}
+  constructor(private router: Router, private route: ActivatedRoute, private firebase: FirebaseLoginService) { }
 
   avatar: string[] = ['Elias_Neumann', 'Elise_Roth', 'Frederik_Beck', 'Noah_Braun', 'Sofia_Müller', 'Steffen_Hoffmann'];
 
