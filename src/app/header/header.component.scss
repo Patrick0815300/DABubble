@@ -74,8 +74,10 @@
     }
 
     100% {
-        top: 75px;
+        top: 25px;
         left: 275px;
+
+
     }
 }
 
@@ -95,7 +97,7 @@
     animation: logoContainerMovement 1.5s ease-in-out 2s forwards;
 
     &.animation-finished {
-        top: 75px;
+        top: 25px;
         left: 275px;
         animation: none;
     }
@@ -191,7 +193,7 @@
 }
 
 .loginHeader {
-    padding-top: 75px;
+    padding-top: 25px;
     height: 100px;
     width: 100vw;
     display: flex;
@@ -328,7 +330,8 @@
 
 @media(max-width:610px) and (min-height:600px) {
     .loginHeaderRegister {
-        bottom: 60px;
+        bottom: 35px;
+        transform: scale(0.8);
         top: auto;
     }
 }

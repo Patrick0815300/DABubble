@@ -6,14 +6,14 @@ import { User } from './database.model';
 })
 export class GuestService {
   guestData = {
-    id: 'uLZkuWo4GcM9ppi1aPMXa',
+    id: 'GlCj56f0GgZ4YAWhFQCdWFcWkhU2',
     name: 'bubble guest',
     email: 'guest@mail.com',
     avatar: 'assets/img/profiles/male_avatar.svg',
-    password: '123456789',
+    password: '123456',
     online: true,
     thread_open: false,
     activeChannelId: '',
   };
-  constructor() {}
+  constructor() { }
 }
